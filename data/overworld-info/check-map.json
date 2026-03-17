@@ -1,0 +1,185 @@
+{
+    "overworld-1": {
+        "start": {
+            "name": "Valley of Ones 0", 
+            "scene": "tutorial", 
+            "unlocked": true
+        },
+        "level-1": {
+            "name": "Valley of Ones 1", 
+            "scene": "level-1", 
+            "unlocked": true
+        },
+        "level-2": {
+            "name": "Valley of Ones 2", 
+            "scene": "level-2", 
+            "unlocked": true
+        },
+        "level-3": {
+            "name": "Valley of Ones 3", 
+            "scene": "level-3", 
+            "unlocked": true
+        },
+        "level-4": {
+            "name": "Ampliy`s castle", 
+            "scene": "level-4", 
+            "unlocked": true
+        },
+        "secret": {
+            "name": "Valley of Ones 0`s secret", 
+            "scene": "overworld-2", 
+            "unlocked": true},
+        "end": {
+            "name": "Valley of Ones`s STAR-DOME", 
+            "scene": "overworld-3", 
+            "unlocked": true}
+    },
+    "overworld-2": {
+        "start": {
+            "name": "Diamond Caves 0", 
+            "scene": "overworld-1", 
+            "unlocked": true
+        },
+        "level-5": {
+            "name": "Diamond Caves 1", 
+            "scene": "level-5", 
+            "unlocked": true
+        },
+        "level-6": {
+            "name": "Diamond Caves 2", 
+            "scene": "level-6", 
+            "unlocked": true
+        },
+        "level-7": {
+            "name": "Diamond Caves 3", 
+            "scene": "level-7", 
+            "unlocked": true
+        },
+        "level-8": {
+            "name": "Diamond Caves 4", 
+            "scene": "level-8", 
+            "unlocked": true
+        },
+        "level-9": {
+            "name": "Diamond Caves`s mansion", 
+            "scene": "level-9", 
+            "unlocked": true
+        },
+        "end:": {
+            "name": "Diamond Caves`s STAR-DOME", 
+            "scene": "overworld-4", 
+            "unlocked": true
+        }
+    },
+    "overworld-3": {
+        "start": {
+            "name": "Hot Tropics 0", 
+            "scene": "overworld-1", 
+            "unlocked": true
+        },
+        "level-10": {
+            "name": "Hot Tropics 1", 
+            "scene": "level-10", 
+            "unlocked": true
+        },
+        "level-11": {
+            "name": "Hot Tropics 2", 
+            "scene": "level-11", 
+            "unlocked": true
+        },
+        "level-12": {
+            "name": "Hot Tropics 3", 
+            "scene": "level-12", 
+            "unlocked": true
+        },
+        "level-13": {
+            "name": "Hot Tropics 4", 
+            "scene": "level-13", 
+            "unlocked": true
+        },
+        "level-14": {
+            "name": "Hot Tropics 5", 
+            "scene": "level-14", 
+            "unlocked": true
+        },
+        "level-15": {
+            "name": "RaySky`s DOME", 
+            "scene": "level-15", 
+            "unlocked": true
+        },
+        "end": {
+            "name": "Hot Tropics`s STAR-DOME", 
+            "scene": "overworld-4", 
+            "unlocked": true
+        }
+    },
+    "overworld-4": {
+        "start": {
+            "name": "DangerZone Lavaland 0", 
+            "scene": "overworld-3", 
+            "unlocked": true
+        },
+        "level-16": {
+            "name": "DangerZone Lavaland 1", 
+            "scene": "level-16", 
+            "unlocked": true
+        },
+        "level-17": {
+            "name": "DangerZone Lavaland 2", 
+            "scene": "level-17", 
+            "unlocked": true
+        },
+        "level-18": {
+            "name": "DangerZone Lavaland 3", 
+            "scene": "level-18", 
+            "unlocked": true
+        },
+        "level-19": {
+            "name": "DangerZone Lavaland 4", 
+            "scene": "level-19", 
+            "unlocked": true
+        },
+        "level-20": {
+            "name": "Greater Lord Lex`s castle", 
+            "scene": "level-20", 
+            "unlocked": true
+        },
+        "end": {
+            "name": "THE END?", 
+            "scene": "overworld-star", 
+            "unlocked": true
+        }
+    },
+    "overworld-star": {
+        "start": {
+            "name": "IMPRESS STAR-DOME", 
+            "scene": "overworld-4", 
+            "unlocked": true
+        },
+        "level-kaizo-1": {
+            "name": "Valley of Ones KAIZO", 
+            "scene": "level-kaizo-1", 
+            "unlocked": true
+        },
+        "level-kaizo-2": {
+            "name": "Diamond Caves KAIZO", 
+            "scene": "level-kaizo-2", 
+            "unlocked": true
+        },
+        "level-kaizo-3": {
+            "name": "Hot Tropics KAIZO", 
+            "scene": "level-kaizo-3", 
+            "unlocked": true
+        },
+        "level-kaizo-4": {
+            "name": "DangerZone Lavaland KAIZO", 
+            "scene": "level-kaizo-4", 
+            "unlocked": true
+        },
+        "ending": {
+            "name": "YOU AWESOME PLAYER!!!", 
+            "scene": "ending", 
+            "unlocked": true
+        }
+    }
+}
