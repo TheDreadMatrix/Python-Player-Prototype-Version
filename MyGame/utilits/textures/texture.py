@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from MyGame.requirements import mgl
-from MyGame.utilits.texture_io import _load_image_bytes
+from MyGame.utilits.textures.texture_io import _load_image_bytes
 
 
 def _apply_filter(texture: "mgl.Texture", tex_filter):

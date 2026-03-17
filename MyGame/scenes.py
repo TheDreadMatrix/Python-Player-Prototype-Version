@@ -17,7 +17,7 @@ class SceneManager:
         self.current_scene = EmptyScene(game)
 
 
-        self.game.scene_name = "test"
+        self.game.scene_name = "menu"
 
 
         self.scene_dict = {

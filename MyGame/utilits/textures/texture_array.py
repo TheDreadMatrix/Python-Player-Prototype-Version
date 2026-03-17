@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from MyGame.requirements import mgl
-from MyGame.utilits.texture_io import _load_images_bytes
-from MyGame.utilits.texture import _apply_filter, _apply_repeat, _apply_anisotropy
+from MyGame.utilits.textures.texture_io import _load_images_bytes
+from MyGame.utilits.textures.texture import _apply_filter, _apply_repeat, _apply_anisotropy
 
 
 def create_texture_array(

@@ -1,33 +1,38 @@
 from MyGame.scenes_component import EmptyScene
 from MyGame.anotation import GameType
 from MyGame.johnson import Johnson, readShader, getAD
-from MyGame.requirements import pg, mgl, glm, array
-from MyGame.utilits.texture import create_texture
+from MyGame.requirements import pg, mgl, glm
+from MyGame.utilits.textures.texture import create_texture
+from MyGame.utilits.atlas import FontAtlas
 
 
 
 class Test(EmptyScene):
     def __init__(self, game: GameType):
         super().__init__(game)
-        instance_list = [0, 0, 88, 128, 100, 0, 96, 128]
+        self.text_atlas = FontAtlas()
 
         
         ebo = self.game.ctx.buffer(game.indices)
         vbo = self.game.ctx.buffer(game.vertices)
-        ivbo = self.game.ctx.buffer(reserve=4096)
-        ivbo.write(array("f", instance_list))
+        self.ivbo = self.game.ctx.buffer(reserve=4096)
+        self.ivbo.write(self.text_atlas.generateTextListByte(f"{self.game.getFps()}", space_x=50, space_y=75))
+
+
+        
 
 
         self.atlas = create_texture(self.game.ctx, getAD("atlas/fonts.png"), flip_y=False)
 
         self.program = self.game.ctx.program(readShader("text/shader.vert"), readShader("text/shader.frag"))
-        self.vao = self.game.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inUV"), (ivbo, "2f 2f/i", "inTextPos", "inTextOffset")], index_buffer=ebo)
+        self.vao = self.game.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inUV"), (self.ivbo, "2f 2f/i", "inTextPos", "inTextOffset")], index_buffer=ebo)
 
         self.timer = 0
 
 
 
     def onUpdate(self):
+        self.ivbo.write(self.text_atlas.generateTextListByte(f"{self.game.getFps():.2f}", space_x=50, space_y=75))
         self.timer += self.game.delta_time
 
         if self.timer >= 3.5:
@@ -42,12 +47,13 @@ class Test(EmptyScene):
 
         self.atlas.use()
 
-        self.program["unPos"] = glm.vec2(100, 100)
-        self.program["unScale"] = glm.vec2(100, 100)
+        self.program["unPos"] = glm.vec2(0, 100)
+        self.program["unScale"] = glm.vec2(50, 50)
         self.program["unAtlas"] = glm.vec2(8, 8)
         self.program["unZayer"] = 1
+        self.program["color_change"] = glm.vec3(248/255, 216/255, 112/255)
         self.program["tex"] = 0
-        self.vao.render(mgl.TRIANGLES, instances=2)
+        self.vao.render(mgl.TRIANGLES, instances=self.text_atlas.instance_count)
     
 
 
@@ -55,8 +61,15 @@ class Test(EmptyScene):
 
 class Menu(EmptyScene):
     def __init__(self, game):
-        
         super().__init__(game)
+        self.title = create_texture(self.game.ctx, getAD("title.png"), flip_y=False)
+
+        ebo = self.game.ctx.buffer(game.indices)
+        vbo = self.game.ctx.buffer(game.vertices)
+
+        self.program = self.game.ctx.program(readShader("textures/shader.vert"), readShader("textures/shader.frag"))
+        self.vao = self.game.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inUV")], index_buffer=ebo)
+
 
 
     def onUpdate(self):
@@ -66,7 +79,23 @@ class Menu(EmptyScene):
         pass
     
     def onRender(self):
-        pass
+        self.game.ctx.clear(0, 1, 0, 1, depth=1.0)
+
+        self.title.use()
+
+        self.program["unPos"] = glm.vec2(self.game.width // 2 - 186, self.game.height // 2 - 250)
+        self.program["unScale"] = glm.vec2(366, 112)
+        self.program["unZayer"] = 1
+        self.program["color_change"] = glm.vec3(1, 1, 1)
+        self.program["tex"] = 0
+        self.vao.render(mgl.TRIANGLES)
+
+        self.program["unPos"] = glm.vec2(self.game.width // 2 - 186, self.game.height // 2 - 240)
+        self.program["unScale"] = glm.vec2(366, 112)
+        self.program["unZayer"] = 0
+        self.program["color_change"] = glm.vec3(0, 0, 0)
+        self.program["tex"] = 0
+        self.vao.render(mgl.TRIANGLES)
     
     def onSave(self):
         pass

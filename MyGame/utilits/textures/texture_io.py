@@ -36,7 +36,7 @@ def _surface_to_bytes(
         fmt = "RGBA"
     else:
         raise ValueError("components must be 3 or 4")
-    return pg.image.tostring(surface, fmt, flip_y)
+    return pg.image.tobytes(surface, fmt, flip_y)
 
 
 def _load_image_bytes(

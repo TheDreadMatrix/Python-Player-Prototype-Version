@@ -11,6 +11,9 @@ class GameType(typing.Protocol):
 
     vertices: list
     indices: list
+
+    width: int
+    height: int
     def __init__(self): ...
 
     def getFps(self) -> float: ...

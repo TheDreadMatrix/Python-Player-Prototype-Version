@@ -38,6 +38,9 @@ class MyGame:
         self.ubo.bind_to_uniform_block(0)
         self.ubo.write(self.projection.to_bytes())
 
+        self.width = self.window.get_width()
+        self.height = self.window.get_height()
+
         self.scene_name = ""
         self.scenes = SceneManager(self)
 
@@ -61,6 +64,8 @@ class MyGame:
                 min_width, min_height = 800, 600
                 new_w = max(event.w, min_width)
                 new_h = max(event.h, min_height)
+
+                self.width, self.height = new_w, new_h
 
                 self.ctx.viewport = (0, 0, new_w, new_h)
                 self.projection = glm.ortho(0, new_w, new_h, 0, -1, 1)
