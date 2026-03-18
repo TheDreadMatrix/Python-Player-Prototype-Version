@@ -1,7 +1,7 @@
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
-from MyGame import SceneManager
+from MyGame import SceneManager, johnson
 import pygame as pg
 import moderngl as mgl
 import glm
@@ -18,6 +18,7 @@ class MyGame:
 
         self.window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
         pg.display.set_caption("Super Mario World: 91P Retitle")
+        pg.mouse.set_visible(False)
 
         self.ctx = mgl.create_context()
         self.ctx.enable(mgl.DEPTH_TEST)
@@ -30,17 +31,39 @@ class MyGame:
         self.delta_time = 0
         self.running = True
 
-        self.vertices = array("f", [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        self.indices = array("I", [0, 1, 2, 2, 3, 0])
+        self.width = self.window.get_width()
+        self.height = self.window.get_height()
+
+
+        self.data_settings = johnson.Johnson(johnson.getDD("settings.json"))
+        self.data_settings_read = self.data_settings.readData()
+
+
+        #BUFFER OPENGL
+        vertices = array("f", [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        indices = array("I", [0, 1, 2, 2, 3, 0])
 
         self.projection = glm.ortho(0, self.window.get_width(), self.window.get_height(), 0, -1, 1)
         self.ubo = self.ctx.buffer(reserve=64)
         self.ubo.bind_to_uniform_block(0)
         self.ubo.write(self.projection.to_bytes())
 
-        self.width = self.window.get_width()
-        self.height = self.window.get_height()
+        self.fbo_texture = self.ctx.texture((self.width, self.height), 4)
+        self.fbo_texture.filter = (mgl.NEAREST, mgl.NEAREST)
 
+        rbo_buffer = self.ctx.depth_renderbuffer((self.width, self.height))
+        self.fbo_buffer = self.ctx.framebuffer(color_attachments=[self.fbo_texture], depth_attachment=rbo_buffer)
+
+        self.ebo = self.ctx.buffer(indices)
+        self.vbo = self.ctx.buffer(vertices)
+
+        self.program = self.ctx.program(johnson.readShader("post-proccessing/shader.vert"), johnson.readShader("post-proccessing/shader.frag"))
+        self.vao = self.ctx.vertex_array(self.program, [(self.vbo, "2f 2f", "aPos", "aTexCoords")], index_buffer=self.ebo)
+
+
+
+
+        #CREATE SCENES
         self.scene_name = ""
         self.scenes = SceneManager(self)
 
@@ -65,6 +88,7 @@ class MyGame:
                 new_w = max(event.w, min_width)
                 new_h = max(event.h, min_height)
 
+                #RESIZING ATTRIBUTES
                 self.width, self.height = new_w, new_h
 
                 self.ctx.viewport = (0, 0, new_w, new_h)
@@ -79,8 +103,26 @@ class MyGame:
 
 
     def render(self):
-        self.ctx.clear(0.7, 0.7, 0.7, 1)
-        self.scenes.render()
+        if self.data_settings_read["vhs-shader"]:
+            self.fbo_buffer.use() 
+            self.fbo_buffer.clear(0.0, 0.0, 0.0, 1.0)
+
+            self.scenes.render()
+
+            self.ctx.screen.use()
+            self.ctx.clear(0.0, 0.0, 0.0, 1.0)
+
+            self.fbo_texture.use()
+
+            self.program["scale"] = glm.vec2(self.width, self.height)
+            self.program["tex"] = 0
+            self.program["time"] = 0
+
+            self.vao.render()
+        else:
+            self.scenes.render()
+
+
         pg.display.flip()
 
 
@@ -94,6 +136,7 @@ class MyGame:
             
 
         self.scenes.save()
+        self.data_settings.saveData(self.data_settings_read)
         pg.quit()
 
 

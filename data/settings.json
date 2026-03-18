@@ -1,7 +1,8 @@
 {
-    "current-player": "player0",
-    "sound-volume": 1.0,
+    "current-player-account": "player0",
     "music-volume": 1.0,
-    "window-mode": 1,
-    "crt-shader": 1
+    "sound-volume": 1.0,
+    "screen-mode": 1,
+    "vhs-shader": false,
+    "vhs-sound": true
 }

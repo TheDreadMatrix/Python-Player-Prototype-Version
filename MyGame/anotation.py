@@ -9,8 +9,8 @@ class GameType(typing.Protocol):
     delta_time: float
     ctx: mgl.Context
 
-    vertices: list
-    indices: list
+    ebo: typing.Any
+    vbo: typing.Any
 
     width: int
     height: int

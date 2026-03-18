@@ -16,7 +16,7 @@ class Johnson:
     
     def saveData(self, data):
         with open(self.path, "w") as f:
-            json.dump(data)
+            json.dump(data, f, indent=4)
 
 
 

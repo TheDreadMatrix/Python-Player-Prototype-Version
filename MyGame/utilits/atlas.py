@@ -11,7 +11,7 @@ class FontAtlas:
         self.font_list = array("f", [0.0] * (max_chars * 4))
         self.instance_count = 0
 
-        symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ.,x-!c*=:$#0123456789"
+        symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ.,x-!c*=:$#0123456789 "
         x = 88
         for s in symbols:
             self.char_dict[s] = [x, 128]

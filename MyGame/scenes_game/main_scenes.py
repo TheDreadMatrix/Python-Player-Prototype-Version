@@ -13,8 +13,6 @@ class Test(EmptyScene):
         self.text_atlas = FontAtlas()
 
         
-        ebo = self.game.ctx.buffer(game.indices)
-        vbo = self.game.ctx.buffer(game.vertices)
         self.ivbo = self.game.ctx.buffer(reserve=4096)
         self.ivbo.write(self.text_atlas.generateTextListByte(f"{self.game.getFps()}", space_x=50, space_y=75))
 
@@ -25,7 +23,7 @@ class Test(EmptyScene):
         self.atlas = create_texture(self.game.ctx, getAD("atlas/fonts.png"), flip_y=False)
 
         self.program = self.game.ctx.program(readShader("text/shader.vert"), readShader("text/shader.frag"))
-        self.vao = self.game.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inUV"), (self.ivbo, "2f 2f/i", "inTextPos", "inTextOffset")], index_buffer=ebo)
+        self.vao = self.game.ctx.vertex_array(self.program, [(self.game.vbo, "2f 2f", "inPos", "inUV"), (self.ivbo, "2f 2f/i", "inTextPos", "inTextOffset")], index_buffer=self.game.ebo)
 
         self.timer = 0
 
@@ -62,13 +60,27 @@ class Test(EmptyScene):
 class Menu(EmptyScene):
     def __init__(self, game):
         super().__init__(game)
-        self.title = create_texture(self.game.ctx, getAD("title.png"), flip_y=False)
 
-        ebo = self.game.ctx.buffer(game.indices)
-        vbo = self.game.ctx.buffer(game.vertices)
+        self.atlas_text = FontAtlas()
+
+        #TEXTURES
+        self.text_atlas_texture = create_texture(self.game.ctx, getAD("atlas/fonts.png"), flip_y=False)
+        self.title = create_texture(self.game.ctx, getAD("title.png"), flip_y=False)
+        self.title_border = create_texture(self.game.ctx, getAD("title-border.png"), flip_y=False)
+
+        #BUFFERS
+    
+        self.ivbo = self.game.ctx.buffer(reserve=1024)
+        self.ivbo.write(self.atlas_text.generateTextListByte("PLAY MODE\nSETTINGS\nQUITc", space_x=25, space_y=100, 
+                                                             start_x=self.game.width // 2 - 100, 
+                                                             start_y=self.game.height // 2 - 150))
+
+
+        self.program_text = self.game.ctx.program(readShader("text/shader.vert"), readShader("text/shader.frag"))
+        self.vao_text = self.game.ctx.vertex_array(self.program_text, [(self.game.vbo, "2f 2f", "inPos", "inUV"), (self.ivbo, "2f 2f/i", "inTextPos", "inTextOffset")], index_buffer=self.game.ebo)
 
         self.program = self.game.ctx.program(readShader("textures/shader.vert"), readShader("textures/shader.frag"))
-        self.vao = self.game.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inUV")], index_buffer=ebo)
+        self.vao = self.game.ctx.vertex_array(self.program, [(self.game.vbo, "2f 2f", "inPos", "inUV")], index_buffer=self.game.ebo)
 
 
 
@@ -76,7 +88,8 @@ class Menu(EmptyScene):
         pass
     
     def onEvent(self, event):
-        pass
+        if event.type == pg.VIDEORESIZE:
+            self.ivbo.write(self.atlas_text.generateTextListByte("PLAY-MODE\nSETTINGS\nQUITc", space_x=50, space_y=135))
     
     def onRender(self):
         self.game.ctx.clear(0, 1, 0, 1, depth=1.0)
@@ -96,6 +109,26 @@ class Menu(EmptyScene):
         self.program["color_change"] = glm.vec3(0, 0, 0)
         self.program["tex"] = 0
         self.vao.render(mgl.TRIANGLES)
+
+        self.title_border.use()
+
+        self.program["unPos"] = glm.vec2(0, 0)
+        self.program["unScale"] = glm.vec2(self.game.width, self.game.height)
+        self.program["unZayer"] = 2
+        self.program["color_change"] = glm.vec3(0.9, 0.3, 0.6)
+        self.program["tex"] = 0
+        self.vao.render(mgl.TRIANGLES)
+
+
+        self.text_atlas_texture.use()
+        self.program_text["unPos"] = glm.vec2(0, 100)
+        self.program_text["unScale"] = glm.vec2(25, 25)
+        self.program_text["unAtlas"] = glm.vec2(8, 8)
+        self.program_text["unZayer"] = 1
+        self.program_text["color_change"] = glm.vec3(0.9, 0.3, 0.6)
+        self.program_text["tex"] = 0
+        self.vao_text.render(mgl.TRIANGLES, instances=self.atlas_text.instance_count)
+
     
     def onSave(self):
         pass
