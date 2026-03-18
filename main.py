@@ -8,6 +8,20 @@ import glm
 from array import array
 
 
+class Programs:
+    def __init__(self, game: "MyGame"):
+        class ShaderConstant:
+            IN_POS="inPos"
+            IN_UV="inUV"
+            IN_TEXT_POS="inTextPos"
+            IN_TEXT_OFFSET="inTextOffset"
+
+
+        self.GLSL = ShaderConstant
+        self.shader_textures = game.ctx.program(johnson.readShader("textures/shader.vert"), johnson.readShader("textures/shader.frag"))
+        self.shader_text = game.ctx.program(johnson.readShader("text/shader.vert"), johnson.readShader("text/shader.frag"))
+        self.shader_pp = game.ctx.program(johnson.readShader("post-proccessing/shader.vert"), johnson.readShader("post-proccessing/shader.frag"))
+
 
 class MyGame:
     def __init__(self):
@@ -29,6 +43,7 @@ class MyGame:
         self.clock = pg.time.Clock()
 
         self.delta_time = 0
+        self.time_fbo_shader = 0
         self.running = True
 
         self.width = self.window.get_width()
@@ -57,7 +72,8 @@ class MyGame:
         self.ebo = self.ctx.buffer(indices)
         self.vbo = self.ctx.buffer(vertices)
 
-        self.program = self.ctx.program(johnson.readShader("post-proccessing/shader.vert"), johnson.readShader("post-proccessing/shader.frag"))
+        self.programs = Programs(self)
+        self.program = self.programs.shader_pp
         self.vao = self.ctx.vertex_array(self.program, [(self.vbo, "2f 2f", "aPos", "aTexCoords")], index_buffer=self.ebo)
 
 
@@ -104,6 +120,8 @@ class MyGame:
 
     def render(self):
         if self.data_settings_read["vhs-shader"]:
+            self.time_fbo_shader += self.delta_time
+
             self.fbo_buffer.use() 
             self.fbo_buffer.clear(0.0, 0.0, 0.0, 1.0)
 
@@ -116,7 +134,7 @@ class MyGame:
 
             self.program["scale"] = glm.vec2(self.width, self.height)
             self.program["tex"] = 0
-            self.program["time"] = 0
+            self.program["time"] = self.time_fbo_shader
 
             self.vao.render()
         else:
@@ -127,6 +145,7 @@ class MyGame:
 
 
     def run(self):
+        
         while self.running:
             self.delta_time = min(self.clock.tick(120) / 1000.0, 0.05)        
         

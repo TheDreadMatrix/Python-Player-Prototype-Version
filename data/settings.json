@@ -3,6 +3,6 @@
     "music-volume": 1.0,
     "sound-volume": 1.0,
     "screen-mode": 1,
-    "vhs-shader": false,
+    "vhs-shader": true,
     "vhs-sound": true
 }
