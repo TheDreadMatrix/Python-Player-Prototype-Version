@@ -3,13 +3,8 @@ from MyGame.requirements import mgl
 
 
 class ProgramsType(typing.Protocol):
-    class ShaderConstant(typing.Protocol):
-        IN_POS: str
-        IN_UV: str
-        IN_TEXT_POS: str
-        IN_TEXT_OFFSET: str
     
-    GLSL: ShaderConstant
+
     shader_textures: mgl.Program    
     shader_text: mgl.Program
     shader_pp: mgl.Program

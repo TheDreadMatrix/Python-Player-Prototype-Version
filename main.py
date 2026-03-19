@@ -10,14 +10,6 @@ from array import array
 
 class Programs:
     def __init__(self, game: "MyGame"):
-        class ShaderConstant:
-            IN_POS="inPos"
-            IN_UV="inUV"
-            IN_TEXT_POS="inTextPos"
-            IN_TEXT_OFFSET="inTextOffset"
-
-
-        self.GLSL = ShaderConstant
         self.shader_textures = game.ctx.program(johnson.readShader("textures/shader.vert"), johnson.readShader("textures/shader.frag"))
         self.shader_text = game.ctx.program(johnson.readShader("text/shader.vert"), johnson.readShader("text/shader.frag"))
         self.shader_pp = game.ctx.program(johnson.readShader("post-proccessing/shader.vert"), johnson.readShader("post-proccessing/shader.frag"))
@@ -30,7 +22,7 @@ class MyGame:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 
-        self.window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
+        self.window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL)
         pg.display.set_caption("Super Mario World: 91P Retitle")
         pg.mouse.set_visible(False)
 
@@ -99,19 +91,6 @@ class MyGame:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.running = False
-            if event.type == pg.VIDEORESIZE:
-                min_width, min_height = 800, 600
-                new_w = max(event.w, min_width)
-                new_h = max(event.h, min_height)
-
-                #RESIZING ATTRIBUTES
-                self.width, self.height = new_w, new_h
-
-                self.ctx.viewport = (0, 0, new_w, new_h)
-                self.projection = glm.ortho(0, new_w, new_h, 0, -1, 1)
-                self.ubo.write(self.projection.to_bytes())
-
-                self.window = pg.display.set_mode((new_w, new_h), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
 
             self.scenes.event(event=event)
         

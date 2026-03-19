@@ -25,7 +25,7 @@ out vec2 fUV;
 void main(){
 
     vec2 finalPos = inPos * unScale + unPos + inTextPos;
-    float finalZayer = -float(unZayer) * 0.01;
+    float finalZayer = float(unZayer) * 0.01;
 
     gl_Position = unProj * vec4(finalPos, finalZayer, 1.0);
 

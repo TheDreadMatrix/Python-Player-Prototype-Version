@@ -6,6 +6,7 @@
     "coins": 0,
     "rcoins": 0,
     "points": 0,
+    "time-in-game": 0,
 
     "player": {
         "cutscened": false

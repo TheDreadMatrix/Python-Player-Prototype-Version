@@ -5,10 +5,10 @@ in vec2 TexCoords;
 uniform sampler2D tex;
 uniform float time;
 
-const float curvature = 0.09;
+const float curvature = 0.02;
 const float scanlineIntensity = 0.15;
 const float noiseIntensity = 0.05;
-const float chromaOffset = 0.0055;
+const float chromaOffset = 0.0025;
 
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -38,9 +38,9 @@ void main()
     color *= 0.8;
 
     
-    float t = time * 0.3;
+    float t = time * 0.7;
     vec3 colorShift = vec3(
-        0.9 + 0.1 * sin(t),
+        0.9 + 0.1 * sin(t + 1.0),
         0.9 + 0.1 * sin(t + 2.0),
         0.9 + 0.1 * sin(t + 4.0)
     );
