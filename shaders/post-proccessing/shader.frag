@@ -5,10 +5,10 @@ in vec2 TexCoords;
 uniform sampler2D tex;
 uniform float time;
 
-const float curvature = 0.02;
+const float curvature = 0.025;
 const float scanlineIntensity = 0.15;
-const float noiseIntensity = 0.05;
-const float chromaOffset = 0.0025;
+const float noiseIntensity = 0.15;
+const float chromaOffset = 0.0015;
 
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -30,22 +30,12 @@ void main()
     color.g = texture(tex, uv).g;
     color.b = texture(tex, uv - vec2(chromaOffset, 0.0)).b;
 
-    float scanline = sin(uv.y * 1080.0 + time * 20.0) * scanlineIntensity;
+    float scanline = sin(uv.y * 1080.0 + time * 2.0) * scanlineIntensity;
     float noise = (rand(uv + time) - 0.5) * noiseIntensity;
 
     color -= scanline;
     color += noise;
     color *= 0.8;
-
-    
-    float t = time * 0.7;
-    vec3 colorShift = vec3(
-        0.9 + 0.1 * sin(t + 1.0),
-        0.9 + 0.1 * sin(t + 2.0),
-        0.9 + 0.1 * sin(t + 4.0)
-    );
-
-    color *= colorShift;
 
     FragColor = vec4(color * vec3(1, 0.9, 0.8), 1.0);
 }

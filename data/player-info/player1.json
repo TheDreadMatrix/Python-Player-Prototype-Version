@@ -7,6 +7,7 @@
     "rcoins": 0,
     "points": 0,
     "time-in-game": 0,
+    "passed-level-count": 0,
 
     "player": {
         "cutscened": false

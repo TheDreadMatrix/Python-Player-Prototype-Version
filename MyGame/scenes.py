@@ -17,7 +17,7 @@ class SceneManager:
         self.current_scene = EmptyScene(game)
 
 
-        self.game.scene_name = "menu"
+        self.game.setFirst("menu")
 
 
         self.scene_dict = {
@@ -77,7 +77,7 @@ class SceneManager:
 
 
     def update(self):
-        state_scene = self.game.scene_name
+        state_scene = self.game._scene_name
 
         if state_scene == "quit":
             self.game.closeGame()

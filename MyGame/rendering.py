@@ -21,10 +21,9 @@ class TextRender:
         self.vao = game.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inUV"), (self.ivbo, "2f 2f/i", "inTextPos", "inTextOffset")], index_buffer=ebo)
 
         self.Position = glm.vec2(0)
-        self.Scale = glm.vec2(100)
+        self.Scale = glm.vec2(25)
         self.SizeAtlas = glm.vec2(8)
         self.Zayer = 1
-        self.Alpha = 1
 
         self.StartX = 0
         self.StartY = 0
@@ -48,7 +47,6 @@ class TextRender:
         self.program["unAtlas"] = self.SizeAtlas
         self.program["unZayer"] = self.Zayer
         self.program["color_change"] = self.ColorChange
-        self.program["alpha"] = self.Alpha
         self.program["tex"] = 0
 
         

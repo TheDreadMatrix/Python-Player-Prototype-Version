@@ -8,132 +8,149 @@ import glm
 from array import array
 
 
-class Programs:
+
+
+
+class GameRequest:
     def __init__(self, game: "MyGame"):
-        self.shader_textures = game.ctx.program(johnson.readShader("textures/shader.vert"), johnson.readShader("textures/shader.frag"))
-        self.shader_text = game.ctx.program(johnson.readShader("text/shader.vert"), johnson.readShader("text/shader.frag"))
-        self.shader_pp = game.ctx.program(johnson.readShader("post-proccessing/shader.vert"), johnson.readShader("post-proccessing/shader.frag"))
+        self.__game = game
+
+    def setShaderVhs(self, flag):
+        pass
+
+    def setAudioVhs(self, flag):
+        pass
+
+    def redirectScene(self, scene):
+        self.__game._scene_name = scene
+
+    def closeGame(self):
+        self.__game._running = False
+
+    def showMouse(self):
+        pg.mouse.set_visible(False)
+
+
+
 
 
 class MyGame:
     def __init__(self):
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
+        # INIT ATTRIBUTE AND OPENGL SYSTEM
         pg.init()
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 
-        self.window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL)
+        self.__window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL)
         pg.display.set_caption("Super Mario World: 91P Retitle")
         pg.mouse.set_visible(False)
 
-        self.ctx = mgl.create_context()
-        self.ctx.enable(mgl.DEPTH_TEST)
-        self.ctx.enable(mgl.BLEND)
-        self.ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
-        self.ctx.viewport = (0, 0, *self.window.get_size())
+        self._ctx = mgl.create_context()
+        self._ctx.enable(mgl.DEPTH_TEST)
+        self._ctx.enable(mgl.BLEND)
+        self._ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
+        self._ctx.viewport = (0, 0, self.__window.get_width(), self.__window.get_height())
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
 
-        self.clock = pg.time.Clock()
 
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
+        # FRAMERATE AND RUNNING ATTRIBUTES
+        self.__clock = pg.time.Clock()
+        self._running = True
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
+
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
+        # FREE TO USE
         self.delta_time = 0
-        self.time_fbo_shader = 0
-        self.running = True
+        self.width = self.__window.get_width()
+        self.height = self.__window.get_height()
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
 
-        self.width = self.window.get_width()
-        self.height = self.window.get_height()
-
-
+        #--------------------------------------------------------------------------------------------------------
+        # ONLY ADMIN WORKPLACE
         self.data_settings = johnson.Johnson(johnson.getDD("settings.json"))
         self.data_settings_read = self.data_settings.readData()
+        #--------------------------------------------------------------------------------------------------------
 
 
-        #BUFFER OPENGL
+    
+
+        #--------------------------------------------------------------------------------------------------------
+        # OPENGL BUFFERS AND SHADER STORAGE SETTINGS
+        #--------------------------------------------------------------------------------------------------------
         vertices = array("f", [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         indices = array("I", [0, 1, 2, 2, 3, 0])
 
-        self.projection = glm.ortho(0, self.window.get_width(), self.window.get_height(), 0, -1, 1)
-        self.ubo = self.ctx.buffer(reserve=64)
-        self.ubo.bind_to_uniform_block(0)
-        self.ubo.write(self.projection.to_bytes())
+        self.__projection = glm.ortho(0, self.width, self.height, 0, -1, 1)
+        self.__ubo = self._ctx.buffer(reserve=64)
+        self.__ubo.bind_to_uniform_block(0)
+        self.__ubo.write(self.__projection.to_bytes())
 
-        self.fbo_texture = self.ctx.texture((self.width, self.height), 4)
-        self.fbo_texture.filter = (mgl.NEAREST, mgl.NEAREST)
+        self._ebo = self._ctx.buffer(indices)
+        self._vbo = self._ctx.buffer(vertices)
+        #--------------------------------------------------------------------------------------------------------
 
-        rbo_buffer = self.ctx.depth_renderbuffer((self.width, self.height))
-        self.fbo_buffer = self.ctx.framebuffer(color_attachments=[self.fbo_texture], depth_attachment=rbo_buffer)
+        self.request = GameRequest(self)
 
-        self.ebo = self.ctx.buffer(indices)
-        self.vbo = self.ctx.buffer(vertices)
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
+        # ALL SCENES REGISTERS IN THAT
+        self._scene_name = ""
+        self.__scenes = SceneManager(self)
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------
 
-        self.programs = Programs(self)
-        self.program = self.programs.shader_pp
-        self.vao = self.ctx.vertex_array(self.program, [(self.vbo, "2f 2f", "aPos", "aTexCoords")], index_buffer=self.ebo)
-
-
-
-
-        #CREATE SCENES
-        self.scene_name = ""
-        self.scenes = SceneManager(self)
 
     def getFps(self):
-        return self.clock.get_fps()
-       
-    def closeGame(self):
-        self.running = False
+        return self.__clock.get_fps()
+    
+    def setFirst(self, scene):
+        self._scene_name = scene
+    
 
-    def switchScene(self, scene_name: str):
-        self.scene_name = scene_name
-
-
-    def update(self):
-        self.scenes.update()
+    def __update(self):
+        self.__scenes.update()
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                self.running = False
+                self._running = False
 
-            self.scenes.event(event=event)
+            self.__scenes.event(event=event)
         
         
 
 
-    def render(self):
-        if self.data_settings_read["vhs-shader"]:
-            self.time_fbo_shader += self.delta_time
-
-            self.fbo_buffer.use() 
-            self.fbo_buffer.clear(0.0, 0.0, 0.0, 1.0)
-
-            self.scenes.render()
-
-            self.ctx.screen.use()
-            self.ctx.clear(0.0, 0.0, 0.0, 1.0)
-
-            self.fbo_texture.use()
-
-            self.program["scale"] = glm.vec2(self.width, self.height)
-            self.program["tex"] = 0
-            self.program["time"] = self.time_fbo_shader
-
-            self.vao.render()
-        else:
-            self.scenes.render()
+    def __render(self):
+        
+        self._ctx.clear(1, 1, 1)
+        self.__scenes.render()
 
 
         pg.display.flip()
 
 
-    def run(self):
+    def __run(self):
         
-        while self.running:
-            self.delta_time = min(self.clock.tick(120) / 1000.0, 0.05)        
+        while self._running:
+            self.delta_time = min(self.__clock.tick(120) / 1000.0, 0.05)        
         
-            self.update()
-            self.render()
+            self.__update()
+            self.__render()
 
             
 
-        self.scenes.save()
+        self.__scenes.save()
         self.data_settings.saveData(self.data_settings_read)
         pg.quit()
 
@@ -141,7 +158,7 @@ class MyGame:
 
 if __name__ == "__main__":
     game = MyGame()
-    game.run()
+    game._MyGame__run()
 
 
 

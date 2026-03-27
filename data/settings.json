@@ -1,8 +1,7 @@
 {
-    "current-player-account": "player0",
+    "current-player-account-path": "player-info/player1",
     "music-volume": 1.0,
     "sound-volume": 1.0,
-    "screen-mode": 1,
-    "vhs-shader": true,
+    "vhs-shader": false,
     "vhs-sound": true
 }

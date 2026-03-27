@@ -8,7 +8,6 @@ in vec2 fUV;
 out vec4 fragColor;
 
 uniform vec3 color_change;
-uniform float alpha;
 uniform sampler2D tex;
 
 
@@ -31,6 +30,6 @@ void main(){
     if (OutColor.a <= 0.0)
         discard;
 
-    fragColor = vec4(OutColor.rgb, alpha);
+    fragColor = OutColor;
 
 }
