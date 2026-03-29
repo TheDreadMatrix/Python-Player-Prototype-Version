@@ -1,4 +1,4 @@
-#version 330
+#version 330 core
 
 layout(location = 0) in vec2 inPos;
 layout(location = 1) in vec2 inUV;
@@ -14,7 +14,7 @@ uniform vec2 unScale;
 
 uniform int unZayer;
 
-out vec2 fUV;
+out vec2 GclUv;
 
 void main(){
 
@@ -24,5 +24,5 @@ void main(){
     gl_Position = unProj * vec4(finalPos, finalZayer, 1.0);
 
 
-    fUV = inUV;
+    GclUv = inUV;
 }

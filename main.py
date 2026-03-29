@@ -6,6 +6,7 @@ import pygame as pg
 import moderngl as mgl
 import glm
 from array import array
+from pathlib import Path
 
 
 
@@ -29,6 +30,51 @@ class GameRequest:
 
     def showMouse(self):
         pg.mouse.set_visible(False)
+
+
+class CorePath:
+    def __init__(self, base_dir=None):
+        self._base_dir = Path(base_dir) if base_dir else Path(__file__).resolve().parent
+        self._assets_dir = self._base_dir / "assets"
+        self._shaders_dir = self._base_dir / "shaders"
+        self._data_dir = self._base_dir / "data"
+        self._soundtracks_dir = self._base_dir / "soundtracks"
+
+    def _ensure_file(self, path: Path, kind: str) -> Path:
+        if not path.exists():
+            raise FileNotFoundError(f"{kind} file not found: {path}")
+        if not path.is_file():
+            raise FileNotFoundError(f"{kind} is not a file: {path}")
+        return path
+
+    def ShaderPath(self, filename):
+        return str(self._ensure_file(self._shaders_dir / filename, "Shader"))
+
+    def AssetPath(self, filename):
+        return str(self._ensure_file(self._assets_dir / filename, "Asset"))
+
+    def DataPath(self, filename):
+        return str(self._ensure_file(self._data_dir / filename, "Data"))
+
+    def SoundtrackPath(self, filename):
+        return str(self._ensure_file(self._soundtracks_dir / filename, "Soundtrack"))
+
+    def ShaderText(self, filename):
+        path = self._ensure_file(self._shaders_dir / filename, "Shader")
+        return path.read_text(encoding="utf-8")
+
+    def AssetDir(self):
+        return str(self._assets_dir)
+
+    def ShaderDir(self):
+        return str(self._shaders_dir)
+
+    def DataDir(self):
+        return str(self._data_dir)
+
+    def SoundtrackDir(self):
+        return str(self._soundtracks_dir)
+
 
 
 
@@ -76,14 +122,6 @@ class MyGame:
         #--------------------------------------------------------------------------------------------------------
         #--------------------------------------------------------------------------------------------------------
 
-        #--------------------------------------------------------------------------------------------------------
-        # ONLY ADMIN WORKPLACE
-        self.data_settings = johnson.Johnson(johnson.getDD("settings.json"))
-        self.data_settings_read = self.data_settings.readData()
-        #--------------------------------------------------------------------------------------------------------
-
-
-    
 
         #--------------------------------------------------------------------------------------------------------
         # OPENGL BUFFERS AND SHADER STORAGE SETTINGS
@@ -101,6 +139,13 @@ class MyGame:
         #--------------------------------------------------------------------------------------------------------
 
         self.request = GameRequest(self)
+        self.paths = CorePath()
+        
+        #--------------------------------------------------------------------------------------------------------
+        # ONLY ADMIN WORKPLACE
+        self.data_settings = johnson.Johnson(self.paths.DataPath("settings.json"))
+        self.data_settings_read = self.data_settings.readData()
+        #--------------------------------------------------------------------------------------------------------
 
         #--------------------------------------------------------------------------------------------------------
         #--------------------------------------------------------------------------------------------------------
@@ -132,11 +177,8 @@ class MyGame:
 
 
     def __render(self):
-        
         self._ctx.clear(1, 1, 1)
         self.__scenes.render()
-
-
         pg.display.flip()
 
 

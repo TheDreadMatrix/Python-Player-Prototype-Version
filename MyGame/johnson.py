@@ -21,29 +21,3 @@ class Johnson:
 
 
 
-def readShader(path: str) -> str:
-    return (Path("shaders") / path).read_text()
-
-
-
-
-
-def getDD(path: str) -> Path:
-    file = Path("data") / path
-    if not file.exists():
-        raise FileNotFoundError(f"Data file not found: {file}")
-    return file
-
-
-def getAD(path: str) -> Path:
-    file = Path("assets") / path
-    if not file.exists():
-        raise FileNotFoundError(f"Asset file not found: {file}")
-    return file
-
-
-def getSD(path: str) -> Path:
-    file = Path("soundtracks") / path
-    if not file.exists():
-        raise FileNotFoundError(f"Soundtrack file not found: {file}")
-    return file

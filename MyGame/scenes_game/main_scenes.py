@@ -1,9 +1,8 @@
 from MyGame.scenes_component import EmptyScene
 from MyGame.anotation import GameType
-from MyGame.johnson import Johnson, readShader, getAD, getDD
+from MyGame.johnson import Johnson
 from MyGame.requirements import pg, mgl, glm
-from MyGame.utilits.textures.texture import create_texture
-from MyGame.rendering import TextRender
+from MyGame.rendering import TextRender, CustomShader
 
 
 
@@ -11,8 +10,14 @@ class Test(EmptyScene):
     def __init__(self, game: GameType):
         super().__init__(game)
 
+        self.shader = CustomShader(game, shader_filename="text.frag")
+        self.text = TextRender(game, custom_shader=self.shader)
+        self.text.SpaceX = 35
+        self.text.Zayer = 1
         
-        
+        self.text_2 = TextRender(game, custom_shader=self.shader)
+        self.text_2.SpaceX = 35
+        self.text_2.Zayer = 2
 
 
 
@@ -24,7 +29,12 @@ class Test(EmptyScene):
 
 
     def onRender(self):
-        pass
+        self.shader.a = 0.8
+        self.text.renderText("HELLO WORLD")
+
+        self.shader.a = 1  
+        self.text_2.renderText("MOMMY!!!")
+        
     
     def onSave(self):
         print("Hello")
@@ -36,9 +46,9 @@ class Menu(EmptyScene):
     def __init__(self, game):
         super().__init__(game)
         #JSON DATAS
-        self.account_0 = Johnson(getDD("player-info/player0.json")).readData()
-        self.account_1 = Johnson(getDD("player-info/player1.json")).readData()
-        self.account_2 = Johnson(getDD("player-info/player2.json")).readData()
+        self.account_0 = Johnson(game.paths.DataPath("player-info/player0.json")).readData()
+        self.account_1 = Johnson(game.paths.DataPath("player-info/player1.json")).readData()
+        self.account_2 = Johnson(game.paths.DataPath("player-info/player2.json")).readData()
         self.account_dict = {f"P-{i}": f"player-info/player{i}" for i in range(3)}
 
         #ATTRIBUTES
@@ -60,9 +70,9 @@ class Menu(EmptyScene):
 
 
         #GRAPHICS
-        self.title = create_texture(self.game.ctx, getAD("title.png"), flip_y=False)
-        self.title_border = create_texture(self.game.ctx, getAD("title-border.png"), flip_y=False)
-        self.background = create_texture(self.game.ctx, getAD("background.png"), flip_y=False)
+        #self.title = create_texture(self.game.ctx, game.paths.AssetPath("title.png"), flip_y=False)
+        #self.title_border = create_texture(self.game.ctx, game.paths.AssetPath("title-border.png"), flip_y=False)
+        #self.background = create_texture(self.game.ctx, game.paths.AssetPath("background.png"), flip_y=False)
 
 
         self.text_1 = TextRender(game)

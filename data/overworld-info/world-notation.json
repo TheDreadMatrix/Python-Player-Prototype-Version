@@ -2,12 +2,12 @@
     "buildings": {
         "pipe": {
             "type": 0,
-            "atlas": {"x": 0, "y": 0, "w": 0, "h": 0}
+            "atlas": {"x": 136, "y": 17, "w": 17, "h": 17}
         },
 
         "castle": {
             "type": 0,
-            "atlas": {"x": 0, "y": 0, "w": 0, "h": 0}
+            "atlas": {"x": 136, "y": 0, "w": 17, "h": 17}
         },
 
         "fort-1": {

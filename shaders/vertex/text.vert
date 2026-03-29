@@ -16,11 +16,9 @@ layout(std140) uniform Projection{
 uniform vec2 unPos;
 uniform vec2 unScale;
 uniform vec2 unAtlas;
-
-
 uniform int unZayer;
 
-out vec2 fUV;
+out vec2 GclUv;
 
 void main(){
 
@@ -32,6 +30,6 @@ void main(){
     vec2 finalTextOffset = inTextOffset / ATLAS_SIZE;
     vec2 finalAtlasSize = unAtlas / ATLAS_SIZE;
 
-    fUV = inUV * finalAtlasSize + finalTextOffset;
+    GclUv = inUV * finalAtlasSize + finalTextOffset;
 }
 
