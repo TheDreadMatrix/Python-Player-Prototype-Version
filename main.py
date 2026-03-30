@@ -96,9 +96,9 @@ class MyGame:
         pg.mouse.set_visible(False)
 
         self._ctx = mgl.create_context()
-        self._ctx.enable(mgl.DEPTH_TEST)
         self._ctx.enable(mgl.BLEND)
         self._ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
+        self._ctx.enable(mgl.DEPTH_TEST)
         self._ctx.viewport = (0, 0, self.__window.get_width(), self.__window.get_height())
         #--------------------------------------------------------------------------------------------------------
         #--------------------------------------------------------------------------------------------------------

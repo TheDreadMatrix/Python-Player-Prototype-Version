@@ -5,7 +5,7 @@ from MyGame.scenes_game.overworld import OverWorld
 from MyGame.scenes_game.main_scenes import Test, Menu, Settings
 from MyGame.scenes_game.levels_editor import LevelEditor
 from MyGame.scenes_game.overworld_editor import OverworldEditor
-
+from MyGame.scenes_game.cutscene import Cutscene_1
 
 
 
@@ -33,7 +33,7 @@ class SceneManager:
             "quit": lambda: EmptyScene(game=game),
 
             "tutorial": lambda: Tutorial(game=game),
-            "cutscene": lambda: EmptyScene(game=game),
+            "cutscene": lambda: Cutscene_1(game=game),
             "bonus-game": lambda: EmptyScene(game=game),
             "bonus-game-2": lambda: EmptyScene(game=game),
             "ending": lambda: EmptyScene(game=game),

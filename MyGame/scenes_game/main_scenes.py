@@ -2,6 +2,7 @@ from MyGame.scenes_component import EmptyScene, GameType
 from MyGame.johnson import Johnson
 from MyGame.requirements import pg, glm
 from MyGame.rendering.rendering import TextRender, CustomShader, SpriteRender, load_texture
+from MyGame.rendering.uieffect import FadeEffect
 
 
 
@@ -76,6 +77,8 @@ class Menu(EmptyScene):
 
 
         #GRAPHICS
+        self.fade = FadeEffect(game)
+        
         self.shader = CustomShader(game, "menu.frag")
 
         self.title = SpriteRender(game, self.shader)
@@ -158,6 +161,7 @@ class Menu(EmptyScene):
         if self.switching:
             self.timer_dissappear -= self.game.delta_time * 0.6
             self.alpha = glm.clamp(self.timer_dissappear, 0.0, 1.0)
+            self.fade.fadeOut()
 
             
             self.switch_timer += self.game.delta_time
@@ -246,6 +250,7 @@ class Menu(EmptyScene):
             self.text_7.renderText("xCHOOSE THE PLAYERx")
 
         self.title_border.renderSprite()
+        self.fade.renderFadeEffect()
 
        
     
