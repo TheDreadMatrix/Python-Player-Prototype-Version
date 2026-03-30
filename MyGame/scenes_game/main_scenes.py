@@ -1,8 +1,7 @@
-from MyGame.scenes_component import EmptyScene
-from MyGame.anotation import GameType
+from MyGame.scenes_component import EmptyScene, GameType
 from MyGame.johnson import Johnson
-from MyGame.requirements import pg, mgl, glm
-from MyGame.rendering import TextRender, CustomShader
+from MyGame.requirements import pg, glm
+from MyGame.rendering.rendering import TextRender, CustomShader, SpriteRender, load_texture
 
 
 
@@ -10,30 +9,35 @@ class Test(EmptyScene):
     def __init__(self, game: GameType):
         super().__init__(game)
 
-        self.shader = CustomShader(game, shader_filename="text.frag")
-        self.text = TextRender(game, custom_shader=self.shader)
-        self.text.SpaceX = 35
-        self.text.Zayer = 1
+        self.shader = CustomShader(game, shader_filename="test.frag")
+        self.text = TextRender(game)
+        self.text.SpaceX = 25
+        self.text.Zayer = 2
         
-        self.text_2 = TextRender(game, custom_shader=self.shader)
+        self.text_2 = TextRender(game)
         self.text_2.SpaceX = 35
         self.text_2.Zayer = 2
 
+        self.sprite = SpriteRender(game=game)
+        
+
+        self.time = 300
 
 
     def onUpdate(self):
-        pass
+        self.time -= self.game.delta_time
 
     def onEvent(self, event):
-        pass
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_w:
+                self.game.request.redirectScene("menu")
 
 
     def onRender(self):
-        self.shader.a = 0.8
-        self.text.renderText("HELLO WORLD")
+        self.text.renderText(f"{int(self.game.getFps())}")
+        self.sprite.renderSprite()
 
-        self.shader.a = 1  
-        self.text_2.renderText("MOMMY!!!")
+        
         
     
     def onSave(self):
@@ -65,14 +69,18 @@ class Menu(EmptyScene):
         self.inactive = glm.vec3(1, 1, 1)
 
         self.switch_timer = 0
+        self.switch_delay = 2.5
         self.switching = False
         self.switching_game = False
+        self.switch_target_scene = ""
 
 
         #GRAPHICS
-        #self.title = create_texture(self.game.ctx, game.paths.AssetPath("title.png"), flip_y=False)
-        #self.title_border = create_texture(self.game.ctx, game.paths.AssetPath("title-border.png"), flip_y=False)
-        #self.background = create_texture(self.game.ctx, game.paths.AssetPath("background.png"), flip_y=False)
+        self.shader = CustomShader(game, "menu.frag")
+
+        self.title = SpriteRender(game, self.shader)
+        self.title_border = SpriteRender(game)
+        self.background = SpriteRender(game)
 
 
         self.text_1 = TextRender(game)
@@ -115,11 +123,20 @@ class Menu(EmptyScene):
         self.text_7.Scale = glm.vec2(20)
         self.text_7.StartX = 10
         self.text_7.SpaceX = 25
-    
 
+        self.title.Texture = load_texture(game, game.paths.AssetPath("menu/title.png"))
+        self.title.Position = glm.vec2(self.game.width // 2 - 186, self.game.height // 2 - 250)
+        self.title.Scale = glm.vec2(376, 112)
+        self.title.Zayer = 1
 
-        self.program = self.game.programs.shader_textures
-        self.vao = self.game.ctx.vertex_array(self.program, [(self.game.vbo, "2f 2f", "inPos", "inUV")], index_buffer=self.game.ebo)
+        self.title_border.Texture = load_texture(game, game.paths.AssetPath("menu/title-border.png"))
+        self.title_border.Position = glm.vec2(0, 0)
+        self.title_border.Scale = glm.vec2(self.game.width, self.game.height)
+        self.title_border.Zayer = 2
+
+        self.background.Texture = load_texture(game, game.paths.AssetPath("menu/background.png"))
+        self.background.Scale = glm.vec2(self.game.width, self.game.height)
+        self.background.Zayer = 0
 
 
 
@@ -145,24 +162,11 @@ class Menu(EmptyScene):
             
             self.switch_timer += self.game.delta_time
 
-            if self.switch_timer >= 2.9: 
-                mode = self.options[self.selected]
-                if mode == "SETTINGS":
-                    self.game.switchScene("settings")
-
-                elif mode == "QUIT":
-                    self.game.switchScene("quit")
+            if self.switch_timer >= self.switch_delay and self.switch_target_scene:
+                self.game.request.redirectScene(self.switch_target_scene)
 
 
-        if not self.switching_game:
-            self.text_1.ColorChange = self.active if self.selected == 0 else self.inactive
-            self.text_2.ColorChange = self.active if self.selected == 1 else self.inactive
-            self.text_3.ColorChange = self.active if self.selected == 2 else self.inactive
-        else:
-
-            self.text_4.ColorChange = self.active if self.selected == 0 else self.inactive
-            self.text_5.ColorChange = self.active if self.selected == 1 else self.inactive
-            self.text_6.ColorChange = self.active if self.selected == 2 else self.inactive
+        
 
 
         
@@ -194,11 +198,13 @@ class Menu(EmptyScene):
                     else:
                         self.switching = True
                         self.switch_timer = 0
+                        self.switch_target_scene = "settings" if selected_option == "SETTINGS" else "quit"
 
                 else:
                     self.game.data_settings_read["current-player-account-path"] = self.account_dict[self.options[self.selected]]
-                    self.game.switchScene("cutscene")  
                     self.switching = True
+                    self.switch_timer = 0
+                    self.switch_target_scene = "cutscene"
 
    
             if event.key == pg.K_z and self.switching_game:
@@ -211,58 +217,35 @@ class Menu(EmptyScene):
         
     
     def onRender(self):
-        self.game.ctx.clear(0, 0, 0)
+        self.game._ctx.clear(0.9, 0.6, 0.4)
+
+        self.background.Position = glm.vec2(self.x_1, glm.sin(self.x_1 * 0.2))
+        self.background.renderSprite()
+
+        self.background.Position = glm.vec2(self.x_2, glm.sin(self.x_1 * 0.2))
+        self.background.renderSprite()
 
         if not self.switching_game:
-            self.title.use()
+            self.shader.setColor = glm.vec3(1)
+            self.title.Position = glm.vec2(self.game.width // 2 - 186, self.game.height // 2 - 250)
+            self.title.renderSprite()
+            
 
-            self.program["unPos"] = glm.vec2(self.game.width // 2 - 186, self.game.height // 2 - 250)
-            self.program["unScale"] = glm.vec2(376, 112)
-            self.program["unZayer"] = 1
-            self.program["color_change"] = glm.vec3(1, 1, 1)
-            self.program["tex"] = 0
-            self.vao.render(mgl.TRIANGLES)
+            self.shader.setColor = glm.vec3(0)
+            self.title.Position = glm.vec2(self.game.width // 2 - 186, self.game.height // 2 - 240)
+            self.title.renderSprite()
+            
 
-            self.program["unPos"] = glm.vec2(self.game.width // 2 - 186, self.game.height // 2 - 240)
-            self.program["unScale"] = glm.vec2(366, 112)
-            self.program["unZayer"] = 0
-            self.program["color_change"] = glm.vec3(0, 0, 0)
-            self.program["tex"] = 0
-            self.vao.render(mgl.TRIANGLES)
-
-            self.text_1.renderText("PLAY MODE")
+            self.text_1.renderText("PLAY-MODE")
             self.text_2.renderText("SETTINGS")
             self.text_3.renderText("QUIT")
         else:
-            self.text_4.renderText(f"PLAYER-0 - {self.account_0["passed-level-count"]}")
-            self.text_5.renderText(f"PLAYER-1 - {self.account_1["passed-level-count"]}")
-            self.text_6.renderText(f"PLAYER-2 - {self.account_2["passed-level-count"]}")
+            self.text_4.renderText(f"PLAYER-0 - {self.account_0['passed-level-count']}")
+            self.text_5.renderText(f"PLAYER-1 - {self.account_1['passed-level-count']}")
+            self.text_6.renderText(f"PLAYER-2 - {self.account_2['passed-level-count']}")
             self.text_7.renderText("xCHOOSE THE PLAYERx")
 
-        self.title_border.use()
-
-        self.program["unPos"] = glm.vec2(0, 0)
-        self.program["unScale"] = glm.vec2(self.game.width, self.game.height)
-        self.program["unZayer"] = 2
-        self.program["color_change"] = glm.vec3(1)
-        self.program["tex"] = 0
-        self.vao.render(mgl.TRIANGLES)
-
-        self.background.use()
-
-        self.program["unPos"] = glm.vec2(self.x_1, glm.sin(self.x_1 * 0.1))
-        self.program["unScale"] = glm.vec2(self.game.width, self.game.height)
-        self.program["unZayer"] = 0
-        self.program["color_change"] = glm.vec3(1)
-        self.program["tex"] = 0
-        self.vao.render(mgl.TRIANGLES)
-
-        self.program["unPos"] = glm.vec2(self.x_2, glm.sin(self.x_1 * 0.1))
-        self.program["unScale"] = glm.vec2(self.game.width, self.game.height)
-        self.program["unZayer"] = 0
-        self.program["color_change"] = glm.vec3(1)
-        self.program["tex"] = 0 
-        self.vao.render(mgl.TRIANGLES)
+        self.title_border.renderSprite()
 
        
     
@@ -279,7 +262,7 @@ class Settings(EmptyScene):
         pass
     
     def onRender(self):
-        self.game.ctx.clear(0, 1, 0)
+        self.game._ctx.clear(0, 1, 0)
     
     def onSave(self):
         pass

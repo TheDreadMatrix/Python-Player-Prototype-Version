@@ -28,8 +28,8 @@ class GameRequest:
     def closeGame(self):
         self.__game._running = False
 
-    def showMouse(self):
-        pg.mouse.set_visible(False)
+    def showMouse(self, flag):
+        pg.mouse.set_visible(flag)
 
 
 class CorePath:
@@ -160,6 +160,9 @@ class MyGame:
     def getFps(self):
         return self.__clock.get_fps()
     
+    def getScene(self):
+        return self._scene_name
+    
     def setFirst(self, scene):
         self._scene_name = scene
     
@@ -183,9 +186,8 @@ class MyGame:
 
 
     def __run(self):
-        
         while self._running:
-            self.delta_time = min(self.__clock.tick(120) / 1000.0, 0.05)        
+            self.delta_time = min(self.__clock.tick(240) / 1000.0, 0.05)        
         
             self.__update()
             self.__render()

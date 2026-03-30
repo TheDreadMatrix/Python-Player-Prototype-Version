@@ -14,6 +14,6 @@
 uniform float num;
 
 void main(){
-    GclColor = texture(GclTexture, GclUv) * vec4(num);
+    GclColor = texture(GclTexture, GclUv) * vec4(num, num, 1, 1);
 }
 

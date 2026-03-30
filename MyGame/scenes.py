@@ -1,28 +1,33 @@
 
-from MyGame.anotation import GameType
-from MyGame.scenes_component import EmptyScene
+from MyGame.scenes_component import EmptyScene, GameType
 from MyGame.scenes_game.levels import Level, Tutorial
 from MyGame.scenes_game.overworld import OverWorld
 from MyGame.scenes_game.main_scenes import Test, Menu, Settings
-
+from MyGame.scenes_game.levels_editor import LevelEditor
+from MyGame.scenes_game.overworld_editor import OverworldEditor
 
 
 
 
 
 class SceneManager:
-    def __init__(self, game: "GameType"):
+    def __init__(self, game: GameType):
         self.game = game
         self.manager_state = ""
         self.current_scene = EmptyScene(game)
 
 
-        self.game.setFirst("test")
+        self.game.request.redirectScene("menu")
 
 
         self.scene_dict = {
+            #JUST TEST
             "test": lambda: Test(game=game),
+            "level-editor": lambda: LevelEditor(game=game),
+            "overworld-editor": lambda: OverworldEditor(game=game),
 
+
+            #IN GAME
             "menu": lambda: Menu(game=game),
             "settings": lambda: Settings(game=game),
             "quit": lambda: EmptyScene(game=game),
@@ -77,10 +82,10 @@ class SceneManager:
 
 
     def update(self):
-        state_scene = self.game._scene_name
+        state_scene = self.game.getScene()
 
         if state_scene == "quit":
-            self.game.closeGame()
+            self.game.request.closeGame()
             
         if state_scene != self.manager_state:
             self.current_scene.onSave()

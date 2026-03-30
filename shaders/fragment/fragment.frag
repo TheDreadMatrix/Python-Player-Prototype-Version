@@ -1,23 +1,15 @@
 #version 330 core
 
 
-in vec2 fUV;
+in vec2 GclUv;
 
-out vec4 fragColor;
+out vec4 GclColor;
 
-uniform vec3 color_change;
-uniform sampler2D tex;
+uniform sampler2D GclTexture;
 
 
 
 
 void main(){
-    vec4 texColor = texture(tex, fUV);
-
-   
-    if (texColor.a <= 0.0)
-        discard;
-
-    fragColor = texColor * vec4(color_change, 1.0);
-
+    GclColor = texture(GclTexture, GclUv);
 }
