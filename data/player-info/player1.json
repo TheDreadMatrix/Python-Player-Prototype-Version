@@ -8,11 +8,9 @@
     "points": 0,
     "time-in-game": 0,
     "passed-level-count": 0,
-
     "player": {
-        "cutscened": false
+        "cutscened-1": true
     },
-
     "overworld": {
         "current-overworld": "overworld-1",
         "current-stop": "start"

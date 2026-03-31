@@ -1,10 +1,20 @@
-from MyGame.scenes_component import EmptyScene
-
+from MyGame.scenes_component import EmptyScene, GameType
+from MyGame.johnson import Johnson
 
 
 class Cutscene_1(EmptyScene):
-    def __init__(self, game):
-        super().__init__(game)
+    def __init__(self, game: GameType):
+        self.game = game
+
+        self.account = Johnson(game.paths.DataPath(f"{game.data_settings_read["current-player-account-path"]}.json"))
+        self.account_read = self.account.readData()
+        if self.account_read["player"]["cutscened-1"]:
+            self.game.request.redirectScene(self.account_read["overworld"]["current-overworld"])
+        self.account_read["player"]["cutscened-1"] = True
+        self.account.saveData(self.account_read)
+            
+        
+
 
 
     def onUpdate(self):

@@ -3,6 +3,7 @@ from MyGame.johnson import Johnson
 from MyGame.requirements import pg, glm
 from MyGame.rendering.rendering import TextRender, CustomShader, SpriteRender, load_texture
 from MyGame.rendering.uieffect import FadeEffect
+import random
 
 
 
@@ -50,6 +51,10 @@ class Test(EmptyScene):
 class Menu(EmptyScene):
     def __init__(self, game):
         super().__init__(game)
+        #MUSIC
+        pg.mixer_music.load(game.paths.SoundtrackPath("music/title-name.mp3"))
+        pg.mixer_music.play(-1, fade_ms=2000)
+
         #JSON DATAS
         self.account_0 = Johnson(game.paths.DataPath("player-info/player0.json")).readData()
         self.account_1 = Johnson(game.paths.DataPath("player-info/player1.json")).readData()
@@ -60,6 +65,10 @@ class Menu(EmptyScene):
         self.timer_appear = 0
         self.timer_dissappear = 1
         self.x_1, self.x_2 = 0, self.game.width
+
+        self.r = random.random()
+        self.g = random.random()
+        self.b = random.random()
 
 
         self.alpha = 0
@@ -78,6 +87,7 @@ class Menu(EmptyScene):
 
         #GRAPHICS
         self.fade = FadeEffect(game)
+        self.fade.Alpha = 1.0
         
         self.shader = CustomShader(game, "menu.frag")
 
@@ -145,6 +155,8 @@ class Menu(EmptyScene):
 
 
     def onUpdate(self):
+        
+        
         self.x_1 += 12 * self.game.delta_time
         self.x_2 += 12 * self.game.delta_time
 
@@ -161,7 +173,8 @@ class Menu(EmptyScene):
         if self.switching:
             self.timer_dissappear -= self.game.delta_time * 0.6
             self.alpha = glm.clamp(self.timer_dissappear, 0.0, 1.0)
-            self.fade.fadeOut()
+            self.fade.fadeOut(0.7)
+            pg.mixer_music.fadeout(2500)
 
             
             self.switch_timer += self.game.delta_time
@@ -169,8 +182,8 @@ class Menu(EmptyScene):
             if self.switch_timer >= self.switch_delay and self.switch_target_scene:
                 self.game.request.redirectScene(self.switch_target_scene)
 
-
-        
+        else:
+            self.fade.fadeIn(2)
 
 
         
@@ -221,7 +234,7 @@ class Menu(EmptyScene):
         
     
     def onRender(self):
-        self.game._ctx.clear(0.9, 0.6, 0.4)
+        self.game.setColorScreen(self.r, self.g, self.b)
 
         self.background.Position = glm.vec2(self.x_1, glm.sin(self.x_1 * 0.2))
         self.background.renderSprite()

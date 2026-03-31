@@ -127,6 +127,7 @@ class MyGame:
         # OPENGL BUFFERS AND SHADER STORAGE SETTINGS
         #--------------------------------------------------------------------------------------------------------
         vertices = array("f", [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        vertices_only = array("f", [0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         indices = array("I", [0, 1, 2, 2, 3, 0])
 
         self.__projection = glm.ortho(0, self.width, self.height, 0, -1, 1)
@@ -136,6 +137,7 @@ class MyGame:
 
         self._ebo = self._ctx.buffer(indices)
         self._vbo = self._ctx.buffer(vertices)
+        self._vbo_only = self._ctx.buffer(vertices_only)
         #--------------------------------------------------------------------------------------------------------
 
         self.request = GameRequest(self)
@@ -163,8 +165,9 @@ class MyGame:
     def getScene(self):
         return self._scene_name
     
-    def setFirst(self, scene):
-        self._scene_name = scene
+
+    def setColorScreen(self, r, g, b):
+        self._ctx.clear(r, g, b)
     
 
     def __update(self):
