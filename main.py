@@ -36,17 +36,23 @@ class GameRequest:
 class CorePath:
     def __init__(self, base_dir=None):
         if base_dir:
-            self._base_dir = Path(base_dir)
+            self._runtime_dir = Path(base_dir)
         else:
-            
-            if hasattr(sys, "_MEIPASS"):
-                self._base_dir = Path(sys._MEIPASS)
+            if getattr(sys, "frozen", False):
+                self._runtime_dir = Path(r"C:\Users\User\.vscode\KartoshkaGame")
             else:
-                self._base_dir = Path(__file__).resolve().parent
-        self._assets_dir = self._base_dir / "assets"
-        self._shaders_dir = self._base_dir / "shaders"
-        self._data_dir = self._base_dir / "data"
-        self._soundtracks_dir = self._base_dir / "soundtracks"
+                self._runtime_dir = Path(__file__).resolve().parent
+
+        if hasattr(sys, "_MEIPASS"):
+            self._resource_dir = Path(sys._MEIPASS)
+        else:
+            self._resource_dir = self._runtime_dir
+
+        self._assets_dir = self._resource_dir / "assets"
+        self._shaders_dir = self._resource_dir / "shaders"
+        self._soundtracks_dir = self._resource_dir / "soundtracks"
+
+        self._data_dir = self._runtime_dir / "data"
 
     def _ensure_file(self, path: Path, kind: str) -> Path:
         if not path.exists():
@@ -103,7 +109,7 @@ class MyGame:
         pg.display.set_caption("Super Mario World: 91P Retitle")
         pg.mouse.set_visible(False)
         pg.event.set_grab(True)
-
+        
         
 
         self._ctx = mgl.create_context()
@@ -154,7 +160,7 @@ class MyGame:
         self.request = GameRequest(self)
         self.paths = CorePath()
 
-        icon = pg.image.load(str(self.paths._base_dir / "icon.ico"))
+        icon = pg.image.load(str(self.paths._resource_dir / "icon.ico"))
         pg.display.set_icon(icon)
         
         #--------------------------------------------------------------------------------------------------------

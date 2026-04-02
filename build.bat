@@ -1,39 +1,50 @@
-$ErrorActionPreference = "Stop"
+@echo off
+setlocal
 
-Write-Host "=== Building project with PyInstaller ==="
+echo === Building project with PyInstaller ===
 
-# Clean previous builds
-if (Test-Path "build") {
-    Remove-Item -Recurse -Force "build"
-}
+REM Clean previous builds
+if exist build (
+    rmdir /s /q build
+)
 
-if (Test-Path "dist") {
-    Remove-Item -Recurse -Force "dist"
-}
+if exist dist (
+    rmdir /s /q dist
+)
 
-if (Test-Path "main.spec") {
-    Remove-Item -Force "main.spec"
-}
+if exist main.spec (
+    del /f /q main.spec
+)
 
-Write-Host "Running PyInstaller..."
+echo Running PyInstaller...
 
-pyinstaller `
-    --onefile `
-    --noconsole `
-    --name MyGame `
-    --icon=icon.ico `
-    --add-data "icon.ico;." `
-    --add-data "assets;assets" `
-    --add-data "shaders;shaders" `
-    --add-data "data;data" `
-    --add-data "soundtracks;soundtracks" `
+pyinstaller ^
+    --onefile ^
+    --noconsole ^
+    --name MyGame ^
+    --icon=icon.ico ^
+    --distpath . ^
+    --add-data "icon.ico;." ^
+    --add-data "assets;assets" ^
+    --add-data "shaders;shaders" ^
+    --add-data "soundtracks;soundtracks" ^
     main.py
 
-$desktop = [Environment]::GetFolderPath("Desktop")
+REM Copy to Desktop
+set "DESKTOP=%USERPROFILE%\Desktop"
 
-Copy-Item "dist\MyGame.exe" "$desktop\MyGame.exe" -Force
+copy /Y "MyGame.exe" "%DESKTOP%\MyGame.exe"
 
-Remove-Item -Recurse -Force build
-Remove-Item MyGame.spec
-Write-Host "=== Build completed successfully ==="
-Write-Host "Output: dist/main.exe"
+REM Cleanup
+if exist build (
+    rmdir /s /q build
+)
+
+if exist MyGame.spec (
+    del /f /q MyGame.spec
+)
+
+echo === Build completed successfully ===
+echo Output: MyGame.exe
+
+pause

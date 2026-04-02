@@ -55,6 +55,10 @@ class Menu(EmptyScene):
         pg.mixer_music.load(game.paths.SoundtrackPath("music/title-name.mp3"))
         pg.mixer_music.play(-1, fade_ms=2000)
 
+        self.sound_choose = pg.mixer.Sound(game.paths.SoundtrackPath("sounds/map.wav"))
+        self.sound_cancer = pg.mixer.Sound(game.paths.SoundtrackPath("sounds/pause.wav"))
+        self.sound_pointer = pg.mixer.Sound(game.paths.SoundtrackPath("sounds/pointer.mp3"))
+
         #JSON DATAS
         self.account_0 = Johnson(game.paths.DataPath("player-info/player0.json")).readData()
         self.account_1 = Johnson(game.paths.DataPath("player-info/player1.json")).readData()
@@ -194,16 +198,19 @@ class Menu(EmptyScene):
 
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_w:
+                self.sound_choose.play()
                 self.selected -= 1
                 if self.selected < 0:
                     self.selected = len(self.options) - 1 
 
             elif event.key == pg.K_s:
+                self.sound_choose.play()
                 self.selected += 1
                 if self.selected >= len(self.options):
                     self.selected = 0
 
             if event.key == pg.K_q:
+                self.sound_pointer.play()
                 if not self.switching_game:
                     selected_option = self.options[self.selected]
 
@@ -225,6 +232,7 @@ class Menu(EmptyScene):
 
    
             if event.key == pg.K_z and self.switching_game:
+                self.sound_cancer.play()
                 self.switching_game = False
                 self.options = ["PLAY MODE", "SETTINGS", "QUIT"]
                 self.selected = 0
