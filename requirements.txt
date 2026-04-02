@@ -1,0 +1,5 @@
+moderngl
+pygame_ce
+pyglm
+pyinstaller
+pillow
