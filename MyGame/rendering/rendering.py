@@ -20,7 +20,6 @@ def load_texture(game: GameType, path: str):
 class CustomShader:
     _VERTEX_HEADER = """#version 330 core\nin vec2 GclUv;\nout vec4 GclColor;\nuniform sampler2D GclTexture;"""
     _VERTEX_TEXT_HEADER = ""
-    _PROHIBITED = {"fragment.frag", "vertex.vert", "text.vert", "text.frag"}
     _INCLUDE_VERTEX_MAP = {
         "vertex": "vertex.vert",
         "vertex.vert": "vertex.vert",
@@ -30,8 +29,6 @@ class CustomShader:
         "vertex_text.vert": "text.vert",
     }
     def __init__(self, game: GameType, shader_filename: str):
-        if shader_filename in self._PROHIBITED:
-            raise FileExistsError("Can not import building file")
         source = game.paths.ShaderText(f"custom/{shader_filename}")
 
         include_vertex = False

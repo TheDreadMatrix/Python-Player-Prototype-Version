@@ -6,6 +6,7 @@ import pygame as pg
 import moderngl as mgl
 import glm
 from array import array
+import sys
 from pathlib import Path
 
 
@@ -34,7 +35,14 @@ class GameRequest:
 
 class CorePath:
     def __init__(self, base_dir=None):
-        self._base_dir = Path(base_dir) if base_dir else Path(__file__).resolve().parent
+        if base_dir:
+            self._base_dir = Path(base_dir)
+        else:
+            
+            if hasattr(sys, "_MEIPASS"):
+                self._base_dir = Path(sys._MEIPASS)
+            else:
+                self._base_dir = Path(__file__).resolve().parent
         self._assets_dir = self._base_dir / "assets"
         self._shaders_dir = self._base_dir / "shaders"
         self._data_dir = self._base_dir / "data"
@@ -94,6 +102,9 @@ class MyGame:
         self.__window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL)
         pg.display.set_caption("Super Mario World: 91P Retitle")
         pg.mouse.set_visible(False)
+        pg.event.set_grab(True)
+
+        
 
         self._ctx = mgl.create_context()
         self._ctx.enable(mgl.BLEND)
@@ -142,6 +153,9 @@ class MyGame:
 
         self.request = GameRequest(self)
         self.paths = CorePath()
+
+        icon = pg.image.load(str(self.paths._base_dir / "icon.ico"))
+        pg.display.set_icon(icon)
         
         #--------------------------------------------------------------------------------------------------------
         # ONLY ADMIN WORKPLACE
@@ -176,6 +190,9 @@ class MyGame:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self._running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE and self.data_settings_read["escape-with-esc"]:
+                    self._running = False
 
             self.__scenes.event(event=event)
         

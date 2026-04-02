@@ -1,5 +1,6 @@
 {
     "current-player-account-path": "player-info/player0",
+    "escape-with-esc": true,
     "music-volume": 1.0,
     "sound-volume": 1.0,
     "vhs-shader": false,
