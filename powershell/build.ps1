@@ -33,6 +33,16 @@ $desktop = [Environment]::GetFolderPath("Desktop")
 
 Copy-Item "MyGame.exe" "$desktop\MyGame.exe" -Force
 
+#CREATING ROOT DIRECTORY
+$dest = "$env:APPDATA\.kartoshkaData"
+$src = ".\data"
+
+New-Item -ItemType Directory -Path $dest -Force
+
+Copy-Item $src $dest -Recurse -Force
+
+
+#DELETE UNNECESSERERY FOLDERS AND FILES
 Remove-Item -Recurse -Force build
 Remove-Item MyGame.spec
 Write-Host "=== Build completed successfully ===" -ForegroundColor Green

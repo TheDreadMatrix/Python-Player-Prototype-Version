@@ -39,7 +39,7 @@ class CorePath:
             self._runtime_dir = Path(base_dir)
         else:
             if getattr(sys, "frozen", False):
-                self._runtime_dir = Path(r"C:\Users\User\.vscode\KartoshkaGame")
+                self._runtime_dir = Path(os.getenv("APPDATA")) / ".kartoshkaData"
             else:
                 self._runtime_dir = Path(__file__).resolve().parent
 
