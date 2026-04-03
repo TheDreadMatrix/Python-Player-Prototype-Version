@@ -24,5 +24,8 @@ dist/
 .DS_Store
 Thumbs.db
 
+test/
+
+
 #EXE
 MyGame.exe
