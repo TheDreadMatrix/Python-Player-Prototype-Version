@@ -1,4 +1,4 @@
-from supermarioworld.scenes_component import EmptyScene
+from supermarioworld.package_typing import EmptyScene
 
 
 

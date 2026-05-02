@@ -1,13 +1,13 @@
 
-from supermarioworld.scenes_component import EmptyScene, GameType
+from supermarioworld.package_typing import EmptyScene, GameType
 
 
-from supermarioworld.scenes_game.levels import Level, Tutorial
-from supermarioworld.scenes_game.overworld import OverWorld
-from supermarioworld.scenes_game.main_scenes import Test, Menu, Settings
-from supermarioworld.scenes_game.levels_editor import LevelEditor
-from supermarioworld.scenes_game.overworld_editor import OverworldEditor
-from supermarioworld.scenes_game.cutscene import Cutscene_1
+from supermarioworld.scenes.levels import Level, Tutorial
+from supermarioworld.scenes.overworld import OverWorld
+from supermarioworld.scenes.main_scenes import Test, Menu, Settings
+from supermarioworld.scenes.levels_editor import LevelEditor
+from supermarioworld.scenes.overworld_editor import OverworldEditor
+from supermarioworld.scenes.cutscene import Cutscene_1
 
 
 

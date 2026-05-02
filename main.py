@@ -1,7 +1,7 @@
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
-from supermarioworld.scenes import SceneManager
+from supermarioworld.router import SceneManager
 from supermarioworld.johnson import Johnson
 
 import pygame as pg
@@ -50,13 +50,15 @@ class CorePath:
         if hasattr(sys, "_MEIPASS"):
             self._resource_dir = Path(sys._MEIPASS)
         else:
-            self._resource_dir = self._runtime_dir
+            self._resource_dir = self._runtime_dir 
 
-        self._assets_dir = self._resource_dir / "assets"
+        self._assets_dir = self._resource_dir / "images"
         self._shaders_dir = self._resource_dir / "shaders"
-        self._soundtracks_dir = self._resource_dir / "soundtracks"
+        self._music_dir = self._resource_dir / "music"
+        self._sound_dir = self._resource_dir / "sounds"
 
         self._data_dir = self._runtime_dir / "data"
+
 
     def _ensure_file(self, path: Path, kind: str) -> Path:
         if not path.exists():
@@ -68,30 +70,23 @@ class CorePath:
     def ShaderPath(self, filename):
         return str(self._ensure_file(self._shaders_dir / filename, "Shader"))
 
-    def AssetPath(self, filename):
-        return str(self._ensure_file(self._assets_dir / filename, "Asset"))
+    def ImagesPath(self, filename):
+        return str(self._ensure_file(self._assets_dir / filename, "Images"))
 
     def DataPath(self, filename):
         return str(self._ensure_file(self._data_dir / filename, "Data"))
 
-    def SoundtrackPath(self, filename):
-        return str(self._ensure_file(self._soundtracks_dir / filename, "Soundtrack"))
+    def MusicPath(self, filename):
+        return str(self._ensure_file(self._music_dir / filename, "Music"))
+
+    def SoundPath(self, filename):
+        return str(self._ensure_file(self._sound_dir / filename, "Sound"))
 
     def ShaderText(self, filename):
         path = self._ensure_file(self._shaders_dir / filename, "Shader")
         return path.read_text(encoding="utf-8")
 
-    def AssetDir(self):
-        return str(self._assets_dir)
-
-    def ShaderDir(self):
-        return str(self._shaders_dir)
-
-    def DataDir(self):
-        return str(self._data_dir)
-
-    def SoundtrackDir(self):
-        return str(self._soundtracks_dir)
+  
 
 
 
@@ -116,8 +111,8 @@ class MyGame:
 
         self._ctx = mgl.create_context()
         self._ctx.enable(mgl.BLEND)
-        self._ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
         self._ctx.enable(mgl.DEPTH_TEST)
+        self._ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
         self._ctx.viewport = (0, 0, self.__window.get_width(), self.__window.get_height())
         #--------------------------------------------------------------------------------------------------------
         #--------------------------------------------------------------------------------------------------------
@@ -150,8 +145,8 @@ class MyGame:
         self.request = GameRequest(self)
         self.paths = CorePath()
 
-        icon = pg.image.load(str(self.paths._resource_dir / "icon.ico"))
-        pg.display.set_icon(icon)
+        #icon = pg.image.load(str(self.paths._resource_dir / "icon.ico"))
+        #pg.display.set_icon(icon)
 
 
         #--------------------------------------------------------------------------------------------------------

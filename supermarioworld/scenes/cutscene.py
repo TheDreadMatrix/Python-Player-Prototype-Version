@@ -1,4 +1,4 @@
-from supermarioworld.scenes_component import EmptyScene, GameType
+from supermarioworld.package_typing import EmptyScene, GameType
 from supermarioworld.johnson import Johnson
 
 

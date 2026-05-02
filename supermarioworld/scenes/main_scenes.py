@@ -1,8 +1,9 @@
-from supermarioworld.scenes_component import EmptyScene, GameType
+from supermarioworld.package_typing import EmptyScene, GameType
 from supermarioworld.johnson import Johnson
 
 import random
-
+import pygame as pg
+import glm
 
 
 class Test(EmptyScene):
@@ -50,12 +51,12 @@ class Menu(EmptyScene):
     def __init__(self, game):
         super().__init__(game)
         #MUSIC
-        pg.mixer_music.load(game.paths.SoundtrackPath("music/title-name.mp3"))
+        pg.mixer_music.load(game.paths.MusicPath("title-name.mp3"))
         pg.mixer_music.play(-1, fade_ms=2000)
 
-        self.sound_choose = pg.mixer.Sound(game.paths.SoundtrackPath("sounds/map.wav"))
-        self.sound_cancer = pg.mixer.Sound(game.paths.SoundtrackPath("sounds/pause.wav"))
-        self.sound_pointer = pg.mixer.Sound(game.paths.SoundtrackPath("sounds/pointer.mp3"))
+        self.sound_choose = pg.mixer.Sound(game.paths.SoundPath("map.wav"))
+        self.sound_cancer = pg.mixer.Sound(game.paths.SoundPath("pause.wav"))
+        self.sound_pointer = pg.mixer.Sound(game.paths.SoundPath("pointer.mp3"))
 
         #JSON DATAS
         self.account_0 = Johnson(game.paths.DataPath("player-info/player0.json")).readData()

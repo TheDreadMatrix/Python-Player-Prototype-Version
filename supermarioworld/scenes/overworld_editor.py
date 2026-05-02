@@ -1,8 +1,8 @@
-from supermarioworld.scenes_component import EmptyScene
+from supermarioworld.package_typing import EmptyScene
 
 
 
-class LevelEditor(EmptyScene):
+class OverworldEditor(EmptyScene):
     def __init__(self, game):
         super().__init__(game)
 
