@@ -1,10 +1,14 @@
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
-from MyGame import SceneManager, johnson
+from supermarioworld.scenes import SceneManager
+from supermarioworld.johnson import Johnson
+
 import pygame as pg
 import moderngl as mgl
 import glm
+
+
 from array import array
 import sys
 from pathlib import Path
@@ -105,10 +109,8 @@ class MyGame:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 
-        self.__window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL)
+        self.__window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
         pg.display.set_caption("Super Mario World: 91P Retitle")
-        pg.mouse.set_visible(False)
-        pg.event.set_grab(True)
         
         
 
@@ -126,6 +128,7 @@ class MyGame:
         #--------------------------------------------------------------------------------------------------------
         # FRAMERATE AND RUNNING ATTRIBUTES
         self.__clock = pg.time.Clock()
+        self.__paused = False
         self._running = True
         #--------------------------------------------------------------------------------------------------------
         #--------------------------------------------------------------------------------------------------------
@@ -136,8 +139,19 @@ class MyGame:
         self.delta_time = 0
         self.width = self.__window.get_width()
         self.height = self.__window.get_height()
+
+        self.v_width = 800
+        self.v_height = 600
         #--------------------------------------------------------------------------------------------------------
         #--------------------------------------------------------------------------------------------------------
+
+        #--------------------------------------------------------------------------------------------------------
+
+        self.request = GameRequest(self)
+        self.paths = CorePath()
+
+        icon = pg.image.load(str(self.paths._resource_dir / "icon.ico"))
+        pg.display.set_icon(icon)
 
 
         #--------------------------------------------------------------------------------------------------------
@@ -147,7 +161,7 @@ class MyGame:
         vertices_only = array("f", [0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         indices = array("I", [0, 1, 2, 2, 3, 0])
 
-        self.__projection = glm.ortho(0, self.width, self.height, 0, -1, 1)
+        self.__projection = glm.ortho(0, self.v_width, self.v_height, 0, -1, 1)
         self.__ubo = self._ctx.buffer(reserve=64)
         self.__ubo.bind_to_uniform_block(0)
         self.__ubo.write(self.__projection.to_bytes())
@@ -155,17 +169,11 @@ class MyGame:
         self._ebo = self._ctx.buffer(indices)
         self._vbo = self._ctx.buffer(vertices)
         self._vbo_only = self._ctx.buffer(vertices_only)
-        #--------------------------------------------------------------------------------------------------------
 
-        self.request = GameRequest(self)
-        self.paths = CorePath()
-
-        icon = pg.image.load(str(self.paths._resource_dir / "icon.ico"))
-        pg.display.set_icon(icon)
         
         #--------------------------------------------------------------------------------------------------------
         # ONLY ADMIN WORKPLACE
-        self.data_settings = johnson.Johnson(self.paths.DataPath("settings.json"))
+        self.data_settings = Johnson(self.paths.DataPath("settings.json"))
         self.data_settings_read = self.data_settings.readData()
         #--------------------------------------------------------------------------------------------------------
 
@@ -191,24 +199,38 @@ class MyGame:
     
 
     def __update(self):
-        self.__scenes.update()
+        if not self.__paused:
+            pg.mixer_music.unpause()
+            self.__scenes.update()
+        else:
+            pg.mixer_music.pause()
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self._running = False
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_ESCAPE and self.data_settings_read["escape-with-esc"]:
-                    self._running = False
 
-            self.__scenes.event(event=event)
+            if event.type in [pg.WINDOWFOCUSLOST, pg.WINDOWMINIMIZED]:
+                self.__paused = True
+            if event.type == pg.WINDOWFOCUSGAINED:
+                self.__paused = False
+
+            if event.type == pg.VIDEORESIZE:
+                self.width = self.__window.get_width()
+                self.height = self.__window.get_height()
+                
+
+            if not self.__paused:
+                self.__scenes.event(event=event)
         
         
 
 
     def __render(self):
-        self._ctx.clear(1, 1, 1)
-        self.__scenes.render()
-        pg.display.flip()
+        if not self.__paused:
+            self._ctx.clear(1, 1, 1)
+            self.__scenes.render()
+            pg.display.flip()
+        
 
 
     def __run(self):
