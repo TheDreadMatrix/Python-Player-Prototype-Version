@@ -39,7 +39,7 @@ class CorePath:
             self._runtime_dir = Path(base_dir)
         else:
             if getattr(sys, "frozen", False):
-                self._runtime_dir = Path(os.getenv("APPDATA")) / ".kartoshkaData"
+                self._runtime_dir = Path(os.getenv("APPDATA")) / ".supermarioworld"
             else:
                 self._runtime_dir = Path(__file__).resolve().parent / "assets"
 
@@ -55,6 +55,8 @@ class CorePath:
         self._sound_dir = self._resource_dir / "sounds"
 
         self._data_dir = self._runtime_dir / "data"
+        self._config_dir = self._runtime_dir / "config"
+        self._csaves_dir = self._runtime_dir / "csaves"
 
 
     def _ensure_file(self, path: Path, kind: str) -> Path:
@@ -64,6 +66,18 @@ class CorePath:
             raise FileNotFoundError(f"{kind} is not a file: {path}")
         return path
     
+
+    def ConfigPath(self, filename):
+        return str(self._ensure_file(self._config_dir / filename, "Config"))
+    
+    def CsavesPath(self, filename):
+        return str(self._ensure_file(self._csaves_dir / filename, "Csaves"))
+    
+    def DataPath(self, filename):
+        return str(self._ensure_file(self._data_dir / filename, "Data"))
+    
+
+    
     def AssetPath(self, filename):
         return str(self._ensure_file(self._resource_dir / filename, "Assets"))
 
@@ -72,9 +86,6 @@ class CorePath:
 
     def ImagesPath(self, filename):
         return str(self._ensure_file(self._assets_dir / filename, "Images"))
-
-    def DataPath(self, filename):
-        return str(self._ensure_file(self._data_dir / filename, "Data"))
 
     def MusicPath(self, filename):
         return str(self._ensure_file(self._music_dir / filename, "Music"))

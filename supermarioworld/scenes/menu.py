@@ -47,13 +47,7 @@ class Menu(EmptyScene):
         self.switching_game = False
         self.switch_target_scene = ""
 
-
-        #GRAPHICS
         
-
-
-
-
     def onUpdate(self):
         self.x_1 += 12 * self.game.delta_time
         self.x_2 += 12 * self.game.delta_time
