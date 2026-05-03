@@ -32,12 +32,14 @@ $desktop = [Environment]::GetFolderPath("Desktop")
 Copy-Item "SuperMarioWorld.exe" "$desktop\SuperMarioWorld.exe" -Force
 
 #CREATING ROOT DIRECTORY
-$dest = "$env:APPDATA\.supermarioworld"
-$src = ".\assets\data"
+$dest = "$env:APPDATA\.superkartoshkaworld"
+$srcConfig = ".\assets\config"
+$srcCsaves = ".\assets\csaves"
 
-New-Item -ItemType Directory -Path $dest -Force
+New-Item -ItemType Directory -Path $dest -Force | Out-Null
 
-Copy-Item $src $dest -Recurse -Force
+Copy-Item $srcConfig $dest -Recurse -Force
+Copy-Item $srcCsaves $dest -Recurse -Force
 
 
 #DELETE UNNECESSERERY FOLDERS AND FILES

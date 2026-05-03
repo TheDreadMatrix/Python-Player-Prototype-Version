@@ -24,9 +24,9 @@ class Menu(EmptyScene):
         self.sound_pointer = pg.mixer.Sound(game.paths.SoundPath("pointer.mp3"))
 
         #JSON DATAS
-        self.account_0 = Johnson(game.paths.DataPath("player-info/player0.json")).readData()
-        self.account_1 = Johnson(game.paths.DataPath("player-info/player1.json")).readData()
-        self.account_2 = Johnson(game.paths.DataPath("player-info/player2.json")).readData()
+        self.account_0 = Johnson(game.paths.ConfigPath("player-info/player0.json")).readData()
+        self.account_1 = Johnson(game.paths.ConfigPath("player-info/player1.json")).readData()
+        self.account_2 = Johnson(game.paths.ConfigPath("player-info/player2.json")).readData()
         self.account_dict = {f"P-{i}": f"player-info/player{i}" for i in range(3)}
 
         #ATTRIBUTES

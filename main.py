@@ -39,7 +39,7 @@ class CorePath:
             self._runtime_dir = Path(base_dir)
         else:
             if getattr(sys, "frozen", False):
-                self._runtime_dir = Path(os.getenv("APPDATA")) / ".supermarioworld"
+                self._runtime_dir = Path(os.getenv("APPDATA")) / ".superkartoshkaworld"
             else:
                 self._runtime_dir = Path(__file__).resolve().parent / "assets"
 
@@ -151,7 +151,7 @@ class MyGame:
         self._vbo = self._ctx.buffer(vertices)
 
   
-        self.settings = Johnson(self.paths.DataPath("settings.json"))
+        self.settings = Johnson(self.paths.CsavesPath("settings.json"))
         self.settings_read = self.settings.readData()
 
 
