@@ -54,7 +54,7 @@ class CorePath:
         self._music_dir = self._resource_dir / "music"
         self._sound_dir = self._resource_dir / "sounds"
 
-        self._data_dir = self._runtime_dir / "data"
+        
         self._config_dir = self._runtime_dir / "config"
         self._csaves_dir = self._runtime_dir / "csaves"
 
@@ -74,7 +74,7 @@ class CorePath:
         return str(self._ensure_file(self._csaves_dir / filename, "Csaves"))
     
     def DataPath(self, filename):
-        return str(self._ensure_file(self._data_dir / filename, "Data"))
+        return "NOT WORKING"
     
 
     

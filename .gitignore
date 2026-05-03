@@ -28,4 +28,4 @@ test/
 
 
 #EXE
-MyGame.exe
+*.exe
