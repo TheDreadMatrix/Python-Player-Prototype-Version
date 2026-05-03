@@ -1,14 +1,12 @@
-
 from supermarioworld.package_typing import EmptyScene, GameType
 
 
 from supermarioworld.scenes.levels import Level, Tutorial
 from supermarioworld.scenes.overworld import OverWorld
-from supermarioworld.scenes.main_scenes import Test, Menu, Settings
-from supermarioworld.scenes.levels_editor import LevelEditor
-from supermarioworld.scenes.overworld_editor import OverworldEditor
+from supermarioworld.scenes.menu import Menu, Settings
 from supermarioworld.scenes.cutscene import Cutscene_1
-
+from supermarioworld.scenes.editor_overlevel import LevelEditor
+from supermarioworld.scenes.editor_overworld import OverworldEditor
 
 
 
@@ -23,8 +21,7 @@ class SceneManager:
 
 
         self.scene_dict = {
-            #JUST TEST
-            "test": lambda: Test(game=game),
+            
             "level-editor": lambda: LevelEditor(game=game),
             "overworld-editor": lambda: OverworldEditor(game=game),
 

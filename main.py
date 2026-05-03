@@ -1,4 +1,5 @@
 import os
+print(os.getenv("APPDATA"))
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
 from supermarioworld.router import SceneManager
@@ -9,8 +10,8 @@ import moderngl as mgl
 import glm
 
 
-from array import array
 import sys
+from array import array
 from pathlib import Path
 
 
@@ -19,22 +20,17 @@ from pathlib import Path
 
 class GameRequest:
     def __init__(self, game: "MyGame"):
-        self.__game = game
+        self._game = game
 
-    def setShaderVhs(self, flag):
-        pass
-
-    def setAudioVhs(self, flag):
+    def restartScene(self):
         pass
 
     def redirectScene(self, scene):
-        self.__game._scene_name = scene
+        self._game._scene_name = scene
 
     def closeGame(self):
-        self.__game._running = False
+        self._game._running = False
 
-    def showMouse(self, flag):
-        pg.mouse.set_visible(flag)
 
 
 class CorePath:
@@ -45,12 +41,13 @@ class CorePath:
             if getattr(sys, "frozen", False):
                 self._runtime_dir = Path(os.getenv("APPDATA")) / ".kartoshkaData"
             else:
-                self._runtime_dir = Path(__file__).resolve().parent
+                self._runtime_dir = Path(__file__).resolve().parent / "assets"
 
         if hasattr(sys, "_MEIPASS"):
-            self._resource_dir = Path(sys._MEIPASS)
+            self._resource_dir = Path(sys._MEIPASS) / "assets"
         else:
             self._resource_dir = self._runtime_dir 
+
 
         self._assets_dir = self._resource_dir / "images"
         self._shaders_dir = self._resource_dir / "shaders"
@@ -66,6 +63,9 @@ class CorePath:
         if not path.is_file():
             raise FileNotFoundError(f"{kind} is not a file: {path}")
         return path
+    
+    def AssetPath(self, filename):
+        return str(self._ensure_file(self._resource_dir / filename, "Assets"))
 
     def ShaderPath(self, filename):
         return str(self._ensure_file(self._shaders_dir / filename, "Shader"))
@@ -95,17 +95,20 @@ class CorePath:
 
 class MyGame:
     def __init__(self):
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
-        # INIT ATTRIBUTE AND OPENGL SYSTEM
+        self.request = GameRequest(self)
+        self.paths = CorePath()
+
+
         pg.init()
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 
-        self.__window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
-        pg.display.set_caption("Super Mario World: 91P Retitle")
+        self._window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
+        icon = pg.image.load(self.paths.AssetPath("icon.ico"))
+
+        pg.display.set_caption("Super Mario World: 91 Retitle")
+        pg.display.set_icon(icon)
         
         
 
@@ -113,73 +116,37 @@ class MyGame:
         self._ctx.enable(mgl.BLEND)
         self._ctx.enable(mgl.DEPTH_TEST)
         self._ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
-        self._ctx.viewport = (0, 0, self.__window.get_width(), self.__window.get_height())
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
+        self._ctx.viewport = (0, 0, self._window.get_width(), self._window.get_height())
 
 
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
-        # FRAMERATE AND RUNNING ATTRIBUTES
-        self.__clock = pg.time.Clock()
-        self.__paused = False
+        self._clock = pg.time.Clock()
         self._running = True
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
 
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
-        # FREE TO USE
+
         self.delta_time = 0
-        self.width = self.__window.get_width()
-        self.height = self.__window.get_height()
-
-        self.v_width = 800
-        self.v_height = 600
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
-
-        #--------------------------------------------------------------------------------------------------------
-
-        self.request = GameRequest(self)
-        self.paths = CorePath()
-
-        #icon = pg.image.load(str(self.paths._resource_dir / "icon.ico"))
-        #pg.display.set_icon(icon)
+        self.width = self._window.get_width()
+        self.height = self._window.get_height()
 
 
-        #--------------------------------------------------------------------------------------------------------
-        # OPENGL BUFFERS AND SHADER STORAGE SETTINGS
-        #--------------------------------------------------------------------------------------------------------
         vertices = array("f", [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        vertices_only = array("f", [0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         indices = array("I", [0, 1, 2, 2, 3, 0])
 
-        self.__projection = glm.ortho(0, self.v_width, self.v_height, 0, -1, 1)
-        self.__ubo = self._ctx.buffer(reserve=64)
-        self.__ubo.bind_to_uniform_block(0)
-        self.__ubo.write(self.__projection.to_bytes())
+        self._projection = glm.ortho(0, self.width, self.height, 0, -1, 1)
+        self._ubo = self._ctx.buffer(reserve=64)
+        self._ubo.bind_to_uniform_block(0)
+        self._ubo.write(self._projection.to_bytes())
 
         self._ebo = self._ctx.buffer(indices)
         self._vbo = self._ctx.buffer(vertices)
-        self._vbo_only = self._ctx.buffer(vertices_only)
 
-        
-        #--------------------------------------------------------------------------------------------------------
-        # ONLY ADMIN WORKPLACE
-        self.data_settings = Johnson(self.paths.DataPath("settings.json"))
-        self.data_settings_read = self.data_settings.readData()
-        #--------------------------------------------------------------------------------------------------------
+  
+        self.settings = Johnson(self.paths.DataPath("settings.json"))
+        self.settings_read = self.settings.readData()
 
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
-        # ALL SCENES REGISTERS IN THAT
+
         self._scene_name = ""
-        self.__scenes = SceneManager(self)
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
-        #--------------------------------------------------------------------------------------------------------
+        self._scenes = SceneManager(self)
+    
 
 
     def getFps(self):
@@ -189,63 +156,54 @@ class MyGame:
         return self._scene_name
     
 
-    def setColorScreen(self, r, g, b):
+    def clearColor(self, r, g, b):
         self._ctx.clear(r, g, b)
     
 
-    def __update(self):
-        if not self.__paused:
-            pg.mixer_music.unpause()
-            self.__scenes.update()
-        else:
-            pg.mixer_music.pause()
+    def _update(self):
+        self._scenes.update()
+
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self._running = False
 
-            if event.type in [pg.WINDOWFOCUSLOST, pg.WINDOWMINIMIZED]:
-                self.__paused = True
-            if event.type == pg.WINDOWFOCUSGAINED:
-                self.__paused = False
-
             if event.type == pg.VIDEORESIZE:
-                self.width = self.__window.get_width()
-                self.height = self.__window.get_height()
+                self.width = self._window.get_width()
+                self.height = self._window.get_height()
+                self._projection = glm.ortho(0, self.width, self.height, 0, -1, 1)
+                self._ubo.write(self._projection.to_bytes())
                 
-
-            if not self.__paused:
-                self.__scenes.event(event=event)
+            self._scenes.event(event=event)
         
         
 
 
-    def __render(self):
-        if not self.__paused:
-            self._ctx.clear(1, 1, 1)
-            self.__scenes.render()
-            pg.display.flip()
+    def _render(self):
+        self._ctx.clear(1, 1, 1)
+        self._scenes.render()
+        pg.display.flip()
         
 
 
-    def __run(self):
+    def _run(self):
         while self._running:
-            self.delta_time = min(self.__clock.tick(240) / 1000.0, 0.05)        
+            self.delta_time = min(self._clock.tick(240) / 1000.0, 0.02)        
         
-            self.__update()
-            self.__render()
+            self._update()
+            self._render()
 
             
 
-        self.__scenes.save()
-        self.data_settings.saveData(self.data_settings_read)
+        self._scenes.save()
+        self.settings.saveData(self.settings_read)
         pg.quit()
 
 
 
 if __name__ == "__main__":
     game = MyGame()
-    game._MyGame__run()
+    game._run()
 
 
 
