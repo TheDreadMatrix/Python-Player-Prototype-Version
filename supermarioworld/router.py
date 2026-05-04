@@ -4,7 +4,7 @@ from supermarioworld.package_typing import EmptyScene, GameType
 from supermarioworld.scenes.levels import Level, Tutorial
 from supermarioworld.scenes.overworld import OverWorld
 from supermarioworld.scenes.menu import Menu, Settings
-from supermarioworld.scenes.cutscene import Cutscene_1
+from supermarioworld.scenes.cutscene import CutsceneScene
 from supermarioworld.scenes.editor_overlevel import LevelEditor
 from supermarioworld.scenes.editor_overworld import OverworldEditor
 
@@ -32,9 +32,11 @@ class SceneManager:
             "quit": lambda: EmptyScene(game=game),
 
             "tutorial": lambda: Tutorial(game=game),
-            "cutscene": lambda: Cutscene_1(game=game),
-            "bonus-game": lambda: EmptyScene(game=game),
+            "cutscene-1": lambda: CutsceneScene(game=game),
+
+            "bonus-game-1": lambda: EmptyScene(game=game),
             "bonus-game-2": lambda: EmptyScene(game=game),
+            
             "ending": lambda: EmptyScene(game=game),
 
             "overworld-1": lambda: OverWorld(game=game, biome="valley", music_name="overworld-1"),

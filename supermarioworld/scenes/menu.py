@@ -24,10 +24,10 @@ class Menu(EmptyScene):
         self.sound_pointer = pg.mixer.Sound(game.paths.SoundPath("pointer.mp3"))
 
         #JSON DATAS
-        self.account_0 = Johnson(game.paths.ConfigPath("player-info/player0.json")).readData()
-        self.account_1 = Johnson(game.paths.ConfigPath("player-info/player1.json")).readData()
-        self.account_2 = Johnson(game.paths.ConfigPath("player-info/player2.json")).readData()
-        self.account_dict = {f"P-{i}": f"player-info/player{i}" for i in range(3)}
+        self.account_0 = Johnson(game.paths.CsavesPath("player/player0.json")).readData()
+        self.account_1 = Johnson(game.paths.CsavesPath("player/player1.json")).readData()
+        self.account_2 = Johnson(game.paths.CsavesPath("player/player2.json")).readData()
+        self.account_dict = {f"P-{i}": f"player/player{i}" for i in range(3)}
 
         #ATTRIBUTES
         self.timer_appear = 0
@@ -110,10 +110,10 @@ class Menu(EmptyScene):
                         self.switch_target_scene = "settings" if selected_option == "SETTINGS" else "quit"
 
                 else:
-                    self.game.settings_read["current-player-account-path"] = self.account_dict[self.options[self.selected]]
+                    self.game.settings_read["current-player"] = self.account_dict[self.options[self.selected]]
                     self.switching = True
                     self.switch_timer = 0
-                    self.switch_target_scene = "cutscene"
+                    self.switch_target_scene = "cutscene-1"
 
    
             if event.key == pg.K_z and self.switching_game:

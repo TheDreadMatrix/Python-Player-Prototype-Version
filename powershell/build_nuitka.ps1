@@ -27,17 +27,28 @@ python -m nuitka `
 
 $desktop = [Environment]::GetFolderPath("Desktop")
 
-Copy-Item "SuperNuitkaWorld.exe" "$desktop\SuperNuitkaWorld.exe" -Force
-
-# CREATING ROOT DIRECTORY
-$dest = "$env:APPDATA\.supernuitkaaworld"
-$srcConfig = ".\assets\config"
-$srcCsaves = ".\assets\csaves"
+$exe = ".\SuperNuitkaWorld.exe"
+$dest = "$env:APPDATA\.supernuitkaworld"
 
 New-Item -ItemType Directory -Path $dest -Force | Out-Null
 
-Copy-Item $srcConfig $dest -Recurse -Force
-Copy-Item $srcCsaves $dest -Recurse -Force
+Copy-Item $exe "$dest\SuperNuitkaWorld.exe" -Force
+
+# assets
+Copy-Item ".\assets\config" $dest -Recurse -Force
+Copy-Item ".\assets\csaves" $dest -Recurse -Force
+
+$target = "$dest\SuperNuitkaWorld.exe"
+$shortcut = "$desktop\SuperNuitkaWorld.lnk"
+
+$WshShell = New-Object -ComObject WScript.Shell
+$sc = $WshShell.CreateShortcut($shortcut)
+
+$sc.TargetPath = $target
+$sc.WorkingDirectory = $dest
+$sc.IconLocation = $target
+$sc.Save()
+
 
 Write-Host "=== Build completed successfully ===" -ForegroundColor Green
 Write-Host "Output: SuperNuitkaWorld.exe" -ForegroundColor Green

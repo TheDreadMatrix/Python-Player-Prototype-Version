@@ -17,7 +17,7 @@ class OverWorld(EmptyScene):
     
 
     def onRender(self):
-        self.game._ctx.clear(0, 0, 1)
+        self.game._ctx.clear(1, 0, 1)
     
 
     def onSave(self):

@@ -23,23 +23,36 @@ pyinstaller `
     --name SuperMarioWorld `
     --icon=icon.ico `
     --version-file version.txt `
-    --distpath . `
+    --distpath games `
     --add-data "assets;assets" `
     main.py
 
-$desktop = [Environment]::GetFolderPath("Desktop")
 
-Copy-Item "SuperMarioWorld.exe" "$desktop\SuperMarioWorld.exe" -Force
 
 #CREATING ROOT DIRECTORY
+$desktop = [Environment]::GetFolderPath("Desktop")
+
+$exe = ".\games\SuperMarioWorld.exe"
 $dest = "$env:APPDATA\.superkartoshkaworld"
-$srcConfig = ".\assets\config"
-$srcCsaves = ".\assets\csaves"
 
 New-Item -ItemType Directory -Path $dest -Force | Out-Null
 
-Copy-Item $srcConfig $dest -Recurse -Force
-Copy-Item $srcCsaves $dest -Recurse -Force
+Copy-Item $exe "$dest\SuperMarioWorld.exe" -Force
+
+# assets
+Copy-Item ".\assets\config" $dest -Recurse -Force
+Copy-Item ".\assets\csaves" $dest -Recurse -Force
+
+$target = "$dest\SuperMarioWorld.exe"
+$shortcut = "$desktop\SuperMarioWorld.lnk"
+
+$WshShell = New-Object -ComObject WScript.Shell
+$sc = $WshShell.CreateShortcut($shortcut)
+
+$sc.TargetPath = $target
+$sc.WorkingDirectory = $dest
+$sc.IconLocation = $target
+$sc.Save()
 
 
 #DELETE UNNECESSERERY FOLDERS AND FILES

@@ -1,5 +1,4 @@
 import os
-print(os.getenv("APPDATA"))
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
 from supermarioworld.router import SceneManager
@@ -49,6 +48,7 @@ class CorePath:
             self._resource_dir = self._runtime_dir 
 
 
+        self._fonts_dir = self._resource_dir / "fonts"
         self._assets_dir = self._resource_dir / "images"
         self._shaders_dir = self._resource_dir / "shaders"
         self._music_dir = self._resource_dir / "music"
@@ -73,10 +73,9 @@ class CorePath:
     def CsavesPath(self, filename):
         return str(self._ensure_file(self._csaves_dir / filename, "Csaves"))
     
-    def DataPath(self, filename):
-        return "NOT WORKING"
-    
 
+    def FontsPath(self, filename):
+        return str(self._ensure_file(self._fonts_dir / filename, "Fonts"))
     
     def AssetPath(self, filename):
         return str(self._ensure_file(self._resource_dir / filename, "Assets"))
