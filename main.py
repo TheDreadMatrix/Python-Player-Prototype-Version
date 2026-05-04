@@ -113,9 +113,10 @@ class MyGame:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
+        
 
         self._window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
-        icon = pg.image.load(self.paths.AssetPath("icon.ico"))
+        icon = pg.image.load(self.paths.AssetPath("icon.jpg"))
 
         pg.display.set_caption("Super Mario World: 91 Retitle")
         pg.display.set_icon(icon)
