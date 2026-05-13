@@ -1,8 +1,7 @@
-from supermarioworld.package_typing import EmptyScene
+from supermarioworld.package_scenes import EmptyScene
 from supermarioworld.johnson import Johnson
 
 from supermarioworld.rendering.moderngl import load_texture
-from supermarioworld.rendering.renderer import Sprite2D
 
 import pygame as pg
 import glm
@@ -16,9 +15,10 @@ class Menu(EmptyScene):
         super().__init__(game)
 
         #MUSIC
+        self.IS_STARTED = False
         pg.mixer_music.load(game.paths.MusicPath("title-name.mp3"))
-        pg.mixer_music.play(-1, fade_ms=2000)
         pg.mixer_music.set_volume(self.game.settings_read["music"])
+        
 
         self.sound_choose = pg.mixer.Sound(game.paths.SoundPath("map.wav"))
         self.sound_cancer = pg.mixer.Sound(game.paths.SoundPath("pause.wav"))
@@ -36,11 +36,9 @@ class Menu(EmptyScene):
         self.x_1, self.x_2 = 0, self.game.width
 
         self.alpha = 0
+        self.timer = 0
         self.options = ["PLAY MODE", "SETTINGS", "QUIT"]
         self.selected = 0
-
-        self.active = glm.vec3(1, 1, 0)   
-        self.inactive = glm.vec3(1, 1, 1)
 
         self.switch_timer = 0
         self.switch_delay = 2.5
@@ -50,23 +48,25 @@ class Menu(EmptyScene):
 
 
         # SPRITES
-        self.title = Sprite2D(game)
-        self.title.texture = load_texture(game, game.paths.ImagesPath("menu/title.png"))
-        self.title.size = (420, 180)
+        self.texture_title = load_texture(game, game.paths.ImagesPath("menu/title.png"))
+        self.texture_title_board = load_texture(game, game.paths.ImagesPath("menu/title-border.png"))
+        self.texture_background = load_texture(game, game.paths.ImagesPath("menu/background.png"))
 
-        self.title.position = (game.width * 0.5 - self.title.size[0] * 0.5, game.height * 0.5 - self.title.size[1] * 0.5)
 
-        self.title_board = Sprite2D(game)
-        self.title_board.texture = load_texture(game, game.paths.ImagesPath("menu/title-border.png"))
-        self.title_board.size = (game.width, game.height)
-
-        self.back_1 = Sprite2D(game)
-        self.back_1.texture = load_texture(game, game.paths.ImagesPath("menu/background.png"))
+    
+    def onUpdate(self):
+        self.game.setCaption(f"{self.game.getFps()}")
 
         
-    def onUpdate(self):
-        self.x_1 += 12 * self.game.delta_time
-        self.x_2 += 12 * self.game.delta_time
+
+        if not self.IS_STARTED:
+            self.IS_STARTED = True
+            pg.mixer_music.play(-1, fade_ms=2000)
+        
+
+        # moving background
+        self.x_1 += 24 * self.game.delta_time
+        self.x_2 += 24 * self.game.delta_time
 
         if self.x_1 >= self.game.width:
             self.x_1 = self.x_2 - self.game.width
@@ -74,6 +74,10 @@ class Menu(EmptyScene):
         if self.x_2 >= self.game.width:
             self.x_2 = self.x_1 - self.game.width
 
+        
+
+
+        # fade effect
         if self.alpha != 1:
             self.timer_appear += self.game.delta_time * 0.6
             self.alpha = glm.clamp(0, self.timer_appear, 1)
@@ -143,9 +147,18 @@ class Menu(EmptyScene):
         
     
     def onRender(self):
-        self.game.clearColor(1, 0.2, 0.6)
-        self.title.render()
-        self.title_board.render()
+        self.game.clearColor(0.3, 0.4, 0.8)
+        
+        self.MAIN.clearPrompt()
+
+        self.MAIN.submitSprite(self.texture_background, size=(self.game.width, self.game.height), position=(self.x_1, 0), layer=0)
+        self.MAIN.submitSprite(self.texture_background, size=(self.game.width, self.game.height), position=(self.x_2, 0), layer=0)
+
+        self.MAIN.submitSprite(self.texture_title, size=(360, 160), position=(self.game.width // 2 - 180, 60), layer=2)
+        self.MAIN.submitSprite(self.texture_title, size=(360, 160), position=(self.game.width // 2 - 180, 70), rgb=(0, 0, 0), layer=1)
+        self.MAIN.submitSprite(self.texture_title_board, size=(self.game.width, self.game.height), layer=3)
+
+        self.MAIN.renderSprite()
 
        
     

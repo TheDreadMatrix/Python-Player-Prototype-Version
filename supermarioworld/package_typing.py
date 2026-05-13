@@ -31,18 +31,10 @@ class GameType(typing.Protocol):
     request: _RequestType
     paths: _PathsType
 
+    settings_read: dict
+
     def getFps(self) -> float: ...
     def getScene(self) -> str: ...
     def clearColor(self, r: float, g: float, b: float) -> None: ...
+    def setCaption(self, title: str) -> None: ...
 
-
-class EmptyScene:
-    def __init__(self, game: "GameType"):
-        self.game = game
-        self.request = game.request
-        self.paths = game.paths
-
-    def onUpdate(self): pass
-    def onEvent(self, event): pass
-    def onRender(self): pass
-    def onSave(self): pass

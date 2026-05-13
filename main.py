@@ -115,7 +115,7 @@ class SuperMariWorldApplication:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         
 
-        self._window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
+        self._window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL)
         icon = pg.image.load(self.paths.AssetPath("icon.jpg"))
 
         pg.display.set_caption("Super Mario World: 91 Retitle")
@@ -163,10 +163,13 @@ class SuperMariWorldApplication:
 
 
     def getFps(self):
-        return self.__clock.get_fps()
+        return self._clock.get_fps()
     
     def getScene(self):
         return self._scene_name
+    
+    def setCaption(self, title):
+        pg.display.set_caption(title)
     
 
     def clearColor(self, r, g, b):
@@ -201,7 +204,7 @@ class SuperMariWorldApplication:
 
     def _run(self):
         while self._running:
-            self.delta_time = min(self._clock.tick(240) / 1000.0, 0.02)        
+            self.delta_time = min(self._clock.tick(120) / 1000.0, 0.02)        
         
             self._update()
             self._render()

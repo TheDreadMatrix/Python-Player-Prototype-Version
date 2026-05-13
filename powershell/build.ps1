@@ -21,7 +21,7 @@ pyinstaller `
     --onefile `
     --noconsole `
     --name SuperMarioWorld `
-    --icon=icon.ico `
+    --icon=assets/icon.ico `
     --version-file version.txt `
     --distpath games `
     --add-data "assets;assets" `

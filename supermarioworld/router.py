@@ -1,5 +1,5 @@
-from supermarioworld.package_typing import EmptyScene, GameType
-
+from supermarioworld.package_typing import GameType
+from supermarioworld.package_scenes import EmptyScene
 
 from supermarioworld.scenes.level import Level, Tutorial
 from supermarioworld.scenes.overworld import OverWorld
