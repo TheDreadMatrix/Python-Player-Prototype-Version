@@ -15,11 +15,11 @@ VSVersionInfo(
         '040904B0',
         [
           StringStruct('CompanyName', 'Kartoshka Studio'),
-          StringStruct('FileDescription', 'Kartoshka Game Launcher'),
+          StringStruct('FileDescription', 'Daemon Game Core Engine'),
           StringStruct('FileVersion', '1.0.0'),
-          StringStruct('ProductName', 'Kartoshka Game'),
-          StringStruct('ProductVersion', '1.0.0'),
-          StringStruct('LegalCopyright', '© 2026 Kartoshka Studio')
+          StringStruct('ProductName', 'Super Mario World: 91 Retitle'),
+          StringStruct('ProductVersion', '0.9.0-alpha'),
+          StringStruct('LegalCopyright', '© 2026 Daemon Launcher')
         ]
       )
     ]),

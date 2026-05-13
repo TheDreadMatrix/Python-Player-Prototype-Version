@@ -18,7 +18,7 @@ from pathlib import Path
 
 
 class GameRequest:
-    def __init__(self, game: "MyGame"):
+    def __init__(self, game):
         self._game = game
 
     def restartScene(self):
@@ -103,7 +103,7 @@ class CorePath:
 
 
 
-class MyGame:
+class SuperMariWorldApplication:
     def __init__(self):
         self.request = GameRequest(self)
         self.paths = CorePath()
@@ -143,6 +143,8 @@ class MyGame:
         indices = array("I", [0, 1, 2, 2, 3, 0])
 
         self._projection = glm.ortho(0, self.width, self.height, 0, -1, 1)
+        
+
         self._ubo = self._ctx.buffer(reserve=64)
         self._ubo.bind_to_uniform_block(0)
         self._ubo.write(self._projection.to_bytes())
@@ -213,9 +215,7 @@ class MyGame:
 
 
 if __name__ == "__main__":
-    game = MyGame()
-    game._run()
+    smw = SuperMariWorldApplication()
+    smw._run()
 
-
-
-print("FINISHED OK")
+    print("FINISHED OK")

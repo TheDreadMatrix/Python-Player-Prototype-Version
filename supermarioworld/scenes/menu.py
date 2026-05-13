@@ -2,6 +2,7 @@ from supermarioworld.package_typing import EmptyScene
 from supermarioworld.johnson import Johnson
 
 from supermarioworld.rendering.moderngl import load_texture
+from supermarioworld.rendering.renderer import Sprite2D
 
 import pygame as pg
 import glm
@@ -46,6 +47,21 @@ class Menu(EmptyScene):
         self.switching = False
         self.switching_game = False
         self.switch_target_scene = ""
+
+
+        # SPRITES
+        self.title = Sprite2D(game)
+        self.title.texture = load_texture(game, game.paths.ImagesPath("menu/title.png"))
+        self.title.size = (420, 180)
+
+        self.title.position = (game.width * 0.5 - self.title.size[0] * 0.5, game.height * 0.5 - self.title.size[1] * 0.5)
+
+        self.title_board = Sprite2D(game)
+        self.title_board.texture = load_texture(game, game.paths.ImagesPath("menu/title-border.png"))
+        self.title_board.size = (game.width, game.height)
+
+        self.back_1 = Sprite2D(game)
+        self.back_1.texture = load_texture(game, game.paths.ImagesPath("menu/background.png"))
 
         
     def onUpdate(self):
@@ -127,7 +143,9 @@ class Menu(EmptyScene):
         
     
     def onRender(self):
-        pass
+        self.game.clearColor(1, 0.2, 0.6)
+        self.title.render()
+        self.title_board.render()
 
        
     

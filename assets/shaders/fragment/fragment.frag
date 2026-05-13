@@ -1,15 +1,7 @@
-#version 330 core
-
-
-in vec2 GclUv;
-
-out vec4 GclColor;
-
-uniform sampler2D GclTexture;
-
+#include vertex
 
 
 
 void main(){
-    GclColor = texture(GclTexture, GclUv);
+    OutColor = texture(DM_Texture, DM_Coord);
 }

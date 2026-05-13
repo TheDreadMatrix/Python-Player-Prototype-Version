@@ -1,7 +1,7 @@
 from supermarioworld.package_typing import EmptyScene, GameType
 
 
-from supermarioworld.scenes.levels import Level, Tutorial
+from supermarioworld.scenes.level import Level, Tutorial
 from supermarioworld.scenes.overworld import OverWorld
 from supermarioworld.scenes.menu import Menu, Settings
 from supermarioworld.scenes.cutscene import CutsceneScene
