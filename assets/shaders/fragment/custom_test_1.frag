@@ -6,10 +6,13 @@ void main()
 {
     vec2 uv = DM_Coord;
 
-    // переливание
-    float r = sin(time + uv.x * 6.0) * 0.5 + 0.5;
-    float g = sin(time * 1.2 + uv.y * 6.0) * 0.5 + 0.5;
-    float b = sin(time + uv.x * 3.0 + uv.y * 3.0) * 0.5 + 0.5;
+    // минимальная яркость
+    float minBright = 0.45;
+
+    // плавное радужное переливание
+    float r = minBright + (sin(time + uv.x * 6.0) * 0.5 + 0.5) * (1.0 - minBright);
+    float g = minBright + (sin(time * 1.2 + uv.y * 6.0) * 0.5 + 0.5) * (1.0 - minBright);
+    float b = minBright + (sin(time + uv.x * 3.0 + uv.y * 3.0) * 0.5 + 0.5) * (1.0 - minBright);
 
     vec3 rainbow = vec3(r, g, b);
 

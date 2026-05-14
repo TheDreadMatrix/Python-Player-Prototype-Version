@@ -3,7 +3,7 @@ from supermarioworld.package_scenes import EmptyScene
 
 from supermarioworld.scenes.level import Level, Tutorial
 from supermarioworld.scenes.overworld import OverWorld
-from supermarioworld.scenes.menu import Menu, Settings
+from supermarioworld.scenes.menu import Menu, Settings, SubSceneEngine
 from supermarioworld.scenes.cutscene import CutsceneScene
 from supermarioworld.scenes.editor_overlevel import LevelEditor
 from supermarioworld.scenes.editor_overworld import OverworldEditor
@@ -18,6 +18,8 @@ class SceneManager:
 
 
         self.game.request.redirectScene("menu")
+
+        self.subsceneEngine = SubSceneEngine(game)
 
 
         self.scene_dict = {
@@ -102,5 +104,6 @@ class SceneManager:
 
 
     def render(self):
-        self.current_scene.onRender()        
+        self.current_scene.onRender()   
+        self.subsceneEngine.onRender()     
 

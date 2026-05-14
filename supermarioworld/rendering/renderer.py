@@ -1,4 +1,4 @@
-from supermarioworld.rendering.moderngl import moderngl
+from supermarioworld.rendering._moderngl import load_texture
 
 from collections import defaultdict
 from dataclasses import dataclass
@@ -93,9 +93,9 @@ class CustomShader:
 
 
 
-@dataclass
+@dataclass(slots=True)
 class RenderPassCommand:
-    texture: moderngl.Texture
+    texture: str
     size: tuple
     position: tuple
     rgb: tuple
@@ -121,18 +121,26 @@ class MainRenderer:
 
         self.layers = defaultdict(list)
         self.shaders = {"default": ShaderEntry(game, 0, True)}
+        self.textures = {}
 
 
     def clearPrompt(self):
         self.layers.clear()
 
 
-    def pushShader(self, key, shader: CustomShader):
+    def pushShader(self, key: str, shader: CustomShader):
         self.shaders.update({key: ShaderEntry(self._game, shader)})
 
 
+    def pushTexture(self, key: str, path: str, filter: int=0, anisotropy: int=0):
+        self.textures.update({key: load_texture(self._game._ctx, path, filter, anisotropy)})
+
+    def _pushStraightTexture(self, key: str, texture):
+        self.textures.update({key: texture})
+
+
     def submitSprite(self, 
-               texture: moderngl.Texture,
+               texture: str,
                *,
                size=(1, 1), 
                position=(0, 0), 
@@ -152,20 +160,9 @@ class MainRenderer:
 
 
     def renderSprite(self):
-        ctx = self._game._ctx
+        all_layers = sorted(self.layers.keys())
 
-        ctx.enable(moderngl.DEPTH_TEST)
-        ctx.enable(moderngl.BLEND)
-
-        ctx.blend_func = (
-            moderngl.SRC_ALPHA,
-            moderngl.ONE_MINUS_SRC_ALPHA
-        )
-
-
-        ctx.depth_mask = True
-
-        for layer in sorted(self.layers.keys()):
+        for layer in all_layers:
 
             commands = self.layers[layer]
 
@@ -177,9 +174,8 @@ class MainRenderer:
                 self._renderCommand(cmd)
 
 
-        ctx.depth_mask = False
 
-        for layer in sorted(self.layers.keys()):
+        for layer in all_layers:
 
             commands = self.layers[layer]
 
@@ -196,18 +192,13 @@ class MainRenderer:
                 self._renderCommand(cmd)
 
 
-        ctx.depth_mask = True
-
-
-
-
-
     def _renderCommand(self, cmd: RenderPassCommand):
         shader = self.shaders[cmd.shader]
         program = shader.program
         vao = shader.vao
 
-        cmd.texture.use(0)
+        texture = self.textures[cmd.texture]
+        texture.use(0)
 
         program["DM_Texture"] = 0
         program["unPos"] = cmd.position

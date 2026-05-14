@@ -125,7 +125,6 @@ class SuperMariWorldApplication:
 
         self._ctx = mgl.create_context()
         self._ctx.enable(mgl.BLEND)
-        self._ctx.enable(mgl.DEPTH_TEST)
         self._ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
         self._ctx.viewport = (0, 0, self._window.get_width(), self._window.get_height())
 
