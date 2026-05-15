@@ -126,7 +126,14 @@ class SuperMariWorldApplication:
         self._ctx = mgl.create_context()
         self._ctx.enable(mgl.BLEND)
         self._ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
-        self._ctx.viewport = (0, 0, self._window.get_width(), self._window.get_height())
+
+        self.width = self._window.get_width()
+        self.height = self._window.get_height()
+        
+
+        self._viewport = (0, 0, self.width, self.height)
+        self._ctx.viewport = (0, 0, self.width, self.height)
+  
 
 
         self._clock = pg.time.Clock()
@@ -134,10 +141,9 @@ class SuperMariWorldApplication:
 
 
         self.delta_time = 0
-        self.width = self._window.get_width()
-        self.height = self._window.get_height()
 
 
+        vertices_only = array("f", [0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         vertices = array("f", [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         indices = array("I", [0, 1, 2, 2, 3, 0])
 
@@ -150,6 +156,7 @@ class SuperMariWorldApplication:
 
         self._ebo = self._ctx.buffer(indices)
         self._vbo = self._ctx.buffer(vertices)
+        self._vbo_only = self._ctx.buffer(vertices_only)
 
   
         self.settings = Johnson(self.paths.CsavesPath("settings.json"))
@@ -158,9 +165,9 @@ class SuperMariWorldApplication:
 
         self._scene_name = ""
         self._scenes = SceneManager(self)
+
+        self.query = None
     
-
-
     def getFps(self):
         return self._clock.get_fps()
     
@@ -184,10 +191,12 @@ class SuperMariWorldApplication:
                 self._running = False
 
             if event.type == pg.VIDEORESIZE:
-                self.width = self._window.get_width()
-                self.height = self._window.get_height()
+                self.width, self.height = event.w, event.h
+                
+
                 self._projection = glm.ortho(0, self.width, self.height, 0, -1, 1)
                 self._ubo.write(self._projection.to_bytes())
+
                 
             self._scenes.event(event=event)
         
@@ -195,8 +204,10 @@ class SuperMariWorldApplication:
 
 
     def _render(self):
-        self._ctx.clear(1, 1, 1)
+        self._ctx.clear(0, 0, 0)
+        self.query = self._ctx.query(time=True)
         self._scenes.render()
+       
         pg.display.flip()
         
 

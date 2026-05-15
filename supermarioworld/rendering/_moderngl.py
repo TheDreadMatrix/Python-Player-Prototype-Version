@@ -2,6 +2,14 @@ import pygame
 import moderngl
 
 
+TEXTURE_BUILD_PATH = 0
+TEXTURE_BUILD_RAW = 1
+TEXTURE_BUILD_TEXT = 2
+
+TEXTURE_ARRAY_BUILD_PATH = 0
+TEXTURE_ARRAY_BUILD_RAW = 1
+
+
 BASE_FILTER_DICT = {
     0: (moderngl.NEAREST, moderngl.NEAREST, False),
     1: (moderngl.LINEAR, moderngl.LINEAR, False),
@@ -11,15 +19,8 @@ BASE_FILTER_DICT = {
     5: (moderngl.LINEAR_MIPMAP_LINEAR, moderngl.LINEAR, True)
 }
 
-
-def load_texture(ctx: moderngl.Texture, path: str, filter: int=0, anisotropy: int=0):
-    surface = pygame.image.load(path).convert_alpha()
-    texture: moderngl.Texture = ctx.texture(surface.size, 4, pygame.image.tobytes(surface, "RGBA"))
-
-    min_filter, mag_filter, use_mipmap = BASE_FILTER_DICT.get(
-        filter,
-        BASE_FILTER_DICT[0]
-    )
+def _build_texture_attribute(texture, filter, anisotropy):
+    min_filter, mag_filter, use_mipmap = BASE_FILTER_DICT.get(filter, BASE_FILTER_DICT[0])
 
     texture.filter = (min_filter, mag_filter)
 
@@ -30,45 +31,33 @@ def load_texture(ctx: moderngl.Texture, path: str, filter: int=0, anisotropy: in
         texture.anisotropy = anisotropy
 
 
-    return texture
+def load_texture_array(ctx: moderngl.Texture, paths: list[str], filter: int=0, anisotropy: int=0):
+    surfaces = b""
+    for path in paths:
+        surface = pygame.image.load(path).convert_alpha()
+        
 
 
-def create_error_texture(ctx):
-    size = 256
-    tile = 32
+    _build_texture_attribute(0, filter, anisotropy)
 
-    data = bytearray()
 
-    purple = (255, 0, 255, 255)
-    black = (0, 0, 0, 255)
 
-    for y in range(size):
-        for x in range(size):
-            if ((x // tile) + (y // tile)) % 2 == 0:
-                data.extend(purple)
-            else:
-                data.extend(black)
 
-    texture = ctx.texture((size, size), 4, bytes(data))
-    texture.build_mipmaps()
+def load_texture(ctx: moderngl.Texture, path: str, filter: int=0, anisotropy: int=0):
+    surface = pygame.image.load(path).convert_alpha()
+    texture: moderngl.Texture = ctx.texture(surface.size, 4, pygame.image.tobytes(surface, "RGBA"))
 
+    _build_texture_attribute(texture, filter, anisotropy)
     return texture
 
 
 
-def load_texture_text(ctx: moderngl.Context, font: pygame.Font, text: str, color: tuple=(255, 255, 255)):
+
+def load_texture_text(ctx: moderngl.Context, font: pygame.Font, text: str, color: tuple=(255, 255, 255), filter: int=0, anisotropy: int=0):
     surface: pygame.Surface = font.render(text, True, color)
     texture = ctx.texture(surface.size, 4, pygame.image.tobytes(surface, "RGBA"))
 
-    min_filter, mag_filter, use_mipmap = BASE_FILTER_DICT.get(
-        0,
-        BASE_FILTER_DICT[0]
-    )
-
-    texture.filter = (min_filter, mag_filter)
-
-    if use_mipmap:
-        texture.build_mipmaps()
+    _build_texture_attribute(texture, filter, anisotropy)
 
     return (texture, surface.get_size())
 

@@ -1,25 +1,12 @@
-#include vertex
+#include vertex_atlas_extension //instancing atlas INSpos INStexture_size INTtexture_position
+#include vertex_texture_array_extension // using samplerArray2D
+#include vertex_texture_array_instansing_extension // INS
+#include vertex_instancing_extension // INSrgb INSpos INSflipx 
+#include vertex //DEFAULT
 
-uniform float time;
 
-void main()
-{
-    vec2 uv = DM_Coord;
 
-    // минимальная яркость
-    float minBright = 0.45;
+void main(){
 
-    // плавное радужное переливание
-    float r = minBright + (sin(time + uv.x * 6.0) * 0.5 + 0.5) * (1.0 - minBright);
-    float g = minBright + (sin(time * 1.2 + uv.y * 6.0) * 0.5 + 0.5) * (1.0 - minBright);
-    float b = minBright + (sin(time + uv.x * 3.0 + uv.y * 3.0) * 0.5 + 0.5) * (1.0 - minBright);
-
-    vec3 rainbow = vec3(r, g, b);
-
-    vec4 tex = texture(DM_Texture, uv);
-
-    OutColor = vec4(
-        tex.rgb * rainbow * rgb,
-        tex.a * alpha
-    );
+    OutColor = texture(DM_Texture, DM_Coord) * vec4(rgb, alpha);
 }

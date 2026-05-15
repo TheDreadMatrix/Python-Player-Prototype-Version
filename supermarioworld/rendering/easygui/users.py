@@ -27,22 +27,18 @@ class TextLabel:
 
         self.texture_note = None
 
-        self._rebuildText(color_text)
+        self._rebuildText(color_text, 0, 0)
     
-    def _rebuildText(self, color_text):
-        self.texture_note, self.size = load_texture_text(self._ctx, self.font, self.text, color_text)
+    def _rebuildText(self, color_text, filter, anisotropy):
+        self.texture_note, self.size = load_texture_text(self._ctx, self.font, self.text, color_text, filter, anisotropy)
         self.renderer._pushStraightTexture(self.texture_id, self.texture_note)
 
 
-    def setText(self, text: str, color_text: tuple=(255, 255, 255)):
+    def setText(self, text: str, color_text: tuple=(255, 255, 255), filter: int=0, anisotropy: int=0):
         if self.text != text:
             self.text = text
-            self._rebuildText(color_text)
+            self._rebuildText(color_text, filter, anisotropy)
 
-
-    def setShader(self, shader_id, shader):
-        self.renderer.pushShader(shader_id, shader)
-        self.shader_id = shader_id
             
 
     def render(self):

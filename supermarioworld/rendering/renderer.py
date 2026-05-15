@@ -135,6 +135,8 @@ class MainRenderer:
     def pushTexture(self, key: str, path: str, filter: int=0, anisotropy: int=0):
         self.textures.update({key: load_texture(self._game._ctx, path, filter, anisotropy)})
 
+    
+
     def _pushStraightTexture(self, key: str, texture):
         self.textures.update({key: texture})
 
@@ -167,29 +169,11 @@ class MainRenderer:
             commands = self.layers[layer]
 
             for cmd in commands:
-
-                if cmd.alpha < 1.0:
-                    continue
-
                 self._renderCommand(cmd)
 
 
 
-        for layer in all_layers:
-
-            commands = self.layers[layer]
-
-            transparent = []
-
-            for cmd in commands:
-
-                if cmd.alpha < 1.0:
-                    transparent.append(cmd)
-
-    
-
-            for cmd in transparent:
-                self._renderCommand(cmd)
+        
 
 
     def _renderCommand(self, cmd: RenderPassCommand):
