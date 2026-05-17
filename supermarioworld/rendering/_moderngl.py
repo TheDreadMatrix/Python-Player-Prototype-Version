@@ -2,12 +2,10 @@ import pygame
 import moderngl
 
 
-TEXTURE_BUILD_PATH = 0
-TEXTURE_BUILD_RAW = 1
-TEXTURE_BUILD_TEXT = 2
+
 
 TEXTURE_ARRAY_BUILD_PATH = 0
-TEXTURE_ARRAY_BUILD_RAW = 1
+TEXTURE_ARRAY_BUILD_RAW = 0
 
 
 BASE_FILTER_DICT = {
@@ -31,19 +29,16 @@ def _build_texture_attribute(texture, filter, anisotropy):
         texture.anisotropy = anisotropy
 
 
-def load_texture_array(ctx: moderngl.Texture, paths: list[str], filter: int=0, anisotropy: int=0):
-    surfaces = b""
-    for path in paths:
-        surface = pygame.image.load(path).convert_alpha()
-        
+
+def load_texture_cutout(ctx: moderngl.Context, path: str, x: int, y: int, w: int, h: int, filter: int=0, anisotropy: int=0):
+    surface = (pygame.image.load(path).convert_alpha()).subsurface((x, y, w, h)).copy()
+    texture: moderngl.Texture = ctx.texture(surface.size, 4, pygame.image.tobytes(surface, "RGBA"))
+
+    _build_texture_attribute(texture, filter, anisotropy)
+    return texture
 
 
-    _build_texture_attribute(0, filter, anisotropy)
-
-
-
-
-def load_texture(ctx: moderngl.Texture, path: str, filter: int=0, anisotropy: int=0):
+def load_texture(ctx: moderngl.Context, path: str, filter: int=0, anisotropy: int=0):
     surface = pygame.image.load(path).convert_alpha()
     texture: moderngl.Texture = ctx.texture(surface.size, 4, pygame.image.tobytes(surface, "RGBA"))
 

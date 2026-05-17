@@ -4,6 +4,9 @@ from supermarioworld.johnson import Johnson
 
 
 from supermarioworld.rendering.easygui import TextLabel
+from supermarioworld.rendering.shaders import CustomShader
+from supermarioworld.rendering.animation import Animation, AnimationCutOut
+
 
 import pygame as pg
 import glm
@@ -58,6 +61,27 @@ class Menu(EmptyScene):
         self.MAIN.pushTexture("title-border", game.paths.ImagesPath("menu/title-border.png"))
         self.MAIN.pushTexture("background", game.paths.ImagesPath("menu/background.png"))
 
+        self.shader = CustomShader(game, game.paths.ShaderPath("fragment/post-processing-crt.frag"))
+        self.MAIN.pushShader("test-1", self.shader)
+
+
+        ATLAS_PATH = game.paths.ImagesPath("atlas/koopas.png")
+        self.animation = AnimationCutOut(game, self.MAIN, 
+                                frames=[
+                                        (ATLAS_PATH, 32, 256, 16, 16),
+                                        (ATLAS_PATH, 48, 256, 16, 16),
+                                        (ATLAS_PATH, 64, 256, 16, 16),
+                                        (ATLAS_PATH, 80, 256, 16, 16) 
+                                    ],
+                                durations=[
+                                    0.05, 0.01, 0.05, 0.01
+                                ],
+                                key_images=[
+                                    "m1", "m2", "m3", "m4"
+                                ]
+                                   )
+        
+        
         
 
 
@@ -74,6 +98,9 @@ class Menu(EmptyScene):
             self.IS_STARTED = True
             pg.mixer_music.play(-1, fade_ms=2000)
         
+
+        self.animation.update()
+
 
         # moving background
         self.our_y = glm.sin(self.timer) * 6
@@ -167,9 +194,10 @@ class Menu(EmptyScene):
         self.game.clearColor(r, g, b)
         self.timer += self.game.delta_time 
         
-
         
         self.MAIN.clearPrompt()
+
+        self.MAIN.submitSprite(self.animation.getTextureKey(), size=(100, 100), position=(400, 300))
 
         self.MAIN.submitSprite("background", size=(self.game.width, self.game.height), position=(self.x_1, self.our_y), layer=0)
         self.MAIN.submitSprite("background", size=(self.game.width, self.game.height), position=(self.x_2, self.our_y), layer=0)
@@ -177,10 +205,6 @@ class Menu(EmptyScene):
         self.MAIN.submitSprite("title", size=(360, 160), position=(self.game.width // 2 - 180, 60), layer=4)
         self.MAIN.submitSprite("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), rgb=(0, 0, 0), layer=3)
         self.MAIN.submitSprite("title-border", size=(self.game.width, self.game.height), layer=5)
-
-
-        self.text.render()
-
         
         self.MAIN.renderSprite()
 
