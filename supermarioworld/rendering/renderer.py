@@ -1,5 +1,4 @@
-from supermarioworld.rendering._moderngl import load_texture
-from supermarioworld.rendering.shaders import CustomShader
+from supermarioworld.core._moderngl import load_texture, create_error_texture, load_texture_cutout
 from collections import defaultdict
 from dataclasses import dataclass
 
@@ -27,39 +26,31 @@ class RenderPassCommand:
     shader: str
 
 
-class ShaderEntry:
-    def __init__(self, game, custom_shader: CustomShader, default=False):
-         
-        self.program = custom_shader._program if not default else game._ctx.program(CustomShader._DEFAULT_VERTEX_SOURCE, CustomShader._DEFAULT_FRAGMENT_SOURCE)
-        self.vao = game._ctx.vertex_array(self.program, [(game._vbo, "2f 2f", "inPos", "inCoord")], index_buffer=game._ebo)
-
 
 
 
 class MainRenderer:
     def __init__(self, game):
-        self._game = game
+        self.game = game
+        self.resources = game.assets
+
+        self.texture_error = create_error_texture(game._ctx)
 
         self.layers = defaultdict(list)
-        self.shaders = {"default": ShaderEntry(game, 0, True)}
-        self.textures = {}
+
+        self.last_texture_name = None
+
+        self.last_shader_program = None
+        self.last_shader_name = None
+        self.last_shader_vao = None
+        
+   
 
 
     def clearPrompt(self):
         self.layers.clear()
 
 
-    def pushShader(self, key: str, shader: CustomShader):
-        self.shaders.update({key: ShaderEntry(self._game, shader)})
-
-
-    def pushTexture(self, key: str, path: str, filter: int=0, anisotropy: int=0):
-        self.textures.update({key: load_texture(self._game._ctx, path, filter, anisotropy)})
-
-    
-
-    def _pushStraightTexture(self, key: str, texture):
-        self.textures.update({key: texture})
 
 
     def submitSprite(self, 
@@ -98,14 +89,17 @@ class MainRenderer:
 
 
     def _renderCommand(self, cmd: RenderPassCommand):
-        shader = self.shaders[cmd.shader]
-        program = shader.program
-        vao = shader.vao
+        if self.last_shader_name != cmd.shader:
+            shader = self.resources.shaders[cmd.shader]
+            program = shader.program
+            vao = shader.vao
 
-        texture = self.textures[cmd.texture]
-        texture.use(0)
+        if self.last_texture_name != cmd.texture:
+            texture = self.resources.textures.get(cmd.texture, self.texture_error)
+            texture.use(0)
+            
 
-        program["DM_Texture"] = 0
+        
         program["unPos"] = cmd.position
         program["unSize"] = cmd.size
         program["unLayer"] = cmd.layer

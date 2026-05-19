@@ -2,10 +2,10 @@ from supermarioworld.package_scenes import EmptyScene
 from supermarioworld.johnson import Johnson
 
 
-
 from supermarioworld.rendering.easygui import TextLabel
-from supermarioworld.rendering.shaders import CustomShader
-from supermarioworld.rendering.animation import Animation, AnimationCutOut
+from supermarioworld.rendering.animation import Animation
+from supermarioworld.daenums import TextureFilters
+
 
 
 import pygame as pg
@@ -14,7 +14,7 @@ import glm
 
 
 
-
+  
 
 
 class Menu(EmptyScene):
@@ -41,7 +41,7 @@ class Menu(EmptyScene):
         self.timer_appear = 0
         self.timer_dissappear = 1
 
-        self.our_y = 0
+        self.our_y = -100
         self.x_1, self.x_2 = 0, self.game.width
 
         self.alpha = 0
@@ -57,53 +57,38 @@ class Menu(EmptyScene):
 
 
         # SPRITES
-        self.MAIN.pushTexture("title", game.paths.ImagesPath("menu/title.png"))
-        self.MAIN.pushTexture("title-border", game.paths.ImagesPath("menu/title-border.png"))
-        self.MAIN.pushTexture("background", game.paths.ImagesPath("menu/background.png"))
+        self.text_play = TextLabel(game, self.RENDER, "text-1", "Play", size_font=32, font_key="pixel")
+        self.text_play.position = (game.width // 2 - self.text_play.size[0] // 2 - 10, 250)
+        self.text_play.rgb = (1, 1, 0)
 
-        self.shader = CustomShader(game, game.paths.ShaderPath("fragment/post-processing-crt.frag"))
-        self.MAIN.pushShader("test-1", self.shader)
+        self.text_options = TextLabel(game, self.RENDER, "text-2", "Options", size_font=32, font_key="pixel")
+        self.text_options.position = (game.width // 2 - self.text_options.size[0] // 2 - 10, 350)
+        self.text_options.rgb = (1, 1, 0)
 
-
-        ATLAS_PATH = game.paths.ImagesPath("atlas/koopas.png")
-        self.animation = AnimationCutOut(game, self.MAIN, 
-                                frames=[
-                                        (ATLAS_PATH, 32, 256, 16, 16),
-                                        (ATLAS_PATH, 48, 256, 16, 16),
-                                        (ATLAS_PATH, 64, 256, 16, 16),
-                                        (ATLAS_PATH, 80, 256, 16, 16) 
-                                    ],
-                                durations=[
-                                    0.05, 0.01, 0.05, 0.01
-                                ],
-                                key_images=[
-                                    "m1", "m2", "m3", "m4"
-                                ]
-                                   )
+        self.text_quit = TextLabel(game, self.RENDER, "text-3", "Quit", size_font=32, font_key="pixel")
+        self.text_quit.position = (game.width // 2 - self.text_quit.size[0] // 2 - 10, 450)
+        self.text_quit.rgb = (1, 1, 0)
         
+    
         
+        self.positions = []
+
+        for x in range(0, 48 * 17, 48):
+            self.positions.append(x)
         
 
-
-        self.text = TextLabel(game, self.MAIN, "text-1", "Hello World", font_path=game.paths.FontsPath("PixelFont.ttf"), size_font=32)
-        self.text.position = (200, 320)
-        self.text.rgb = (1, 1, 0)
-        self.text.layer = 2
 
 
     
     def onUpdate(self):
-        self.game.setCaption(f"{self.game.getFps():.2f}")
+        self.timer += self.game.delta_time 
         if not self.IS_STARTED:
             self.IS_STARTED = True
-            pg.mixer_music.play(-1, fade_ms=2000)
-        
-
-        self.animation.update()
-
+            pg.mixer_music.play(-1, fade_ms=1000)
 
         # moving background
-        self.our_y = glm.sin(self.timer) * 6
+        self.our_y = glm.sin(self.timer) * 0.7
+      
 
         self.x_1 += 36 * self.game.delta_time
         self.x_2 += 36 * self.game.delta_time
@@ -115,6 +100,21 @@ class Menu(EmptyScene):
             self.x_2 = self.x_1 - self.game.width
 
         
+        # Recolor
+        if self.selected == 0:
+            self.text_play.rgb = (1, 0, 0)
+        else:
+            self.text_play.rgb = (1, 1, 0)
+
+        if self.selected == 1:
+            self.text_options.rgb = (1, 0, 0)
+        else:
+            self.text_options.rgb = (1, 1, 0)
+
+        if self.selected == 2:
+            self.text_quit.rgb = (1, 0, 0)
+        else:
+            self.text_quit.rgb = (1, 1, 0)
 
 
         # fade effect
@@ -187,26 +187,33 @@ class Menu(EmptyScene):
         
     
     def onRender(self):
-        r = glm.sin(self.timer * 0.8) * 0.35 + 0.65
-        g = glm.sin(self.timer * 1.0 + 2.0) * 0.35 + 0.65
-        b = glm.sin(self.timer * 1.2 + 4.0) * 0.35 + 0.65
-
-        self.game.clearColor(r, g, b)
-        self.timer += self.game.delta_time 
+        self.game.clearColor(0.53, 0.99, 1)
         
         
-        self.MAIN.clearPrompt()
-
-        self.MAIN.submitSprite(self.animation.getTextureKey(), size=(100, 100), position=(400, 300))
-
-        self.MAIN.submitSprite("background", size=(self.game.width, self.game.height), position=(self.x_1, self.our_y), layer=0)
-        self.MAIN.submitSprite("background", size=(self.game.width, self.game.height), position=(self.x_2, self.our_y), layer=0)
-
-        self.MAIN.submitSprite("title", size=(360, 160), position=(self.game.width // 2 - 180, 60), layer=4)
-        self.MAIN.submitSprite("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), rgb=(0, 0, 0), layer=3)
-        self.MAIN.submitSprite("title-border", size=(self.game.width, self.game.height), layer=5)
         
-        self.MAIN.renderSprite()
+        self.RENDER.clearPrompt()  
+
+
+        for position in self.positions:
+            self.RENDER.submitSprite("b1", size=(48, 48), position=(position, 500))
+            self.RENDER.submitSprite("b4", size=(48, 48), position=(position, 548))
+            self.RENDER.submitSprite("b4", size=(48, 48), position=(position, 596))
+        
+
+        self.RENDER.submitSprite("background", size=(self.game.width, self.game.height), position=(self.x_1, self.our_y), layer=0)
+        self.RENDER.submitSprite("background", size=(self.game.width, self.game.height), position=(self.x_2, self.our_y), layer=0)
+
+        self.RENDER.submitSprite("title", size=(360, 160), position=(self.game.width // 2 - 180, 60), layer=4)
+        self.RENDER.submitSprite("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), rgb=(0, 0, 0), layer=3)
+        self.RENDER.submitSprite("title-border", size=(self.game.width, self.game.height), layer=5)
+        
+
+        self.RENDER.submitSprite(self.text_play.texture_id, size=self.text_play.size, position=self.text_play.position, rgb=self.text_play.rgb)
+        self.RENDER.submitSprite(self.text_options.texture_id, size=self.text_options.size, position=self.text_options.position, rgb=self.text_options.rgb)
+        self.RENDER.submitSprite(self.text_quit.texture_id, size=self.text_quit.size, position=self.text_quit.position, rgb=self.text_quit.rgb)
+       
+
+        self.RENDER.renderSprite()
 
       
 
@@ -230,3 +237,12 @@ class Settings(EmptyScene):
     
     def onSave(self):
         pass
+
+
+
+
+class QuitScene(EmptyScene):
+    def __init__(self, game):
+        super().__init__(game)
+
+        self.request.closeGame()

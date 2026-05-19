@@ -8,3 +8,6 @@ class TextureFilters(IntEnum):
     LINEAR_NEAR = 3
     NEAREST_LINE = 4
     LINEAR_LINE = 5
+
+
+

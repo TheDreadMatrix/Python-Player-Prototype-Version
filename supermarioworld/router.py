@@ -3,7 +3,7 @@ from supermarioworld.package_scenes import EmptyScene
 
 from supermarioworld.scenes.level import Level, Tutorial
 from supermarioworld.scenes.overworld import OverWorld
-from supermarioworld.scenes.menu import Menu, Settings
+from supermarioworld.scenes.menu import Menu, Settings, QuitScene
 from supermarioworld.scenes.cutscene import CutsceneScene
 from supermarioworld.scenes.editor_overlevel import LevelEditor
 from supermarioworld.scenes.editor_overworld import OverworldEditor
@@ -11,6 +11,19 @@ from supermarioworld.scenes.editor_overworld import OverworldEditor
 
 
 class SceneManager:
+    def onLoad(self, game: GameType):
+        game.assets.regImage("title", "menu/title.png")
+        game.assets.regImage("title-border", "menu/title-border.png")
+        game.assets.regImage("background", "menu/background.png")
+
+
+        game.assets.pushAtlas("blocks", "levels/tile-blocks.png")
+        game.assets.pushAtlas("koopas", "atlas/koopas.png")
+        game.assets.pushFont("pixel", "PixelFont.ttf")
+
+        game.assets.regCutOutImage("b1", "blocks", 16, 200, 16, 16)
+        game.assets.regCutOutImage("b4", "blocks", 32, 40, 16, 16)
+
     def __init__(self, game: GameType):
         self.game = game
         self.manager_state = ""
@@ -29,7 +42,7 @@ class SceneManager:
             #IN GAME
             "menu": lambda: Menu(game=game),
             "settings": lambda: Settings(game=game),
-            "quit": lambda: EmptyScene(game=game),
+            "quit": lambda: QuitScene(game=game),
 
             "tutorial": lambda: Tutorial(game=game),
             "cutscene-1": lambda: CutsceneScene(game=game),
@@ -84,9 +97,6 @@ class SceneManager:
 
     def update(self):
         state_scene = self.game.getScene()
-
-        if state_scene == "quit":
-            self.game.request.closeGame()
             
         if state_scene != self.manager_state:
             self.current_scene.onSave()

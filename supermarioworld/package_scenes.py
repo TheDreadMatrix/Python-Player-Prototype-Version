@@ -6,7 +6,9 @@ class EmptyScene:
         self.game = game
         self.request = game.request
         self.paths = game.paths
-        self.MAIN = MainRenderer(game)
+        self.assets = game.assets
+        
+        self.RENDER = MainRenderer(game)
 
     def onUpdate(self): pass
     def onEvent(self, event): pass
