@@ -7,7 +7,7 @@ from supermarioworld.johnson import Johnson
 
 from supermarioworld.core.corepaths import CorePath
 from supermarioworld.core.daemonapi import GameRequest
-from supermarioworld.core.resources import AssetsResources
+from supermarioworld.core.resources import AssetsResources, AudioStream
 
 import pygame as pg
 import moderngl as mgl
@@ -78,6 +78,7 @@ class SuperMariWorldApplication:
 
         # Scenes and user side
         self.assets = AssetsResources(self)
+        self.audio = AudioStream(self.assets)
 
         self._scene_name = ""
         self._scenes = SceneManager(self)

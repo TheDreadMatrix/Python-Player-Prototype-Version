@@ -7,6 +7,7 @@ class EmptyScene:
         self.request = game.request
         self.paths = game.paths
         self.assets = game.assets
+        self.audio = game.audio
         
         self.RENDER = MainRenderer(game)
 

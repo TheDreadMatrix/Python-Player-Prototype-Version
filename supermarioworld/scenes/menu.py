@@ -3,8 +3,7 @@ from supermarioworld.johnson import Johnson
 
 
 from supermarioworld.rendering.easygui import TextLabel
-from supermarioworld.rendering.animation import Animation
-from supermarioworld.daenums import TextureFilters
+
 
 
 
@@ -22,14 +21,19 @@ class Menu(EmptyScene):
         super().__init__(game)
 
         #MUSIC
-        self.IS_STARTED = False
-        pg.mixer_music.load(game.paths.MusicPath("title-name.mp3"))
-        pg.mixer_music.set_volume(self.game.settings_read["music"])
+        game.assets.regMusic("title", "title-name.mp3")
+        game.assets.regMusic("daemon", "danger-zone-lava-land.mp3")
+        game.assets.regSound("choose", "map.wav")
+        game.assets.regSound("pause", "pause.wav")
+        game.assets.regSound("pointer", "pointer.mp3")
+
+        self.audio.load("title")
+        self.audio.setVolume(self.game.settings_read["music"])
         
 
-        self.sound_choose = pg.mixer.Sound(game.paths.SoundPath("map.wav"))
-        self.sound_cancer = pg.mixer.Sound(game.paths.SoundPath("pause.wav"))
-        self.sound_pointer = pg.mixer.Sound(game.paths.SoundPath("pointer.mp3"))
+        self.sound_choose = game.audio.giveSound("choose")
+        self.sound_cancer = game.audio.giveSound("pause")
+        self.sound_pointer = game.audio.giveSound("pointer")
 
         #JSON DATAS
         self.account_0 = Johnson(game.paths.CsavesPath("player/player0.json")).readData()
@@ -57,6 +61,20 @@ class Menu(EmptyScene):
 
 
         # SPRITES
+        game.assets.regImage("title", "menu/title.png")
+        game.assets.regImage("title-border", "menu/title-border.png")
+        game.assets.regImage("background", "menu/background.png")
+
+
+        game.assets.pushAtlas("blocks", "levels/tile-blocks.png")
+        game.assets.pushAtlas("koopas", "atlas/koopas.png")
+        game.assets.pushFont("pixel", "PixelFont.ttf")
+
+        game.assets.regCutOutImage("b1", "blocks", 16, 200, 16, 16)
+        game.assets.regCutOutImage("b4", "blocks", 32, 40, 16, 16)
+
+        
+
         self.text_play = TextLabel(game, self.RENDER, "text-1", "Play", size_font=32, font_key="pixel")
         self.text_play.position = (game.width // 2 - self.text_play.size[0] // 2 - 10, 250)
         self.text_play.rgb = (1, 1, 0)
@@ -69,12 +87,8 @@ class Menu(EmptyScene):
         self.text_quit.position = (game.width // 2 - self.text_quit.size[0] // 2 - 10, 450)
         self.text_quit.rgb = (1, 1, 0)
         
-    
         
-        self.positions = []
-
-        for x in range(0, 48 * 17, 48):
-            self.positions.append(x)
+        self.positions = list(range(0, 48 * 17, 48))
         
 
 
@@ -82,9 +96,8 @@ class Menu(EmptyScene):
     
     def onUpdate(self):
         self.timer += self.game.delta_time 
-        if not self.IS_STARTED:
-            self.IS_STARTED = True
-            pg.mixer_music.play(-1, fade_ms=1000)
+        
+        self.audio.play(loops=-1, fade_in=2)
 
         # moving background
         self.our_y = glm.sin(self.timer) * 0.7
@@ -99,22 +112,8 @@ class Menu(EmptyScene):
         if self.x_2 >= self.game.width:
             self.x_2 = self.x_1 - self.game.width
 
+    
         
-        # Recolor
-        if self.selected == 0:
-            self.text_play.rgb = (1, 0, 0)
-        else:
-            self.text_play.rgb = (1, 1, 0)
-
-        if self.selected == 1:
-            self.text_options.rgb = (1, 0, 0)
-        else:
-            self.text_options.rgb = (1, 1, 0)
-
-        if self.selected == 2:
-            self.text_quit.rgb = (1, 0, 0)
-        else:
-            self.text_quit.rgb = (1, 1, 0)
 
 
         # fade effect
@@ -125,7 +124,8 @@ class Menu(EmptyScene):
         if self.switching:
             self.timer_dissappear -= self.game.delta_time * 0.6
             self.alpha = glm.clamp(self.timer_dissappear, 0.0, 1.0)
-            pg.mixer_music.fadeout(2500)
+
+            self.audio.fadeOut(3)
 
             
             self.switch_timer += self.game.delta_time
@@ -216,6 +216,13 @@ class Menu(EmptyScene):
         self.RENDER.renderSprite()
 
       
+    def onSave(self):
+        self.game.assets.delImage("title")
+        self.game.assets.delImage("title-border")
+        self.game.assets.delImage("background")
+        self.game.assets.delImage("b1")
+        self.game.assets.delImage("b4")
+        
 
         
        

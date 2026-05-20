@@ -1,5 +1,5 @@
 from supermarioworld.core._moderngl import (
-    load_texture, load_texture_cutout, 
+    load_texture, load_texture_cutout, create_error_texture,
     _DEFAULT_FRAGMENT_SOURCE, _DEFAULT_VERTEX_SOURCE
     )
 import pygame as pg
@@ -16,8 +16,13 @@ class AssetsResources:
     def __init__(self, game):
         self.game = game
 
-        
-        self.shaders = {"default": ShaderEntry(game=game, custom_shader=0, default=True)}
+        self.default_texture = create_error_texture(game._ctx)
+        self.default_shader = ShaderEntry(game, 0, True)
+
+
+        self.sounds = {}
+        self.musics = {}
+        self.shaders = {}
         self.textures = {}
 
         self.atlas_surfaces = {}
@@ -49,4 +54,75 @@ class AssetsResources:
         self.textures.update({texture_key: texture})
 
 
+
+    def regSound(self, sound_key, sound_path):
+        self.sounds.update({sound_key: pg.Sound(self.game.paths.SoundPath(sound_path))})
+
+
+    def regMusic(self, music_key, music_path):
+        self.musics.update({music_key: self.game.paths.MusicPath(music_path)})
+
+
+    def delSound(self, sound_key):
+        self.sounds.pop(sound_key)
+
+    def delMusic(self, music_key):
+        self.musics.pop(music_key)
+
+
+
+    def delImage(self, texture_key):
+        tex = self.textures.pop(texture_key, None)
+        if tex is not None:
+            tex.release()
+
+    def delShader(self, shader_key):
+        shader = self.shaders.pop(shader_key, None)
+        if shader is not None:
+            shader.program.release()
+            shader.vao.release()
+
+
     
+
+class AudioStream:
+    def __init__(self, resources: AssetsResources):
+        self.resources = resources
+        self.played = False
+        self.passed = False
+
+    def load(self, music_key):
+        pg.mixer.music.load(self.resources.musics[music_key])
+        self.played = False
+        self.passed = False
+
+    def play(self, starts=0, fade_in=0, loops=0):
+        if not self.played:
+            pg.mixer.music.play(loops, starts, 1000 * fade_in)
+            self.played = True
+
+
+    def fadeOut(self, fade_out):
+        if not self.passed:
+            pg.mixer.music.fadeout(1000 * fade_out)
+            self.passed = True
+
+
+    def pause(self):
+        pg.mixer.music.pause()
+
+    def unpause(self):
+        pg.mixer.music.unpause()
+
+    def stop(self):
+        pg.mixer.music.stop()
+
+    def setVolume(self, volume):
+        pg.mixer.music.set_volume(volume)
+
+
+    def giveSound(self, sound_key):
+        return self.resources.sounds[sound_key]
+
+
+

@@ -12,17 +12,7 @@ from supermarioworld.scenes.editor_overworld import OverworldEditor
 
 class SceneManager:
     def onLoad(self, game: GameType):
-        game.assets.regImage("title", "menu/title.png")
-        game.assets.regImage("title-border", "menu/title-border.png")
-        game.assets.regImage("background", "menu/background.png")
-
-
-        game.assets.pushAtlas("blocks", "levels/tile-blocks.png")
-        game.assets.pushAtlas("koopas", "atlas/koopas.png")
-        game.assets.pushFont("pixel", "PixelFont.ttf")
-
-        game.assets.regCutOutImage("b1", "blocks", 16, 200, 16, 16)
-        game.assets.regCutOutImage("b4", "blocks", 32, 40, 16, 16)
+        pass
 
     def __init__(self, game: GameType):
         self.game = game

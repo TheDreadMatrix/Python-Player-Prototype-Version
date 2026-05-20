@@ -8,6 +8,7 @@ def main():
 
     smw = SuperMariWorldApplication(__file__)
     smw._run()
+    
 
 
 

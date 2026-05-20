@@ -6,6 +6,7 @@ from supermarioworld.johnson import Johnson
 class CutsceneScene(EmptyScene):
     def __init__(self, game: GameType):
         self.game = game
+        print(self.game.assets.textures, self.game.assets.shaders)
 
         self.account = Johnson(game.paths.CsavesPath(f"{game.settings_read["current-player"]}.json"))
         self.account_read = self.account.readData()

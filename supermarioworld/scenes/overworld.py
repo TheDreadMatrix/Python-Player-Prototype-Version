@@ -7,6 +7,13 @@ class OverWorld(EmptyScene):
     def __init__(self, game, biome: str, music_name: str):
         super().__init__(game)
 
+        self.audio.load("daemon")
+
+        self.audio.setVolume(self.game.settings_read["music"])
+
+        self.audio.play(loops=-1, fade_in=4)
+
+
 
     def onUpdate(self):
         return super().onUpdate()
@@ -17,7 +24,7 @@ class OverWorld(EmptyScene):
     
 
     def onRender(self):
-        self.game._ctx.clear(1, 0, 1)
+        self.game.clearColor(0, 0, 0)
     
 
     def onSave(self):
