@@ -7,6 +7,10 @@ class Level(EmptyScene):
     def __init__(self, game, biome: str, music_name: str):
         super().__init__(game)
 
+        self.audio.load(music_name)
+        self.audio.setVolume(self.game.settings_read["music"])
+        self.audio.play(loops=-1, fade_in=3)
+
     def onUpdate(self):
         return super().onUpdate()
     

@@ -39,6 +39,8 @@ class MainRenderer:
         self.default_shader = game.assets.default_shader
         self.default_texture = game.assets.default_texture
 
+        self.current_shader = self.default_shader
+
         # Cache
         self.last_texture_name = None
         self.last_shader_name = None
@@ -47,6 +49,10 @@ class MainRenderer:
 
     def clearPrompt(self):
         self.layers.clear()
+
+
+    def submitMesh(self, size=(1, 1), position=(0, 0), rgb=(1, 1, 1), alpha=1, layer=1, shader: str="default"):
+        pass
 
 
     def submitSprite(self, texture: str, *, size=(1, 1), position=(0, 0), rgb=(1, 1, 1), alpha=1, layer=1, flipx=False, flipy=False, shader: str="default"):
@@ -74,23 +80,26 @@ class MainRenderer:
 
     def _renderCommand(self, cmd: RenderPassCommand):
         if self.last_shader_name != cmd.shader:
-            shader = self.resources.shaders.get(cmd.shader, self.default_shader)
-            program = shader.program
-            vao = shader.vao
+            self.last_shader_name = cmd.shader
+            self.current_shader = self.resources.shaders.get(cmd.shader, self.default_shader)
+            
+        shader = self.current_shader
+        uniforms = shader.uniforms
+        vao = shader.vao
 
         if self.last_texture_name != cmd.texture:
+            self.last_texture_name = cmd.texture
             texture = self.resources.textures.get(cmd.texture, self.default_texture)
             texture.use(0)
             
 
-        
-        program["unPos"] = cmd.position
-        program["unSize"] = cmd.size
-        program["unLayer"] = cmd.layer
-        program["alpha"] = cmd.alpha
-        program["rgb"] = cmd.rgb
-        program["unFlx"] = cmd.flipx
-        program["unFly"] = cmd.flipy
+        uniforms["unPos"].value = cmd.position
+        uniforms["unSize"].value = cmd.size
+        uniforms["unLayer"].value = cmd.layer
+        uniforms["alpha"].value = cmd.alpha
+        uniforms["rgb"].value = cmd.rgb
+        uniforms["unFlx"].value = cmd.flipx
+        uniforms["unFly"].value = cmd.flipy
         
 
         vao.render()

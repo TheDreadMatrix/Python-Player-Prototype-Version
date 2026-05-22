@@ -1,5 +1,6 @@
 {
     "player": {
+        "slot": 0,
         "current-char": "martis",
         "current-form": "small",
         "powerup": null,

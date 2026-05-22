@@ -7,6 +7,7 @@ from supermarioworld.johnson import Johnson
 
 from supermarioworld.core.corepaths import CorePath
 from supermarioworld.core.daemonapi import GameRequest
+from supermarioworld.core.accounts import PlayerAccountManager
 from supermarioworld.core.resources import AssetsResources, AudioStream
 
 import pygame as pg
@@ -73,8 +74,7 @@ class SuperMariWorldApplication:
 
   
         # Configuration settings
-        self.settings = Johnson(self.paths.CsavesPath("settings.json"))
-        self.settings_read = self.settings.readData()
+        self.account = PlayerAccountManager(self)
 
         # Scenes and user side
         self.assets = AssetsResources(self)
@@ -129,7 +129,7 @@ class SuperMariWorldApplication:
 
     def _run(self):
         while self._running:
-            self.delta_time = min(self._clock.tick(self.settings_read["frametime"]) / 1000.0, 0.02)        
+            self.delta_time = min(self._clock.tick(self.account.getFps()) / 1000.0, 0.02)        
         
             self._update()
             self._render()
@@ -137,7 +137,8 @@ class SuperMariWorldApplication:
             
 
         self._scenes.save()
-        self.settings.saveData(self.settings_read)
+        
+        self.account.save()
         pg.quit()
 
 

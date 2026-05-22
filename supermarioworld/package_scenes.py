@@ -8,6 +8,7 @@ class EmptyScene:
         self.paths = game.paths
         self.assets = game.assets
         self.audio = game.audio
+        self.account = game.account
         
         self.RENDER = MainRenderer(game)
 

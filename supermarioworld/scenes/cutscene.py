@@ -1,24 +1,23 @@
 from supermarioworld.package_typing import GameType
 from supermarioworld.package_scenes import EmptyScene
-from supermarioworld.johnson import Johnson
+
 
 
 class CutsceneScene(EmptyScene):
-    def __init__(self, game: GameType):
-        self.game = game
-        print(self.game.assets.textures, self.game.assets.shaders)
+    def __init__(self, game: GameType, cutscene_id: str, redirect_scene: str):
+        super().__init__(game=game)
+        CURRENT_PLAYER = self.account.getCurrentPlayer()
+        
 
-        self.account = Johnson(game.paths.CsavesPath(f"{game.settings_read["current-player"]}.json"))
-        self.account_read = self.account.readData()
-
-        if self.account_read["cutscene"]["cutscene-1"]:
-            self.game.request.redirectScene(self.account_read["overworld"]["current-overworld"])
-
-        self.account_read["cutscene"]["cutscene-1"] = True
-        self.account.saveData(self.account_read)
+        if CURRENT_PLAYER.hasPassedCutscene(cutscene_id):
+            self.request.redirectScene(redirect_scene if not isinstance(redirect_scene, int) else CURRENT_PLAYER.current_overworld)
+        else:
+            CURRENT_PLAYER.setCutsceneAsWatched("cutscene-1")
+            CURRENT_PLAYER.save()
             
         
 
+    
 
 
     def onUpdate(self):
@@ -30,7 +29,7 @@ class CutsceneScene(EmptyScene):
     
 
     def onRender(self):
-        return super().onRender()
+        self.game.clearColor(1, 0, 0)
     
 
     def onSave(self):

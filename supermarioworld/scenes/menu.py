@@ -1,5 +1,4 @@
 from supermarioworld.package_scenes import EmptyScene
-from supermarioworld.johnson import Johnson
 
 
 from supermarioworld.rendering.easygui import TextLabel
@@ -21,25 +20,22 @@ class Menu(EmptyScene):
         super().__init__(game)
 
         #MUSIC
-        game.assets.regMusic("title", "title-name.mp3")
-        game.assets.regMusic("daemon", "danger-zone-lava-land.mp3")
         game.assets.regSound("choose", "map.wav")
         game.assets.regSound("pause", "pause.wav")
         game.assets.regSound("pointer", "pointer.mp3")
 
         self.audio.load("title")
-        self.audio.setVolume(self.game.settings_read["music"])
-        
+        self.audio.setVolume(game.account.getMusicVolume())
 
+        
         self.sound_choose = game.audio.giveSound("choose")
         self.sound_cancer = game.audio.giveSound("pause")
         self.sound_pointer = game.audio.giveSound("pointer")
 
-        #JSON DATAS
-        self.account_0 = Johnson(game.paths.CsavesPath("player/player0.json")).readData()
-        self.account_1 = Johnson(game.paths.CsavesPath("player/player1.json")).readData()
-        self.account_2 = Johnson(game.paths.CsavesPath("player/player2.json")).readData()
-        self.account_dict = {f"P-{i}": f"player/player{i}" for i in range(3)}
+        
+        # Account
+        self.accounts = {"P-0": 0, "P-1": 1, "P-2": 2}
+
 
         #ATTRIBUTES
         self.timer_appear = 0
@@ -96,6 +92,7 @@ class Menu(EmptyScene):
     
     def onUpdate(self):
         self.timer += self.game.delta_time 
+        
         
         self.audio.play(loops=-1, fade_in=2)
 
@@ -170,7 +167,8 @@ class Menu(EmptyScene):
                         self.switch_target_scene = "settings" if selected_option == "SETTINGS" else "quit"
 
                 else:
-                    self.game.settings_read["current-player"] = self.account_dict[self.options[self.selected]]
+                    self.account.loadPlayer(self.accounts.get(self.options[self.selected], 0))
+                    
                     self.switching = True
                     self.switch_timer = 0
                     self.switch_target_scene = "cutscene-1"
@@ -188,8 +186,6 @@ class Menu(EmptyScene):
     
     def onRender(self):
         self.game.clearColor(0.53, 0.99, 1)
-        
-        
         
         self.RENDER.clearPrompt()  
 

@@ -10,6 +10,15 @@ class ShaderEntry:
         self.program = custom_shader._program if not default else game._ctx.program(_DEFAULT_VERTEX_SOURCE, _DEFAULT_FRAGMENT_SOURCE)
         self.vao = game._ctx.vertex_array(self.program, [(game._vbo, "2f 2f", "inPos", "inCoord")], index_buffer=game._ebo)
         self.program["DM_Texture"] = 0
+        self.uniforms = {
+            "unPos": self.program["unPos"],
+            "unSize": self.program["unSize"],
+            "unLayer": self.program["unLayer"],
+            "alpha": self.program["alpha"],
+            "rgb": self.program["rgb"],
+            "unFlx": self.program["unFlx"],
+            "unFly": self.program["unFly"],
+        }
 
 
 class AssetsResources:

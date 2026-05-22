@@ -8,11 +8,22 @@ from supermarioworld.scenes.cutscene import CutsceneScene
 from supermarioworld.scenes.editor_overlevel import LevelEditor
 from supermarioworld.scenes.editor_overworld import OverworldEditor
 
+from supermarioworld.daenums import LevelBiome, OverWorldBiome, REDIRECT_TO_OVERWORLD
+
+
 
 
 class SceneManager:
     def onLoad(self, game: GameType):
-        pass
+        game.assets.regMusic("title", "title-name.mp3")
+
+
+        game.assets.regMusic("overworld-1", "overworld/valley-of-ones.mp3")
+        game.assets.regMusic("overworld-4", "overworld/danger-zone-lava-land.mp3")
+
+        game.assets.regMusic("A", "level/1.ogg")
+        game.assets.regMusic("B", "level/2.ogg")
+        game.assets.regMusic("CS", "level/3.ogg")
 
     def __init__(self, game: GameType):
         self.game = game
@@ -20,7 +31,7 @@ class SceneManager:
         self.current_scene = EmptyScene(game)
 
 
-        self.game.request.redirectScene("menu")
+        self.game.request.redirectScene("overworld-1")
 
 
         self.scene_dict = {
@@ -34,48 +45,50 @@ class SceneManager:
             "settings": lambda: Settings(game=game),
             "quit": lambda: QuitScene(game=game),
 
+            "cutscene-1": lambda: CutsceneScene(game=game, cutscene_id="cutscene-1", redirect_scene=REDIRECT_TO_OVERWORLD),
+            "ending": lambda: CutsceneScene(game=game, cutscene_id="ending", redirect_scene=REDIRECT_TO_OVERWORLD),
+
             "tutorial": lambda: Tutorial(game=game),
-            "cutscene-1": lambda: CutsceneScene(game=game),
 
             "bonus-game-1": lambda: EmptyScene(game=game),
             "bonus-game-2": lambda: EmptyScene(game=game),
             
-            "ending": lambda: EmptyScene(game=game),
+            
+            "overworld-1": lambda: OverWorld(game=game, biome=OverWorldBiome.VALLEY, music_name="overworld-1", map_ref="overworld-1"),
+            "overworld-2": lambda: OverWorld(game=game, biome=OverWorldBiome.UNDERGROUND, music_name="overworld-2", map_ref="overworld-2"),
+            "overworld-3": lambda: OverWorld(game=game, biome=OverWorldBiome.RED_FOREST, music_name="overworld-3", map_ref="overworld-3"),
+            "overworld-4": lambda: OverWorld(game=game, biome=OverWorldBiome.MAGMA, music_name="overworld-4", map_ref="overworld-4"),
 
-            "overworld-1": lambda: OverWorld(game=game, biome="valley", music_name="overworld-1"),
-            "overworld-2": lambda: OverWorld(game=game, biome="cave", music_name="overworld-2"),
-            "overworld-3": lambda: OverWorld(game=game, biome="tropic", music_name="overworld-3"),
-            "overworld-4": lambda: OverWorld(game=game, biome="magma", music_name="overworld-4"),
-            "overworld-star": lambda: OverWorld(game=game, biome="star", music_name="overworld-star"),
+            "overworld-star": lambda: OverWorld(game=game, biome=OverWorldBiome.SPECIAL, music_name="overworld-star", map_ref="overworld-star"),
 
-            "level-1": lambda: Level(game=game, biome="valley", music_name="world-A"),
-            "level-2": lambda: Level(game=game, biome="valley", music_name="world-A"),
-            "level-3": lambda: Level(game=game, biome="valley", music_name="atletic-A"),
-            "level-4": lambda: Level(game=game, biome="castle", music_name="castle"),
+            "level-1": lambda: Level(game=game, biome=LevelBiome.VALLEY, music_name="A"),
+            "level-2": lambda: Level(game=game, biome=LevelBiome.VALLEY, music_name="A"),
+            "level-3": lambda: Level(game=game, biome=LevelBiome.VALLEY, music_name="A"),
+            "level-4": lambda: Level(game=game, biome=LevelBiome.CASTLE, music_name="CS"),
 
-            "level-5": lambda: Level(game=game, biome="cave", music_name="underground-B"),
-            "level-6": lambda: Level(game=game, biome="cave", music_name="underground-A"),
-            "level-7": lambda: Level(game=game, biome="cave", music_name="underground-B"),
-            "level-8": lambda: Level(game=game, biome="cave", music_name="underground-A"),
-            "level-9": lambda: Level(game=game, biome="castle", music_name="castle"),
+            "level-5": lambda: Level(game=game, biome=LevelBiome.UNDERGROUND, music_name="B"),
+            "level-6": lambda: Level(game=game, biome=LevelBiome.UNDERGROUND, music_name="A"),
+            "level-7": lambda: Level(game=game, biome=LevelBiome.UNDERGROUND, music_name="B"),
+            "level-8": lambda: Level(game=game, biome=LevelBiome.UNDERGROUND, music_name="A"),
+            "level-9": lambda: Level(game=game, biome=LevelBiome.CASTLE, music_name="CS"),
 
-            "level-10": lambda: Level(game=game, biome="valley", music_name="world-B"),
-            "level-11": lambda: Level(game=game, biome="valley", music_name="atletic-B"),
-            "level-12": lambda: Level(game=game, biome="forest", music_name="world-A"),
-            "level-13": lambda: Level(game=game, biome="forest", music_name="world-A"),
-            "level-14": lambda: Level(game=game, biome="valley", music_name="atletic-B"),
-            "level-15": lambda: Level(game=game, biome="castle", music_name="castle"),
+            "level-10": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="B"),
+            "level-11": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="B"),
+            "level-12": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="A"),
+            "level-13": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="A"),
+            "level-14": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="B"),
+            "level-15": lambda: Level(game=game, biome=LevelBiome.CASTLE, music_name="CS"),
 
-            "level-16": lambda: Level(game=game, biome="magma", music_name="castle-B"),
-            "level-17": lambda: Level(game=game, biome="magma", music_name="castle-B"),
-            "level-18": lambda: Level(game=game, biome="magma", music_name="castle-B"),
-            "level-19": lambda: Level(game=game, biome="magma", music_name="castle-B"),
-            "level-20": lambda: Level(game=game, biome="castle", music_name="castle"),
+            "level-16": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="B"),
+            "level-17": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="B"),
+            "level-18": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="B"),
+            "level-19": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="B"),
+            "level-20": lambda: Level(game=game, biome=LevelBiome.CASTLE, music_name="CS"),
 
-            "level-kaizo-1": lambda: Level(game=game, biome="valley", music_name="world-A"),
-            "level-kaizo-2": lambda: Level(game=game, biome="cave", music_name="underground-A"),
-            "level-kaizo-3": lambda: Level(game=game, biome="forest", music_name="atletic-A"),
-            "level-kaizo-4": lambda: Level(game=game, biome="magma", music_name="castle-B")
+            "level-kaizo-1": lambda: Level(game=game, biome=LevelBiome.VALLEY, music_name="A"),
+            "level-kaizo-2": lambda: Level(game=game, biome=LevelBiome.UNDERGROUND, music_name="A"),
+            "level-kaizo-3": lambda: Level(game=game, biome=LevelBiome.RED_FOREST, music_name="A"),
+            "level-kaizo-4": lambda: Level(game=game, biome=LevelBiome.CASTLE, music_name="CS")
         }
 
     
