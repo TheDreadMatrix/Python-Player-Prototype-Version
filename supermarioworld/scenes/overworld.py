@@ -1,6 +1,6 @@
 from supermarioworld.package_scenes import EmptyScene
 
-from supermarioworld.tilemaps.tilemap import OverWorldMap
+from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
 
 
 
@@ -22,7 +22,7 @@ class OverWorld(EmptyScene):
 
 
     def onUpdate(self):
-        return super().onUpdate()
+        self.request.setTitle(f"{self.game.getFps():.2f}")
     
 
     def onEvent(self, event):
@@ -35,7 +35,7 @@ class OverWorld(EmptyScene):
         self.RENDER.clearPrompt()
 
         self.overworld_map.submit(self.RENDER)
-        #self.RENDER.submitSprite("overworld-border", size=(self.game.width, self.game.height))
+        self.RENDER.submitSprite("overworld-border", size=(self.game.width, self.game.height))
 
         self.RENDER.renderSprite()
     

@@ -68,6 +68,8 @@ class OverWorldMap:
                     if normalized_key is not None:
                         used_keys.add(normalized_key)
 
+       
+
         for tile_key in used_keys:
             if tile_key in self._registered_keys:
                 continue

@@ -3,8 +3,10 @@ from supermarioworld.package_scenes import EmptyScene
 
 from supermarioworld.scenes.level import Level, Tutorial
 from supermarioworld.scenes.overworld import OverWorld
-from supermarioworld.scenes.menu import Menu, Settings, QuitScene
+from supermarioworld.scenes.menu import Menu, QuitScene
+from supermarioworld.scenes.settings import Settings
 from supermarioworld.scenes.cutscene import CutsceneScene
+
 from supermarioworld.scenes.editor_overlevel import LevelEditor
 from supermarioworld.scenes.editor_overworld import OverworldEditor
 
@@ -25,16 +27,23 @@ class SceneManager:
         game.assets.regMusic("B", "level/2.ogg")
         game.assets.regMusic("CS", "level/3.ogg")
 
+        game.assets.regSound("choose", "map.wav")
+        game.assets.regSound("pause", "pause.wav")
+        game.assets.regSound("pointer", "pointer.mp3")
+
     def __init__(self, game: GameType):
         self.game = game
         self.manager_state = ""
         self.current_scene = EmptyScene(game)
 
 
-        self.game.request.redirectScene("overworld-1")
+        self.game.request.redirectScene("overworld-editor")
 
 
         self.scene_dict = {
+
+            "overworld-editor-developer": lambda: EmptyScene(game=game),
+            "level-editor-developer": lambda: EmptyScene(game=game),
             
             "level-editor": lambda: LevelEditor(game=game),
             "overworld-editor": lambda: OverworldEditor(game=game),

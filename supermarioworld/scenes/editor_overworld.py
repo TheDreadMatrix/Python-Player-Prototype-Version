@@ -20,6 +20,13 @@ class OverworldEditor(EmptyScene):
         self.tile_size = 8
         self.cell_size = 32
         self.grid_origin = (20, 100)
+        self.min_grid_cols = 50
+        self.min_grid_rows = 50
+        self.view_offset = [0, 0]
+        self.zoom = 1.0
+        self.zoom_min = 0.5
+        self.zoom_max = 3.0
+        self.palette_scroll_rows = 0
 
         self.notation = self._load_json(self.config_root / "tile-notation.json")
         self.palette_keys = [k for k, v in self.notation.items() if isinstance(v, list) and len(v) >= 2]
@@ -39,6 +46,8 @@ class OverworldEditor(EmptyScene):
         self.dirty = False
         self.status = "Ready"
         self.status_timer = 0.0
+        self._prev_mouse_buttons = (False, False, False)
+        self._prev_mouse_pos = pg.mouse.get_pos()
 
         self._create_labels()
         self._load_current_map()
@@ -78,7 +87,8 @@ class OverworldEditor(EmptyScene):
         self._register_solid_texture("ow-ui-btn-hot", (85, 105, 135, 255))
         self._register_solid_texture("ow-ui-grid", (255, 255, 255, 100))
         self._register_solid_texture("ow-ui-select", (255, 235, 90, 220))
-        self.assets_to_release.update({"ow-ui-btn", "ow-ui-btn-hot", "ow-ui-grid", "ow-ui-select"})
+        self._register_solid_texture("ow-ui-tile-frame", (220, 40, 40, 255))
+        self.assets_to_release.update({"ow-ui-btn", "ow-ui-btn-hot", "ow-ui-grid", "ow-ui-select", "ow-ui-tile-frame"})
 
     def _register_solid_texture(self, key: str, rgba: tuple[int, int, int, int]):
         surface = pg.Surface((1, 1), flags=pg.SRCALPHA)
@@ -110,10 +120,18 @@ class OverworldEditor(EmptyScene):
             self.layer_index = 0
         self.layer_index = max(0, min(self.layer_index, len(self.layer_keys) - 1))
         layer = self._active_layer()
+        default_tile = "tile-1" if "tile-1" in self.notation else ""
+        is_completely_empty = all((not cell) for row in layer for cell in row) if layer else True
+
+        # Ensure every layer has enough editable space even if source JSON is tiny.
+        while len(layer) < self.min_grid_rows:
+            layer.append([])
+
         width = max((len(row) for row in layer), default=0)
+        width = max(width, self.min_grid_cols)
         for row in layer:
             while len(row) < width:
-                row.append("")
+                row.append(default_tile if is_completely_empty else "")
 
     def _active_layer_key(self):
         return self.layer_keys[self.layer_index]
@@ -126,6 +144,9 @@ class OverworldEditor(EmptyScene):
         rows = len(layer)
         cols = max((len(row) for row in layer), default=0)
         return cols, rows
+
+    def _map_cell_size(self):
+        return max(1, int(self.cell_size * self.zoom))
 
     def _set_status(self, text: str):
         self.status = text
@@ -153,10 +174,13 @@ class OverworldEditor(EmptyScene):
 
     def _paint(self, mouse_pos, erase: bool):
         cols, rows = self._get_grid_size()
+        map_cell = self._map_cell_size()
         gx, gy = self.grid_origin
         mx, my = mouse_pos
-        tx = (mx - gx) // self.cell_size
-        ty = (my - gy) // self.cell_size
+        mx -= self.view_offset[0]
+        my -= self.view_offset[1]
+        tx = (mx - gx) // map_cell
+        ty = (my - gy) // map_cell
         if tx < 0 or ty < 0 or tx >= cols or ty >= rows:
             return False
 
@@ -185,6 +209,59 @@ class OverworldEditor(EmptyScene):
             "next_layer": (746, 90, 34, 28),
         }
 
+    def _palette_rects(self):
+        rects = []
+        start_x, start_y, _, _ = self._palette_view_rect()
+        per_row = self._palette_per_row()
+        pad = 4
+        row_offset = self.palette_scroll_rows * (self.cell_size + pad)
+        for i, tile_key in enumerate(self.palette_keys):
+            cx = i % per_row
+            cy = i // per_row
+            x = start_x + cx * (self.cell_size + pad)
+            y = start_y + cy * (self.cell_size + pad) - row_offset
+            rects.append((tile_key, (x, y, self.cell_size, self.cell_size)))
+        return rects
+
+    def _palette_per_row(self):
+        return 14
+
+    def _palette_view_rect(self):
+        pad = 4
+        per_row = self._palette_per_row()
+        width = per_row * self.cell_size + (per_row - 1) * pad
+        x = 20
+        top = 120
+        bottom = self.game.height - 60
+        height = max(self.cell_size, bottom - top)
+        return (x, top, width, height)
+
+    def _palette_max_scroll_rows(self):
+        per_row = self._palette_per_row()
+        total_rows = (len(self.palette_keys) + per_row - 1) // per_row
+        _, _, _, view_h = self._palette_view_rect()
+        pad = 4
+        visible_rows = max(1, (view_h + pad) // (self.cell_size + pad))
+        return max(0, total_rows - visible_rows)
+
+    def _scroll_palette(self, delta_rows: int):
+        max_rows = self._palette_max_scroll_rows()
+        self.palette_scroll_rows = max(0, min(max_rows, self.palette_scroll_rows + delta_rows))
+
+    def _over_ui(self, pos):
+        for rect in self._ui_rects().values():
+            if self._in_rect(pos, rect):
+                return True
+        return False
+
+    def _over_palette(self, pos):
+        if self._in_rect(pos, self._palette_view_rect()):
+            return True
+        for _, rect in self._palette_rects():
+            if self._in_rect(pos, rect):
+                return True
+        return False
+
     def _save_current_map(self):
         if self.map_path is None:
             self._set_status("No map file to save")
@@ -194,15 +271,75 @@ class OverworldEditor(EmptyScene):
         self._set_status(f"Saved: {self.map_path.name}")
 
     def onUpdate(self):
+        self.request.setTitle(f"{self.game.getFps():.2f}")
         if self.status_timer > 0:
             self.status_timer -= self.game.delta_time
         else:
             self.status = ""
 
+        self._handle_mouse_input()
+
         self.map_label.setText(f"Map: {self.map_path.name if self.map_path else 'none'} {'*' if self.dirty else ''}")
         self.layer_label.setText(f"Layer: {self._active_layer_key() if self.layer_keys else 'none'}")
         self.tile_label.setText(f"Tile: {self.selected_tile if self.selected_tile else 'none'}")
-        self.status_label.setText(self.status if self.status else "LMB draw | RMB erase | [/] map | ;/' layer | Q/E tile | Ctrl+S save")
+        self.status_label.setText(self.status if self.status else "LMB draw | RMB erase | MMB pan | Wheel zoom | [/] map | ;/' layer | Q/E tile | Ctrl+S save")
+
+    def _handle_mouse_input(self):
+        mouse_pos = pg.mouse.get_pos()
+        left, middle, right = pg.mouse.get_pressed(3)
+        prev_left, prev_middle, prev_right = self._prev_mouse_buttons
+        rects = self._ui_rects()
+        over_ui = self._over_ui(mouse_pos)
+        over_palette = self._over_palette(mouse_pos)
+
+        if middle:
+            dx = mouse_pos[0] - self._prev_mouse_pos[0]
+            dy = mouse_pos[1] - self._prev_mouse_pos[1]
+            self.view_offset[0] += dx
+            self.view_offset[1] += dy
+            if not prev_middle:
+                self._set_status("Pan map")
+
+        # UI buttons should trigger once per click, not every frame while held.
+        if left and not prev_left:
+            if over_ui and self._in_rect(mouse_pos, rects["save"]):
+                self._save_current_map()
+                self._prev_mouse_buttons = (left, middle, right)
+                self._prev_mouse_pos = mouse_pos
+                return
+            if over_ui and self._in_rect(mouse_pos, rects["prev_map"]):
+                self._switch_map(-1)
+                self._prev_mouse_buttons = (left, middle, right)
+                self._prev_mouse_pos = mouse_pos
+                return
+            if over_ui and self._in_rect(mouse_pos, rects["next_map"]):
+                self._switch_map(1)
+                self._prev_mouse_buttons = (left, middle, right)
+                self._prev_mouse_pos = mouse_pos
+                return
+            if over_ui and self._in_rect(mouse_pos, rects["prev_layer"]):
+                self._switch_layer(-1)
+                self._prev_mouse_buttons = (left, middle, right)
+                self._prev_mouse_pos = mouse_pos
+                return
+            if over_ui and self._in_rect(mouse_pos, rects["next_layer"]):
+                self._switch_layer(1)
+                self._prev_mouse_buttons = (left, middle, right)
+                self._prev_mouse_pos = mouse_pos
+                return
+
+        if left and not middle and not over_ui and not over_palette:
+            if self._paint(mouse_pos, erase=False):
+                self._set_status("Draw")
+
+        if left and not prev_left and over_palette:
+            self._pick_tile_from_palette(mouse_pos)
+
+        if right and not middle and not over_ui and not over_palette and self._paint(mouse_pos, erase=True):
+            self._set_status("Erase")
+
+        self._prev_mouse_buttons = (left, middle, right)
+        self._prev_mouse_pos = mouse_pos
 
     def onEvent(self, event):
         if event.type == pg.KEYDOWN:
@@ -220,46 +357,27 @@ class OverworldEditor(EmptyScene):
                 self._select_tile_delta(1)
             elif event.key == pg.K_s and (event.mod & pg.KMOD_CTRL):
                 self._save_current_map()
+            elif event.key in (pg.K_EQUALS, pg.K_PLUS, pg.K_KP_PLUS):
+                self._change_zoom(0.1)
+            elif event.key in (pg.K_MINUS, pg.K_KP_MINUS):
+                self._change_zoom(-0.1)
+        elif event.type == pg.MOUSEWHEEL:
+            mouse_pos = pg.mouse.get_pos()
+            if self._in_rect(mouse_pos, self._palette_view_rect()):
+                self._scroll_palette(-event.y)
+            else:
+                self._change_zoom(0.1 if event.y > 0 else -0.1)
 
-        if event.type == pg.MOUSEBUTTONDOWN:
-            rects = self._ui_rects()
-            if event.button == 1:
-                if self._in_rect(event.pos, rects["save"]):
-                    self._save_current_map()
-                    return
-                if self._in_rect(event.pos, rects["prev_map"]):
-                    self._switch_map(-1)
-                    return
-                if self._in_rect(event.pos, rects["next_map"]):
-                    self._switch_map(1)
-                    return
-                if self._in_rect(event.pos, rects["prev_layer"]):
-                    self._switch_layer(-1)
-                    return
-                if self._in_rect(event.pos, rects["next_layer"]):
-                    self._switch_layer(1)
-                    return
-
-                if self._paint(event.pos, erase=False):
-                    self._set_status("Draw")
-                    return
-
-                self._pick_tile_from_palette(event.pos)
-
-            elif event.button == 3 and self._paint(event.pos, erase=True):
-                self._set_status("Erase")
+    def _change_zoom(self, delta: float):
+        old_zoom = self.zoom
+        self.zoom = max(self.zoom_min, min(self.zoom_max, self.zoom + delta))
+        if self.zoom != old_zoom:
+            self._set_status(f"Zoom: {self.zoom:.1f}x")
 
     def _pick_tile_from_palette(self, pos):
-        start_x = 20
-        start_y = self.game.height - 160
-        per_row = 14
-        pad = 4
-        for i, tile_key in enumerate(self.palette_keys):
-            cx = i % per_row
-            cy = i // per_row
-            x = start_x + cx * (self.cell_size + pad)
-            y = start_y + cy * (self.cell_size + pad)
-            rect = (x, y, self.cell_size, self.cell_size)
+        if not self._in_rect(pos, self._palette_view_rect()):
+            return
+        for tile_key, rect in self._palette_rects():
             if self._in_rect(pos, rect):
                 self.selected_tile = tile_key
                 self._set_status(f"Selected {tile_key}")
@@ -280,16 +398,25 @@ class OverworldEditor(EmptyScene):
     def _render_map(self):
         if not self.layer_keys:
             return
+        map_cell = self._map_cell_size()
+        screen_w, screen_h = self.game.width, self.game.height
         gx, gy = self.grid_origin
+        ox, oy = self.view_offset
         layer = self._active_layer()
         for y, row in enumerate(layer):
+            py = gy + y * map_cell + oy
+            if py + map_cell <= 0 or py >= screen_h:
+                continue
             for x, tile_key in enumerate(row):
                 if not tile_key or tile_key not in self.notation:
                     continue
+                px = gx + x * map_cell + ox
+                if px + map_cell <= 0 or px >= screen_w:
+                    continue
                 self.RENDER.submitSprite(
                     tile_key,
-                    size=(self.cell_size, self.cell_size),
-                    position=(gx + x * self.cell_size, gy + y * self.cell_size),
+                    size=(map_cell, map_cell),
+                    position=(px, py),
                     layer=1,
                 )
 
@@ -297,27 +424,50 @@ class OverworldEditor(EmptyScene):
         cols, rows = self._get_grid_size()
         if cols == 0 or rows == 0:
             return
+        map_cell = self._map_cell_size()
+        screen_w, screen_h = self.game.width, self.game.height
         gx, gy = self.grid_origin
-        w = cols * self.cell_size
-        h = rows * self.cell_size
+        ox, oy = self.view_offset
+        w = cols * map_cell
+        h = rows * map_cell
         for ix in range(cols + 1):
-            self.RENDER.submitSprite("ow-ui-grid", size=(1, h), position=(gx + ix * self.cell_size, gy), layer=2)
+            px = gx + ix * map_cell + ox
+            py = gy + oy
+            if px < 0 or px >= screen_w:
+                continue
+            if py + h <= 0 or py >= screen_h:
+                continue
+            draw_y = max(py, 0)
+            draw_h = min(py + h, screen_h) - draw_y
+            if draw_h > 0:
+                self.RENDER.submitSprite("ow-ui-grid", size=(1, draw_h), position=(px, draw_y), layer=2)
         for iy in range(rows + 1):
-            self.RENDER.submitSprite("ow-ui-grid", size=(w, 1), position=(gx, gy + iy * self.cell_size), layer=2)
+            px = gx + ox
+            py = gy + iy * map_cell + oy
+            if py < 0 or py >= screen_h:
+                continue
+            if px + w <= 0 or px >= screen_w:
+                continue
+            draw_x = max(px, 0)
+            draw_w = min(px + w, screen_w) - draw_x
+            if draw_w > 0:
+                self.RENDER.submitSprite("ow-ui-grid", size=(draw_w, 1), position=(draw_x, py), layer=2)
 
     def _render_palette(self):
-        start_x = 20
-        start_y = self.game.height - 160
-        per_row = 14
-        pad = 4
-        for i, tile_key in enumerate(self.palette_keys):
-            cx = i % per_row
-            cy = i // per_row
-            x = start_x + cx * (self.cell_size + pad)
-            y = start_y + cy * (self.cell_size + pad)
+        view_x, view_y, view_w, view_h = self._palette_view_rect()
+        self.RENDER.submitSprite("ow-ui-btn", size=(view_w, view_h), position=(view_x, view_y), layer=2)
+        for tile_key, rect in self._palette_rects():
+            x, y, _, _ = rect
+            if y + self.cell_size <= view_y or y >= view_y + view_h:
+                continue
             self.RENDER.submitSprite(tile_key, size=(self.cell_size, self.cell_size), position=(x, y), layer=3)
+            # Red frame around each tile button in palette.
+            self.RENDER.submitSprite("ow-ui-tile-frame", size=(self.cell_size, 1), position=(x, y), layer=4)
+            self.RENDER.submitSprite("ow-ui-tile-frame", size=(self.cell_size, 1), position=(x, y + self.cell_size - 1), layer=4)
+            self.RENDER.submitSprite("ow-ui-tile-frame", size=(1, self.cell_size), position=(x, y), layer=4)
+            self.RENDER.submitSprite("ow-ui-tile-frame", size=(1, self.cell_size), position=(x + self.cell_size - 1, y), layer=4)
             if tile_key == self.selected_tile:
-                self.RENDER.submitSprite("ow-ui-select", size=(self.cell_size, 2), position=(x, y + self.cell_size - 2), layer=4)
+                self.RENDER.submitSprite("ow-ui-select", size=(self.cell_size, 2), position=(x, y + self.cell_size - 2), layer=5)
 
     def _render_ui(self):
         rects = self._ui_rects()

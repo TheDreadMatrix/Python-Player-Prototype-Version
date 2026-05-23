@@ -20,10 +20,6 @@ class Menu(EmptyScene):
         super().__init__(game)
 
         #MUSIC
-        game.assets.regSound("choose", "map.wav")
-        game.assets.regSound("pause", "pause.wav")
-        game.assets.regSound("pointer", "pointer.mp3")
-
         self.audio.load("title")
         self.audio.setVolume(game.account.getMusicVolume())
 
@@ -223,26 +219,6 @@ class Menu(EmptyScene):
         
        
     
-
-
-class Settings(EmptyScene):
-    def __init__(self, game):
-        super().__init__(game)
-
-    def onUpdate(self):
-        pass
-    
-    def onEvent(self, event):
-        pass
-    
-    def onRender(self):
-        self.game._ctx.clear(0, 1, 0)
-    
-    def onSave(self):
-        pass
-
-
-
 
 class QuitScene(EmptyScene):
     def __init__(self, game):
