@@ -14,7 +14,7 @@ class OverworldEditor(EmptyScene):
 
         self.assets.pushAtlas("overworld", "overworld/overworld.png")
 
-        self.config_root = Path(self.paths.ConfigPath("overworld/tile-notation.json")).parent
+        self.config_root = Path(self.paths.ConfigPath("overworld/notations/tile-notation-valley.json")).parent
         self.maps_dir = self.config_root / "maps"
 
         self.tile_size = 8
@@ -28,7 +28,7 @@ class OverworldEditor(EmptyScene):
         self.zoom_max = 3.0
         self.palette_scroll_rows = 0
 
-        self.notation = self._load_json(self.config_root / "tile-notation.json")
+        self.notation = self._load_json(self.config_root / "tile-notation-valley.json")["tiles"]
         self.palette_keys = [k for k, v in self.notation.items() if isinstance(v, list) and len(v) >= 2]
         self.selected_tile = self.palette_keys[0] if self.palette_keys else None
 

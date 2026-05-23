@@ -37,7 +37,7 @@ class SceneManager:
         self.current_scene = EmptyScene(game)
 
 
-        self.game.request.redirectScene("overworld-editor")
+        self.game.request.redirectScene("overworld-1")
 
 
         self.scene_dict = {

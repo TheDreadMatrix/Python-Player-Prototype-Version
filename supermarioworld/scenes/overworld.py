@@ -13,11 +13,18 @@ class OverWorld(EmptyScene):
         self.audio.setVolume(self.account.getMusicVolume())
         self.audio.play(loops=-1, fade_in=4)
 
-        # Assets
-        self.assets.pushAtlas("overworld", "overworld/overworld.png")
         self.assets.regImage("overworld-border", "overworld/overworld-border.png")
 
-        self.overworld_map = OverWorldMap(game=game, biome=biome, atlas_key="overworld")
+        BASE_BIOME_DICT = {
+            0: "tile-notation-valley",
+            1: "tile-notation-underground",
+            2: "tile-notation-red-forest",
+            3: "tile-notation-magma",
+            4: "tile-notation-special"
+        }
+
+
+        self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{BASE_BIOME_DICT.get(biome)}.json")
         self.overworld_map.load(map_ref)
 
 
