@@ -33,3 +33,10 @@ class OverWorldBiome(IntEnum):
     RED_FOREST = 2
     MAGMA = 3
     SPECIAL = 4
+
+
+class Keys(IntEnum):
+    A = 0
+    B = 1
+    C = 2
+    D = 3

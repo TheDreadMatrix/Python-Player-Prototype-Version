@@ -1,32 +1,14 @@
-from supermarioworld.core._moderngl import (
-    load_texture, load_texture_cutout, create_error_texture,
-    _DEFAULT_FRAGMENT_SOURCE, _DEFAULT_VERTEX_SOURCE
-    )
+from supermarioworld.core.gl_utils import (load_texture, load_texture_cutout)
 import pygame as pg
 
 
-class ShaderEntry:
-    def __init__(self, game, custom_shader, default=False):
-        self.program = custom_shader._program if not default else game._ctx.program(_DEFAULT_VERTEX_SOURCE, _DEFAULT_FRAGMENT_SOURCE)
-        self.vao = game._ctx.vertex_array(self.program, [(game._vbo, "2f 2f", "inPos", "inCoord")], index_buffer=game._ebo)
-        self.program["DM_Texture"] = 0
-        self.uniforms = {
-            "unPos": self.program["unPos"],
-            "unSize": self.program["unSize"],
-            "unLayer": self.program["unLayer"],
-            "alpha": self.program["alpha"],
-            "rgb": self.program["rgb"],
-            "unFlx": self.program["unFlx"],
-            "unFly": self.program["unFly"],
-        }
+
 
 
 class AssetsResources:
     def __init__(self, game):
         self.game = game
 
-        self.default_texture = create_error_texture(game._ctx)
-        self.default_shader = ShaderEntry(game, 0, True)
 
 
         self.sounds = {}
@@ -94,44 +76,7 @@ class AssetsResources:
 
     
 
-class AudioStream:
-    def __init__(self, resources: AssetsResources):
-        self.resources = resources
-        self.played = False
-        self.passed = False
 
-    def load(self, music_key):
-        pg.mixer.music.load(self.resources.musics[music_key])
-        self.played = False
-        self.passed = False
-
-    def play(self, starts=0, fade_in=0, loops=0):
-        if not self.played:
-            pg.mixer.music.play(loops, starts, 1000 * fade_in)
-            self.played = True
-
-
-    def fadeOut(self, fade_out):
-        if not self.passed:
-            pg.mixer.music.fadeout(1000 * fade_out)
-            self.passed = True
-
-
-    def pause(self):
-        pg.mixer.music.pause()
-
-    def unpause(self):
-        pg.mixer.music.unpause()
-
-    def stop(self):
-        pg.mixer.music.stop()
-
-    def setVolume(self, volume):
-        pg.mixer.music.set_volume(volume)
-
-
-    def giveSound(self, sound_key):
-        return self.resources.sounds[sound_key]
 
 
 

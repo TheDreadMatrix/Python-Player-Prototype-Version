@@ -47,11 +47,14 @@ _DEFAULT_FRAGMENT_SOURCE = """
         out vec4 OutColor;
 
         uniform sampler2D DM_Texture;
-        uniform vec3 rgb;
-        uniform float alpha;
+
+        uniform float r;
+        uniform float g;
+        uniform float b;
+        uniform float a;
 
         void main(){
-            OutColor = texture(DM_Texture, DM_Coord) * vec4(rgb, alpha);
+            OutColor = texture(DM_Texture, DM_Coord) * vec4(r, g, b, a);
         }
     """
 

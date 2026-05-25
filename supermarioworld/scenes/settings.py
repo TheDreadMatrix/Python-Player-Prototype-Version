@@ -1,9 +1,8 @@
-from supermarioworld.package_scenes import EmptyScene
-from supermarioworld.package_typing import GameType
+from supermarioworld.scenes.base import EmptyScene
 
 
 class Settings(EmptyScene):
-    def __init__(self, game: GameType):
+    def __init__(self, game):
         super().__init__(game)
 
     def onUpdate(self):

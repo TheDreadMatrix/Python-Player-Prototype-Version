@@ -1,4 +1,4 @@
-from supermarioworld.core._moderngl import pygame, load_texture_text
+from supermarioworld.core.gl_utils import pygame, load_texture_text
 
 
 
@@ -45,6 +45,9 @@ class TextLabel:
         self._rebuildText(color_text, 0, 0)
     
     def _rebuildText(self, color_text, filter, anisotropy):
+        if self.texture_note is not None:
+            self.texture_note.release()
+            
         self.texture_note, self.size = load_texture_text(self._ctx, self.font, self.text, color_text, filter, anisotropy)
         self.resources._regRawImage(self.texture_id, self.texture_note)
 

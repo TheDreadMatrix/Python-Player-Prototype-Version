@@ -33,8 +33,45 @@ class CorePath:
         if not path.is_file():
             raise FileNotFoundError(f"{kind} is not a file: {path}")
         return path
+
+    def _ensure_folder(self, path: Path, kind: str) -> Path:
+        if not path.exists():
+            raise FileNotFoundError(f"{kind} folder not found: {path}")
+
+        if not path.is_dir():
+            raise NotADirectoryError(f"{kind} is not a directory: {path}")
+        
+        return path
     
 
+    
+    def ConfigFolder(self, folders):
+        return str(self._ensure_folder(self._config_dir / folders, "Config"))
+    
+    def CsavesFolder(self, folders):
+        return str(self._ensure_folder(self._csaves_dir / folders, "Csaves"))
+
+
+    def findGlobal(self, folder: str, file_category: str) -> list[str]:
+        root = Path(folder)
+
+        if not root.exists():
+            raise FileNotFoundError(f"Folder not found: {root}")
+
+        files = []
+
+        for file in root.glob(file_category):
+            if file.is_file():
+                files.append(str(file))
+
+        return files
+    
+    
+    
+
+    
+
+    # Work with file path
     def ConfigPath(self, filename):
         return str(self._ensure_file(self._config_dir / filename, "Config"))
     

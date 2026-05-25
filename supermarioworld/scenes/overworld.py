@@ -1,4 +1,4 @@
-from supermarioworld.package_scenes import EmptyScene
+from supermarioworld.scenes.base import EmptyScene
 
 from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
 
@@ -39,12 +39,12 @@ class OverWorld(EmptyScene):
     def onRender(self):
         self.game.clearColor(0.53, 0.99, 1)
 
-        self.RENDER.clearPrompt()
+        self.renderer.clearPrompt()
 
-        self.overworld_map.submit(self.RENDER)
-        self.RENDER.submitSprite("overworld-border", size=(self.game.width, self.game.height))
+        self.overworld_map.submit(self.renderer)
+        self.renderer.submitSprite("overworld-border", size=(self.game.width, self.game.height))
 
-        self.RENDER.renderSprite()
+        self.renderer.renderSprite()
     
 
     def onSave(self):

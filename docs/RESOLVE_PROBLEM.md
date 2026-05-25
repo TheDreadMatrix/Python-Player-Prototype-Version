@@ -1,24 +1,10 @@
 
 
 
-Single drawing -> Atlas modrawing -> Animation ([CutOut])
 
+onRender:
 
+    self.renderer.render("base:tex", pos, size, r, g, b, a, layer, mode, shader)
+    self.renderer.draw_rect(r, g, b, a, pos, size, layer, mode, shader)
 
-
-self.RESOURCES.registerAtlas("my-atlas", path, filter, anisotropy)
-self.RESOURCES.registerTexture("key-texture", path, filter, anisotropy)
-self.RESOURCES.registerCutOutTexture("cut-out", path, xywh, filter, anisotropy)
-
-self.RESOURCES._registerRawTexture("raw", mgl.Texture)
-
-self.RESOURCES.registerShader("my-custom", path)
-
-
-self.MAIN.forget()
-
-self.MAIN.submitAtlas("my-atlas", )
-self.MAIN.submit("key-texture", size, position, rgba, layer, flipx, flipy, shader="my-custom")
-
-
-self.MAIN.render()
+    self.renderer.renderInstance()

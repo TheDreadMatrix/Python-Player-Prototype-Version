@@ -1,11 +1,11 @@
-from pathlib import Path
 import json
 
 import pygame as pg
 import moderngl as mgl
 
-from supermarioworld.package_scenes import EmptyScene
+from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.rendering.easygui import TextLabel
+from supermarioworld.tilemaps.spatial_hash import SpatialHash
 
 
 class OverworldEditor(EmptyScene):
@@ -14,8 +14,11 @@ class OverworldEditor(EmptyScene):
 
         self.assets.pushAtlas("overworld", "overworld/overworld.png")
 
-        self.config_root = Path(self.paths.ConfigPath("overworld/notations/tile-notation-valley.json")).parent
-        self.maps_dir = self.config_root / "maps"
+        self.audio.load("CS")
+        self.audio.play(loops=-1)
+
+        # game.paths.ConfigFolder("oveworld/maps")
+        self.maps_dir = game.paths.ConfigFolder("overworld/maps")
 
         self.tile_size = 8
         self.cell_size = 32
@@ -24,11 +27,14 @@ class OverworldEditor(EmptyScene):
         self.min_grid_rows = 50
         self.view_offset = [0, 0]
         self.zoom = 1.0
-        self.zoom_min = 0.5
+        self.zoom_min = 0.1
         self.zoom_max = 3.0
         self.palette_scroll_rows = 0
+        self.palette_pos = [0, 120]
+        self._drag_palette = False
+        self._drag_palette_off = (0, 0)
 
-        self.notation = self._load_json(self.config_root / "tile-notation-valley.json")["tiles"]
+        self.notation = self._load_json(game.paths.ConfigPath("overworld/notations/tile-notation-valley.json"))["tiles"]
         self.palette_keys = [k for k, v in self.notation.items() if isinstance(v, list) and len(v) >= 2]
         self.selected_tile = self.palette_keys[0] if self.palette_keys else None
 
@@ -36,7 +42,8 @@ class OverworldEditor(EmptyScene):
         self._register_palette_textures()
         self._register_ui_textures()
 
-        self.map_files = sorted([p for p in self.maps_dir.glob("*.json") if p.is_file()])
+        # game.paths.findGlobal(self.maps_dir, file_category="*.json")
+        self.map_files = sorted([p for p in game.paths.findGlobal(self.maps_dir, file_category="*.json")])
         self.map_index = 0
 
         self.map_path = None
@@ -48,31 +55,34 @@ class OverworldEditor(EmptyScene):
         self.status_timer = 0.0
         self._prev_mouse_buttons = (False, False, False)
         self._prev_mouse_pos = pg.mouse.get_pos()
+        self.undo_stack = []
+        self._tile_hash = SpatialHash(16)
+        self._tile_hash_dirty = True
 
         self._create_labels()
         self._load_current_map()
 
     def _create_labels(self):
-        self.title_label = TextLabel(self.game, self.RENDER, "ow-title", "OVERWORLD EDITOR", size_font=24)
+        self.title_label = TextLabel(self.game, self.renderer, "ow-title", "OVERWORLD EDITOR", size_font=24)
         self.title_label.position = (20, 20)
 
-        self.map_label = TextLabel(self.game, self.RENDER, "ow-map", "", size_font=20)
+        self.map_label = TextLabel(self.game, self.renderer, "ow-map", "", size_font=20)
         self.map_label.position = (20, 56)
 
-        self.layer_label = TextLabel(self.game, self.RENDER, "ow-layer", "", size_font=18)
+        self.layer_label = TextLabel(self.game, self.renderer, "ow-layer", "", size_font=18)
         self.layer_label.position = (380, 56)
 
-        self.tile_label = TextLabel(self.game, self.RENDER, "ow-tile", "", size_font=18)
+        self.tile_label = TextLabel(self.game, self.renderer, "ow-tile", "", size_font=18)
         self.tile_label.position = (20, 72)
 
-        self.status_label = TextLabel(self.game, self.RENDER, "ow-status", "", size_font=18)
+        self.status_label = TextLabel(self.game, self.renderer, "ow-status", "", size_font=18)
         self.status_label.position = (20, self.game.height - 30)
 
-    def _load_json(self, path: Path):
+    def _load_json(self, path):
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def _save_json(self, path: Path, data):
+    def _save_json(self, path, data):
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -111,7 +121,8 @@ class OverworldEditor(EmptyScene):
         self.layer_index = 0
         self._normalize_active_layer()
         self.dirty = False
-        self.status = f"Loaded: {self.map_path.stem}"
+        self.status = f"Loaded: {self.map_path}"
+        self._tile_hash_dirty = True
 
     def _normalize_active_layer(self):
         if not self.layer_keys:
@@ -163,6 +174,7 @@ class OverworldEditor(EmptyScene):
             return
         self.layer_index = (self.layer_index + delta) % len(self.layer_keys)
         self._normalize_active_layer()
+        self._tile_hash_dirty = True
         self._set_status(f"Layer: {self._active_layer_key()}")
 
     def _select_tile_delta(self, delta: int):
@@ -190,9 +202,31 @@ class OverworldEditor(EmptyScene):
         if current == new_value:
             return False
 
+        self.undo_stack.append((self._active_layer_key(), tx, ty, current))
         layer[ty][tx] = new_value
         self.dirty = True
+        self._tile_hash_dirty = True
         return True
+
+    def _undo_last(self):
+        if not self.undo_stack:
+            self._set_status("Nothing to undo")
+            return
+
+        layer_key, tx, ty, prev_value = self.undo_stack.pop()
+        layer = self.map_json.get(layer_key)
+        if not isinstance(layer, list) or ty < 0 or ty >= len(layer):
+            self._set_status("Undo skipped")
+            return
+        row = layer[ty]
+        if not isinstance(row, list) or tx < 0 or tx >= len(row):
+            self._set_status("Undo skipped")
+            return
+
+        row[tx] = prev_value
+        self.dirty = True
+        self._tile_hash_dirty = True
+        self._set_status("Undo")
 
     @staticmethod
     def _in_rect(pos, rect):
@@ -230,8 +264,11 @@ class OverworldEditor(EmptyScene):
         pad = 4
         per_row = self._palette_per_row()
         width = per_row * self.cell_size + (per_row - 1) * pad
-        x = 20
-        top = 120
+        if self.palette_pos[0] == 0:
+            self.palette_pos[0] = self.game.width - width - 20
+        x = max(0, min(self.game.width - width, self.palette_pos[0]))
+        top = max(0, min(self.game.height - self.cell_size, self.palette_pos[1]))
+        self.palette_pos[0], self.palette_pos[1] = x, top
         bottom = self.game.height - 60
         height = max(self.cell_size, bottom - top)
         return (x, top, width, height)
@@ -268,7 +305,7 @@ class OverworldEditor(EmptyScene):
             return
         self._save_json(self.map_path, self.map_json)
         self.dirty = False
-        self._set_status(f"Saved: {self.map_path.name}")
+        self._set_status(f"Saved: {self.map_path}")
 
     def onUpdate(self):
         self.request.setTitle(f"{self.game.getFps():.2f}")
@@ -279,7 +316,7 @@ class OverworldEditor(EmptyScene):
 
         self._handle_mouse_input()
 
-        self.map_label.setText(f"Map: {self.map_path.name if self.map_path else 'none'} {'*' if self.dirty else ''}")
+        self.map_label.setText(f"Map: {'Map' if self.map_path else 'none'} {'*' if self.dirty else ''}")
         self.layer_label.setText(f"Layer: {self._active_layer_key() if self.layer_keys else 'none'}")
         self.tile_label.setText(f"Tile: {self.selected_tile if self.selected_tile else 'none'}")
         self.status_label.setText(self.status if self.status else "LMB draw | RMB erase | MMB pan | Wheel zoom | [/] map | ;/' layer | Q/E tile | Ctrl+S save")
@@ -289,6 +326,24 @@ class OverworldEditor(EmptyScene):
         left, middle, right = pg.mouse.get_pressed(3)
         prev_left, prev_middle, prev_right = self._prev_mouse_buttons
         rects = self._ui_rects()
+        palette_rect = self._palette_view_rect()
+
+        if left and not prev_left and self._in_rect(mouse_pos, palette_rect):
+            picked = self._pick_tile_from_palette(mouse_pos)
+            if not picked:
+                self._drag_palette = True
+                self._drag_palette_off = (mouse_pos[0] - self.palette_pos[0], mouse_pos[1] - self.palette_pos[1])
+
+        if not left:
+            self._drag_palette = False
+
+        if self._drag_palette:
+            self.palette_pos[0] = mouse_pos[0] - self._drag_palette_off[0]
+            self.palette_pos[1] = mouse_pos[1] - self._drag_palette_off[1]
+            self._prev_mouse_buttons = (left, middle, right)
+            self._prev_mouse_pos = mouse_pos
+            return
+
         over_ui = self._over_ui(mouse_pos)
         over_palette = self._over_palette(mouse_pos)
 
@@ -332,9 +387,6 @@ class OverworldEditor(EmptyScene):
             if self._paint(mouse_pos, erase=False):
                 self._set_status("Draw")
 
-        if left and not prev_left and over_palette:
-            self._pick_tile_from_palette(mouse_pos)
-
         if right and not middle and not over_ui and not over_palette and self._paint(mouse_pos, erase=True):
             self._set_status("Erase")
 
@@ -357,6 +409,8 @@ class OverworldEditor(EmptyScene):
                 self._select_tile_delta(1)
             elif event.key == pg.K_s and (event.mod & pg.KMOD_CTRL):
                 self._save_current_map()
+            elif event.key == pg.K_z and (event.mod & pg.KMOD_CTRL):
+                self._undo_last()
             elif event.key in (pg.K_EQUALS, pg.K_PLUS, pg.K_KP_PLUS):
                 self._change_zoom(0.1)
             elif event.key in (pg.K_MINUS, pg.K_KP_MINUS):
@@ -376,16 +430,17 @@ class OverworldEditor(EmptyScene):
 
     def _pick_tile_from_palette(self, pos):
         if not self._in_rect(pos, self._palette_view_rect()):
-            return
+            return False
         for tile_key, rect in self._palette_rects():
             if self._in_rect(pos, rect):
                 self.selected_tile = tile_key
                 self._set_status(f"Selected {tile_key}")
-                return
+                return True
+        return False
 
     def onRender(self):
         self.game.clearColor(0.12, 0.2, 0.3)
-        self.RENDER.clearPrompt()
+        self.renderer.clearPrompt()
 
         self._render_map()
         self._render_grid()
@@ -393,7 +448,7 @@ class OverworldEditor(EmptyScene):
         self._render_ui()
         self._render_labels()
 
-        self.RENDER.renderSprite()
+        self.renderer.renderSprite()
 
     def _render_map(self):
         if not self.layer_keys:
@@ -403,22 +458,24 @@ class OverworldEditor(EmptyScene):
         gx, gy = self.grid_origin
         ox, oy = self.view_offset
         layer = self._active_layer()
-        for y, row in enumerate(layer):
-            py = gy + y * map_cell + oy
-            if py + map_cell <= 0 or py >= screen_h:
+        if self._tile_hash_dirty:
+            entities = []
+            for y, row in enumerate(layer):
+                for x, tile_key in enumerate(row):
+                    if tile_key and tile_key in self.notation:
+                        entities.append({"x": x, "y": y, "tile_key": tile_key})
+            self._tile_hash.setEntities(entities)
+            self._tile_hash_dirty = False
+        cx = ((screen_w / 2) - gx - ox) / map_cell
+        cy = ((screen_h / 2) - gy - oy) / map_cell
+        rx = (screen_w / 2) / map_cell + 2
+        ry = (screen_h / 2) / map_cell + 2
+        for e in self._tile_hash.getEntities(cx, cy, rx, ry):
+            px = gx + e["x"] * map_cell + ox
+            py = gy + e["y"] * map_cell + oy
+            if px + map_cell <= 0 or px >= screen_w or py + map_cell <= 0 or py >= screen_h:
                 continue
-            for x, tile_key in enumerate(row):
-                if not tile_key or tile_key not in self.notation:
-                    continue
-                px = gx + x * map_cell + ox
-                if px + map_cell <= 0 or px >= screen_w:
-                    continue
-                self.RENDER.submitSprite(
-                    tile_key,
-                    size=(map_cell, map_cell),
-                    position=(px, py),
-                    layer=1,
-                )
+            self.renderer.submitSprite(e["tile_key"], size=(map_cell, map_cell), position=(px, py), layer=1)
 
     def _render_grid(self):
         cols, rows = self._get_grid_size()
@@ -440,7 +497,7 @@ class OverworldEditor(EmptyScene):
             draw_y = max(py, 0)
             draw_h = min(py + h, screen_h) - draw_y
             if draw_h > 0:
-                self.RENDER.submitSprite("ow-ui-grid", size=(1, draw_h), position=(px, draw_y), layer=2)
+                self.renderer.submitSprite("ow-ui-grid", size=(1, draw_h), position=(px, draw_y), layer=2)
         for iy in range(rows + 1):
             px = gx + ox
             py = gy + iy * map_cell + oy
@@ -451,7 +508,7 @@ class OverworldEditor(EmptyScene):
             draw_x = max(px, 0)
             draw_w = min(px + w, screen_w) - draw_x
             if draw_w > 0:
-                self.RENDER.submitSprite("ow-ui-grid", size=(draw_w, 1), position=(draw_x, py), layer=2)
+                self.renderer.submitSprite("ow-ui-grid", size=(draw_w, 1), position=(draw_x, py), layer=2)
 
     def _render_palette(self):
         view_x, view_y, view_w, view_h = self._palette_view_rect()

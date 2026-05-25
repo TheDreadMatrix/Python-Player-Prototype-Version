@@ -112,6 +112,11 @@ class _PathsType(typing.Protocol):
     def ConfigPath(self, filename: str) -> str: ...
     def CsavesPath(self, filename: str) -> str: ...
 
+    def ConfigFolder(self, folders: str) -> str: ...
+    def CsavesFolder(self, folders: str) -> str: ...
+    
+    def findGlobal(self, folder: str, file_category: str) -> list[str]: ...
+
 
 class _AssetsType(typing.Protocol):
     def pushAtlas(self, atlas_key: str, atlas_path: str) -> None: ...
@@ -154,7 +159,28 @@ class _StreamType:
 
 
 
+class _RendererType:
+    def render(self, 
+               texture_key: str, 
+               *, 
+               size: tuple=(1, 1), 
+               position: tuple=(0, 0), 
+               r: float=1.0,
+               g: float=1.0,
+               b: float=1.0,
+               a: float=1.0,
+               layer: int=1,
+               flx: bool=False,
+               fly: bool=False,
+               shader_key: str="default",
+               mode: int=0
+               ) -> None: ...
 
+
+
+class Evalent(typing.Protocol):
+    type: typing.Any
+    key: int
 
 
 class GameType(typing.Protocol):
@@ -162,6 +188,8 @@ class GameType(typing.Protocol):
     
     width: int
     height: int
+
+    renderer: _RendererType
 
     request: _RequestType
     paths: _PathsType

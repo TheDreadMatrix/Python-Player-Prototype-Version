@@ -1,4 +1,4 @@
-from supermarioworld.package_scenes import EmptyScene
+from supermarioworld.scenes.base import EmptyScene
 
 
 from supermarioworld.rendering.easygui import TextLabel
@@ -67,15 +67,15 @@ class Menu(EmptyScene):
 
         
 
-        self.text_play = TextLabel(game, self.RENDER, "text-1", "Play", size_font=32, font_key="pixel")
+        self.text_play = TextLabel(game, self.renderer, "text-1", "Play", size_font=32, font_key="pixel")
         self.text_play.position = (game.width // 2 - self.text_play.size[0] // 2 - 10, 250)
         self.text_play.rgb = (1, 1, 0)
 
-        self.text_options = TextLabel(game, self.RENDER, "text-2", "Options", size_font=32, font_key="pixel")
+        self.text_options = TextLabel(game, self.renderer, "text-2", "Options", size_font=32, font_key="pixel")
         self.text_options.position = (game.width // 2 - self.text_options.size[0] // 2 - 10, 350)
         self.text_options.rgb = (1, 1, 0)
 
-        self.text_quit = TextLabel(game, self.RENDER, "text-3", "Quit", size_font=32, font_key="pixel")
+        self.text_quit = TextLabel(game, self.renderer, "text-3", "Quit", size_font=32, font_key="pixel")
         self.text_quit.position = (game.width // 2 - self.text_quit.size[0] // 2 - 10, 450)
         self.text_quit.rgb = (1, 1, 0)
         
@@ -167,7 +167,7 @@ class Menu(EmptyScene):
                     
                     self.switching = True
                     self.switch_timer = 0
-                    self.switch_target_scene = "cutscene-1"
+                    self.switch_target_scene = "base:cutscene-1"
 
    
             if event.key == pg.K_z and self.switching_game:
@@ -183,29 +183,29 @@ class Menu(EmptyScene):
     def onRender(self):
         self.game.clearColor(0.53, 0.99, 1)
         
-        self.RENDER.clearPrompt()  
+        self.renderer.clearPrompt()  
 
 
         for position in self.positions:
-            self.RENDER.submitSprite("b1", size=(48, 48), position=(position, 500))
-            self.RENDER.submitSprite("b4", size=(48, 48), position=(position, 548))
-            self.RENDER.submitSprite("b4", size=(48, 48), position=(position, 596))
+            self.renderer.submitSprite("b1", size=(48, 48), position=(position, 500))
+            self.renderer.submitSprite("b4", size=(48, 48), position=(position, 548))
+            self.renderer.submitSprite("b4", size=(48, 48), position=(position, 596))
+        
+        self.renderer.renderSprite()
+
+        self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_1, self.our_y), layer=0)
+        self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_2, self.our_y), layer=0)
+
+        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 60), layer=4)
+        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), r=0, g=0, b=0, a=0.7, layer=3)
+        self.renderer.render("title-border", size=(self.game.width, self.game.height), layer=5)
         
 
-        self.RENDER.submitSprite("background", size=(self.game.width, self.game.height), position=(self.x_1, self.our_y), layer=0)
-        self.RENDER.submitSprite("background", size=(self.game.width, self.game.height), position=(self.x_2, self.our_y), layer=0)
-
-        self.RENDER.submitSprite("title", size=(360, 160), position=(self.game.width // 2 - 180, 60), layer=4)
-        self.RENDER.submitSprite("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), rgb=(0, 0, 0), layer=3)
-        self.RENDER.submitSprite("title-border", size=(self.game.width, self.game.height), layer=5)
-        
-
-        self.RENDER.submitSprite(self.text_play.texture_id, size=self.text_play.size, position=self.text_play.position, rgb=self.text_play.rgb)
-        self.RENDER.submitSprite(self.text_options.texture_id, size=self.text_options.size, position=self.text_options.position, rgb=self.text_options.rgb)
-        self.RENDER.submitSprite(self.text_quit.texture_id, size=self.text_quit.size, position=self.text_quit.position, rgb=self.text_quit.rgb)
+        self.renderer.render(self.text_play.texture_id, size=self.text_play.size, position=self.text_play.position)
+        self.renderer.render(self.text_options.texture_id, size=self.text_options.size, position=self.text_options.position)
+        self.renderer.render(self.text_quit.texture_id, size=self.text_quit.size, position=self.text_quit.position)
        
-
-        self.RENDER.renderSprite()
+        
 
       
     def onSave(self):

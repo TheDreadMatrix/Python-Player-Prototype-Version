@@ -1,5 +1,4 @@
-from supermarioworld.rendering.renderer import MainRenderer
-from supermarioworld.package_typing import GameType
+from supermarioworld.package_typing import GameType, Evalent
 
 class EmptyScene:
     def __init__(self, game: "GameType"):
@@ -10,9 +9,9 @@ class EmptyScene:
         self.audio = game.audio
         self.account = game.account
         
-        self.RENDER = MainRenderer(game)
+        self.renderer = game.renderer
 
     def onUpdate(self): pass
-    def onEvent(self, event): pass
+    def onEvent(self, event: Evalent): pass
     def onRender(self): pass
     def onSave(self): pass

@@ -1,4 +1,4 @@
-from supermarioworld.core._moderngl import _DEFAULT_VERTEX_SOURCE
+from supermarioworld.core.gl_utils import _DEFAULT_VERTEX_SOURCE
 
 class CustomShader:
     def __init__(self, game, shader_path: str):
