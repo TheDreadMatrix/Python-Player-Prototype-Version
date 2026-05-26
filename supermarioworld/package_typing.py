@@ -160,6 +160,10 @@ class _StreamType:
 
 
 class _RendererType:
+    def regShader(self, shader_key: str, your_shader: _CustomShaderType) -> None: ...
+    def delShader(self, shader_key: str) -> None: ...
+    def renderQuad(self, r: float=1, g: float=1, b: float=1, a: float=1, shader_key: str="quad", mode: int=0) -> None: ...
+    def renderInstance(self, texture_key: str, *, r: float=1, g: float=1, b: float=1, a: float=1, shader_key: str="instance", mode: int=0, instances: list[float]=[]) -> None: ...
     def render(self, 
                texture_key: str, 
                *, 
@@ -169,7 +173,6 @@ class _RendererType:
                g: float=1.0,
                b: float=1.0,
                a: float=1.0,
-               layer: int=1,
                flx: bool=False,
                fly: bool=False,
                shader_key: str="default",

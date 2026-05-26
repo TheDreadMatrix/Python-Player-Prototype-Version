@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 
 import pygame as pg
 import moderngl as mgl
@@ -58,6 +59,11 @@ class OverworldEditor(EmptyScene):
         self.undo_stack = []
         self._tile_hash = SpatialHash(16)
         self._tile_hash_dirty = True
+        self._cached_map_batches = {}
+        self._cached_grid_instances = []
+        self._cached_palette_batches = {}
+        self._cached_ui_batches = {"ow-ui-btn": [], "ow-ui-btn-hot": []}
+        self._cached_label_batches = {}
 
         self._create_labels()
         self._load_current_map()
@@ -103,9 +109,13 @@ class OverworldEditor(EmptyScene):
     def _register_solid_texture(self, key: str, rgba: tuple[int, int, int, int]):
         surface = pg.Surface((1, 1), flags=pg.SRCALPHA)
         surface.fill(rgba)
-        texture = self.game._ctx.texture(surface.get_size(), 4, pg.image.tobytes(surface, "RGBA"))
+        texture = self.renderer._ctx.texture(surface.get_size(), 4, pg.image.tobytes(surface, "RGBA"))
         texture.filter = (mgl.NEAREST, mgl.NEAREST)
         self.assets._regRawImage(key, texture)
+
+    def _render_batch(self, texture_key: str, instances):
+        if instances:
+            self.renderer.renderInstance(texture_key, instances=instances)
 
     def _load_current_map(self):
         if not self.map_files:
@@ -320,6 +330,14 @@ class OverworldEditor(EmptyScene):
         self.layer_label.setText(f"Layer: {self._active_layer_key() if self.layer_keys else 'none'}")
         self.tile_label.setText(f"Tile: {self.selected_tile if self.selected_tile else 'none'}")
         self.status_label.setText(self.status if self.status else "LMB draw | RMB erase | MMB pan | Wheel zoom | [/] map | ;/' layer | Q/E tile | Ctrl+S save")
+        self._rebuild_render_cache()
+
+    def _rebuild_render_cache(self):
+        self._cached_map_batches = self._build_map_batches()
+        self._cached_grid_instances = self._build_grid_instances()
+        self._cached_palette_batches = self._build_palette_batches()
+        self._cached_ui_batches = self._build_ui_batches()
+        self._cached_label_batches = self._build_label_batches()
 
     def _handle_mouse_input(self):
         mouse_pos = pg.mouse.get_pos()
@@ -440,19 +458,23 @@ class OverworldEditor(EmptyScene):
 
     def onRender(self):
         self.game.clearColor(0.12, 0.2, 0.3)
-        self.renderer.clearPrompt()
+        self._render_from_cache()
 
-        self._render_map()
-        self._render_grid()
-        self._render_palette()
-        self._render_ui()
-        self._render_labels()
+    def _render_from_cache(self):
+        for texture_key, instances in self._cached_map_batches.items():
+            self._render_batch(texture_key, instances)
+        self._render_batch("ow-ui-grid", self._cached_grid_instances)
+        for texture_key, instances in self._cached_palette_batches.items():
+            self._render_batch(texture_key, instances)
+        for texture_key, instances in self._cached_ui_batches.items():
+            self._render_batch(texture_key, instances)
+        for texture_key, instances in self._cached_label_batches.items():
+            self._render_batch(texture_key, instances)
 
-        self.renderer.renderSprite()
-
-    def _render_map(self):
+    def _build_map_batches(self):
+        map_batches = defaultdict(list)
         if not self.layer_keys:
-            return
+            return map_batches
         map_cell = self._map_cell_size()
         screen_w, screen_h = self.game.width, self.game.height
         gx, gy = self.grid_origin
@@ -475,18 +497,20 @@ class OverworldEditor(EmptyScene):
             py = gy + e["y"] * map_cell + oy
             if px + map_cell <= 0 or px >= screen_w or py + map_cell <= 0 or py >= screen_h:
                 continue
-            self.renderer.submitSprite(e["tile_key"], size=(map_cell, map_cell), position=(px, py), layer=1)
+            map_batches[e["tile_key"]].append([px, py, map_cell, map_cell, 0.0, 0.0])
+        return map_batches
 
-    def _render_grid(self):
+    def _build_grid_instances(self):
         cols, rows = self._get_grid_size()
         if cols == 0 or rows == 0:
-            return
+            return []
         map_cell = self._map_cell_size()
         screen_w, screen_h = self.game.width, self.game.height
         gx, gy = self.grid_origin
         ox, oy = self.view_offset
         w = cols * map_cell
         h = rows * map_cell
+        grid_instances = []
         for ix in range(cols + 1):
             px = gx + ix * map_cell + ox
             py = gy + oy
@@ -497,7 +521,7 @@ class OverworldEditor(EmptyScene):
             draw_y = max(py, 0)
             draw_h = min(py + h, screen_h) - draw_y
             if draw_h > 0:
-                self.renderer.submitSprite("ow-ui-grid", size=(1, draw_h), position=(px, draw_y), layer=2)
+                grid_instances.append([px, draw_y, 1, draw_h, 0.0, 0.0])
         for iy in range(rows + 1):
             px = gx + ox
             py = gy + iy * map_cell + oy
@@ -508,53 +532,58 @@ class OverworldEditor(EmptyScene):
             draw_x = max(px, 0)
             draw_w = min(px + w, screen_w) - draw_x
             if draw_w > 0:
-                self.renderer.submitSprite("ow-ui-grid", size=(draw_w, 1), position=(draw_x, py), layer=2)
+                grid_instances.append([draw_x, py, draw_w, 1, 0.0, 0.0])
+        return grid_instances
 
-    def _render_palette(self):
+    def _build_palette_batches(self):
+        batches = defaultdict(list)
         view_x, view_y, view_w, view_h = self._palette_view_rect()
-        self.RENDER.submitSprite("ow-ui-btn", size=(view_w, view_h), position=(view_x, view_y), layer=2)
+        batches["ow-ui-btn"].append([view_x, view_y, view_w, view_h, 0.0, 0.0])
         for tile_key, rect in self._palette_rects():
             x, y, _, _ = rect
             if y + self.cell_size <= view_y or y >= view_y + view_h:
                 continue
-            self.RENDER.submitSprite(tile_key, size=(self.cell_size, self.cell_size), position=(x, y), layer=3)
+            batches[tile_key].append([x, y, self.cell_size, self.cell_size, 0.0, 0.0])
             # Red frame around each tile button in palette.
-            self.RENDER.submitSprite("ow-ui-tile-frame", size=(self.cell_size, 1), position=(x, y), layer=4)
-            self.RENDER.submitSprite("ow-ui-tile-frame", size=(self.cell_size, 1), position=(x, y + self.cell_size - 1), layer=4)
-            self.RENDER.submitSprite("ow-ui-tile-frame", size=(1, self.cell_size), position=(x, y), layer=4)
-            self.RENDER.submitSprite("ow-ui-tile-frame", size=(1, self.cell_size), position=(x + self.cell_size - 1, y), layer=4)
+            batches["ow-ui-tile-frame"].append([x, y, self.cell_size, 1, 0.0, 0.0])
+            batches["ow-ui-tile-frame"].append([x, y + self.cell_size - 1, self.cell_size, 1, 0.0, 0.0])
+            batches["ow-ui-tile-frame"].append([x, y, 1, self.cell_size, 0.0, 0.0])
+            batches["ow-ui-tile-frame"].append([x + self.cell_size - 1, y, 1, self.cell_size, 0.0, 0.0])
             if tile_key == self.selected_tile:
-                self.RENDER.submitSprite("ow-ui-select", size=(self.cell_size, 2), position=(x, y + self.cell_size - 2), layer=5)
+                batches["ow-ui-select"].append([x, y + self.cell_size - 2, self.cell_size, 2, 0.0, 0.0])
+        return batches
 
-    def _render_ui(self):
+    def _build_ui_batches(self):
         rects = self._ui_rects()
         mouse_pos = pg.mouse.get_pos()
+        batches = {"ow-ui-btn": [], "ow-ui-btn-hot": []}
         for key, rect in rects.items():
             base = "ow-ui-btn-hot" if self._in_rect(mouse_pos, rect) else "ow-ui-btn"
-            self.RENDER.submitSprite(base, size=(rect[2], rect[3]), position=(rect[0], rect[1]), layer=5)
+            target = batches["ow-ui-btn-hot"] if base == "ow-ui-btn-hot" else batches["ow-ui-btn"]
+            target.append([rect[0], rect[1], rect[2], rect[3], 0.0, 0.0])
+        return batches
 
-    def _render_labels(self):
-        self.RENDER.submitSprite(self.title_label.texture_id, size=self.title_label.size, position=self.title_label.position, layer=6)
-        self.RENDER.submitSprite(self.map_label.texture_id, size=self.map_label.size, position=self.map_label.position, layer=6)
-        self.RENDER.submitSprite(self.layer_label.texture_id, size=self.layer_label.size, position=self.layer_label.position, layer=6)
-        self.RENDER.submitSprite(self.tile_label.texture_id, size=self.tile_label.size, position=self.tile_label.position, layer=6)
-        self.RENDER.submitSprite(self.status_label.texture_id, size=self.status_label.size, position=self.status_label.position, layer=6)
+    def _build_label_batches(self):
+        batches = defaultdict(list)
+        batches[self.title_label.texture_id].append([self.title_label.position[0], self.title_label.position[1], self.title_label.size[0], self.title_label.size[1], 0.0, 0.0])
+        batches[self.map_label.texture_id].append([self.map_label.position[0], self.map_label.position[1], self.map_label.size[0], self.map_label.size[1], 0.0, 0.0])
+        batches[self.layer_label.texture_id].append([self.layer_label.position[0], self.layer_label.position[1], self.layer_label.size[0], self.layer_label.size[1], 0.0, 0.0])
+        batches[self.tile_label.texture_id].append([self.tile_label.position[0], self.tile_label.position[1], self.tile_label.size[0], self.tile_label.size[1], 0.0, 0.0])
+        batches[self.status_label.texture_id].append([self.status_label.position[0], self.status_label.position[1], self.status_label.size[0], self.status_label.size[1], 0.0, 0.0])
 
-        self._render_button_text("Save", (676, 22))
-        self._render_button_text("<", (652, 58))
-        self._render_button_text(">", (758, 58))
-        self._render_button_text("<", (652, 92))
-        self._render_button_text(">", (758, 92))
+        for text, pos in [("Save", (676, 22)), ("<", (652, 58)), (">", (758, 58)), ("<", (652, 92)), (">", (758, 92))]:
+            key, size = self._resolve_button_text_texture(text, pos)
+            batches[key].append([pos[0], pos[1], size[0], size[1], 0.0, 0.0])
+        return batches
 
-    def _render_button_text(self, text: str, pos: tuple[int, int]):
+    def _resolve_button_text_texture(self, text: str, pos: tuple[int, int]):
         key = f"ow-btn-{text}-{pos[0]}-{pos[1]}"
         if key not in self.assets.textures:
-            label = TextLabel(self.game, self.RENDER, key, text, size_font=20)
+            label = TextLabel(self.game, self.renderer, key, text, size_font=20)
             self.assets_to_release.add(key)
             self.assets_to_release.add(label.texture_id)
-            self.RENDER.submitSprite(label.texture_id, size=label.size, position=pos, layer=6)
-            return
-        self.RENDER.submitSprite(key, size=(22, 24), position=pos, layer=6)
+            return label.texture_id, label.size
+        return key, (22, 24)
 
     def onSave(self):
         for key in self.assets_to_release:

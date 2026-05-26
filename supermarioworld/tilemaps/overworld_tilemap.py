@@ -1,4 +1,5 @@
 import json
+from supermarioworld.johnson import readData
 
 
 class OverWorldMap:
@@ -116,11 +117,4 @@ class OverWorldMap:
         self._build_commands()
         return self.commands
 
-    def submit(self, renderer):
-        for cmd in self.commands:
-            renderer.submitSprite(
-                cmd["texture"],
-                size=cmd["size"],
-                position=cmd["position"],
-                layer=cmd["layer"],
-            )
+   

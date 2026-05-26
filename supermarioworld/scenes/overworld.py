@@ -26,6 +26,16 @@ class OverWorld(EmptyScene):
 
         self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{BASE_BIOME_DICT.get(biome)}.json")
         self.overworld_map.load(map_ref)
+        self._map_instance_batches = {}
+        self._build_instance_batches()
+
+    def _build_instance_batches(self):
+        batches = {}
+        for cmd in self.overworld_map.commands:
+            batches.setdefault(cmd["texture"], []).append(
+                [cmd["position"][0], cmd["position"][1], cmd["size"][0], cmd["size"][1], 0.0, 0.0]
+            )
+        self._map_instance_batches = batches
 
 
     def onUpdate(self):
@@ -38,13 +48,10 @@ class OverWorld(EmptyScene):
 
     def onRender(self):
         self.game.clearColor(0.53, 0.99, 1)
+        for texture_key, instances in self._map_instance_batches.items():
+            self.renderer.renderInstance(texture_key, instances=instances)
 
-        self.renderer.clearPrompt()
-
-        self.overworld_map.submit(self.renderer)
-        self.renderer.submitSprite("overworld-border", size=(self.game.width, self.game.height))
-
-        self.renderer.renderSprite()
+        self.renderer.render("overworld-border", size=(self.game.width, self.game.height))
     
 
     def onSave(self):

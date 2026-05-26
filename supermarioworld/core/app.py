@@ -15,7 +15,7 @@ from supermarioworld.core.audio import AudioStream
 from supermarioworld.core.renderer import MainRenderer
 
 import pygame as pg
-import moderngl as mgl
+
 
 
 
@@ -54,17 +54,6 @@ class SuperMariWorldApplication:
         pg.display.set_caption("Super Mario World: 91 Retitle")
         pg.display.set_icon(icon)
         
-        
-        # Create render context
-        self._ctx = mgl.create_context()
-        self._ctx.enable(mgl.BLEND)
-        self._ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
-
-        self._ctx.viewport = (0, 0, self.width, self.height)
-
-
-  
-    def _initSubstence(self):
         # Configuration settings
         self.account = PlayerAccountManager(self)
 
@@ -75,6 +64,9 @@ class SuperMariWorldApplication:
         # Renderer
         self.renderer = MainRenderer(self)
 
+
+  
+    def _initSubstence(self):
         self._scene_name = ""
 
         self._scenes = Bootloader(self)
@@ -93,7 +85,7 @@ class SuperMariWorldApplication:
     
 
     def clearColor(self, r, g, b):
-        self._ctx.clear(r, g, b)
+        self.renderer._clearColor(r, g, b)
     
 
     def _update(self):
@@ -115,7 +107,7 @@ class SuperMariWorldApplication:
 
 
     def _render(self):
-        self._ctx.clear(0.8, 0.6, 0.7)
+        self.renderer._clearColor(0.7, 0.6, 0.8)
 
         self._scenes.render()
        

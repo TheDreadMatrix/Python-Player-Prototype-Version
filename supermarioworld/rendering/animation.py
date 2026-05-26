@@ -1,4 +1,4 @@
-from supermarioworld.core.gl_utils import load_texture, load_texture_cutout
+from supermarioworld.core.gl_utils.gl_textures import load_texture, load_texture_cutout
 
 
 

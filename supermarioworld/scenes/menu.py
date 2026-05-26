@@ -80,14 +80,37 @@ class Menu(EmptyScene):
         self.text_quit.rgb = (1, 1, 0)
         
         
-        self.positions = list(range(0, 48 * 17, 48))
-        
+        self.positions = list(range(0, 48 * 50, 48))
+        self.instances_b1 = []
+
+        for position in self.positions:
+
+            self.instances_b1.append([
+                position, 500,
+                48, 48,
+                0, 0
+            ])
+        self.instances_b4 = []
+
+        for position in self.positions:
+            self.instances_b4.append([
+                position, 548,
+                48, 48,
+                0, 0
+            ])
+
+            self.instances_b4.append([
+                position, 596,
+                48, 48,
+                0, 0
+            ])
 
 
 
     
     def onUpdate(self):
         self.timer += self.game.delta_time 
+        self.request.setTitle(f"{self.game.getFps():.2f}")
         
         
         self.audio.play(loops=-1, fade_in=2)
@@ -183,27 +206,27 @@ class Menu(EmptyScene):
     def onRender(self):
         self.game.clearColor(0.53, 0.99, 1)
         
-        self.renderer.clearPrompt()  
+
+        self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_1, self.our_y))
+        self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_2, self.our_y))
+
+        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), r=0, g=0, b=0, a=0.7)
+        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 60))
 
 
-        for position in self.positions:
-            self.renderer.submitSprite("b1", size=(48, 48), position=(position, 500))
-            self.renderer.submitSprite("b4", size=(48, 48), position=(position, 548))
-            self.renderer.submitSprite("b4", size=(48, 48), position=(position, 596))
+        self.renderer.renderInstance("b1", instances=self.instances_b1)    
+        self.renderer.renderInstance("b4", instances=self.instances_b4)
+
         
-        self.renderer.renderSprite()
-
-        self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_1, self.our_y), layer=0)
-        self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_2, self.our_y), layer=0)
-
-        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 60), layer=4)
-        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), r=0, g=0, b=0, a=0.7, layer=3)
-        self.renderer.render("title-border", size=(self.game.width, self.game.height), layer=5)
+        
+        self.renderer.render("title-border", size=(self.game.width, self.game.height))
         
 
         self.renderer.render(self.text_play.texture_id, size=self.text_play.size, position=self.text_play.position)
         self.renderer.render(self.text_options.texture_id, size=self.text_options.size, position=self.text_options.position)
         self.renderer.render(self.text_quit.texture_id, size=self.text_quit.size, position=self.text_quit.position)
+
+        
        
         
 

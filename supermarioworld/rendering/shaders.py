@@ -1,4 +1,4 @@
-from supermarioworld.core.gl_utils import _DEFAULT_VERTEX_SOURCE
+from supermarioworld.core.gl_utils.gl_sources import _DEFAULT_VERTEX_SOURCE
 
 class CustomShader:
     def __init__(self, game, shader_path: str):
@@ -18,6 +18,9 @@ class CustomShader:
             _DEFAULT_VERTEX_SOURCE, 
             fragment_source
         )
+
+        self._vao = game.renderer._ctx.vertex_array()
+        self._uniforms = {}
 
 
     def setUniform(self, name, value) -> None:

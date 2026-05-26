@@ -1,12 +1,12 @@
-from supermarioworld.core.gl_utils import pygame, load_texture_text
+from supermarioworld.core.gl_utils.gl_textures import pygame, load_texture_text
 
 
 
 class FadeLabel:
-    def __init__(self, game, renderer):
+    def __init__(self, game):
         self.game = game
 
-        self.renderer = renderer
+        self.renderer = game.renderer
 
         self.size = (game.width, game.height)
         self.position = (0, 0)
@@ -20,9 +20,9 @@ class FadeLabel:
 
 
 class TextLabel:
-    def __init__(self, game, renderer, text_id: str, text: str, font_key: str=None, size_font: int=20, color_text: tuple=(255, 255, 255)):
-        self._ctx = game._ctx
-        self.renderer = renderer
+    def __init__(self, game, text_id: str, text: str, font_key: str=None, size_font: int=20, color_text: tuple=(255, 255, 255)):
+        self._ctx = game.renderer._ctx
+        self.renderer = game.renderer
         self.resources = game.assets
 
         self.text = text

@@ -1,14 +1,15 @@
-from collections import defaultdict
-from dataclasses import dataclass
 from array import array
 
-from supermarioworld.core.gl_utils import (
-        moderngl, 
-        create_error_texture, 
-        _DEFAULT_FRAGMENT_SOURCE, 
-        _DEFAULT_VERTEX_SOURCE
-    )
+from supermarioworld.core.gl_utils.gl_textures import moderngl, create_error_texture
+from supermarioworld.core.gl_utils.gl_sources import (
+    _DEFAULT_VERTEX_SOURCE_INSTANCE,
+    _DEFAULT_FRAGMENT_SOURCE, 
+    _DEFAULT_FRAGMENT_SOURCE_MESH, 
+    _DEFAULT_VERTEX_SOURCE, 
+    _DEFAULT_VERTEX_SOURCE_MESH
+)
 
+import numpy
 import glm
 
 
@@ -21,48 +22,72 @@ RENDER_MODES = {
 }
 
 class ShaderEntry:
-    def __init__(self, game, custom_shader, default=False, vbo=None, ebo=None, vbo_only=None):
-        self.program = custom_shader._program if not default else game._ctx.program(_DEFAULT_VERTEX_SOURCE, _DEFAULT_FRAGMENT_SOURCE)
+    def __init__(self, ctx: moderngl.Context, custom_shader, shader_type=0, vbo=None, ebo=None, vbo_instance=None):
+        self.ctx = ctx
+        self.shader_type = shader_type
 
-        self.vao = game._ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inCoord")], index_buffer=ebo)
+        if shader_type == 0:
+            self.program = ctx.program(_DEFAULT_VERTEX_SOURCE, _DEFAULT_FRAGMENT_SOURCE)
+            self.program["DM_Texture"] = 0
 
-        self.program["DM_Texture"] = 0
+        elif shader_type == 1:
+            self.program = ctx.program(_DEFAULT_VERTEX_SOURCE_MESH, _DEFAULT_FRAGMENT_SOURCE_MESH)
 
-        self.uniforms = {
-            "unPos": self.program["unPos"],
-            "unSize": self.program["unSize"],
-            "unLayer": self.program["unLayer"],
-        
-            "r": self.program["r"],
-            "g": self.program["g"],
-            "b": self.program["b"],
-            "a": self.program["a"],
+        elif shader_type == 2:
+            self.program = ctx.program(_DEFAULT_VERTEX_SOURCE_INSTANCE, _DEFAULT_FRAGMENT_SOURCE)
+            self.program["DM_Texture"] = 0
 
-            "unFlx": self.program["unFlx"],
-            "unFly": self.program["unFly"],
-        }
+        else:
+            self.program = custom_shader._program
+            
 
-
-
-
-@dataclass(slots=True)
-class RenderPassCommand:
-    texture: str
-    size: tuple
-    position: tuple
-    
-    r: float
-    g: float
-    b: float
-    a: float
+        self._buildVao(vbo, ebo, vbo_instance, custom_shader)
+        self._buildUniforms(custom_shader)
 
 
-    layer: int
-    flipx: bool
-    flipy: bool
-    shader: str
+    def _buildVao(self, vbo, ebo, vbo_instance, custom_shader):
+        if self.shader_type == 0:
+            self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inCoord")], index_buffer=ebo)
+        elif self.shader_type == 1:
+            self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f", "inPos")], index_buffer=ebo)
+        elif self.shader_type == 2:
+            self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inCoord"), 
+                                                            (vbo_instance, "2f 2f 1f 1f/i", "instancePos", "instanceSize", "instanceFlx", "instanceFly")], index_buffer=ebo)
+        else:
+            self.vao = custom_shader._vao
 
+    def _buildUniforms(self, custom_shader):
+        if self.shader_type == 0:
+            self.uniforms = self.uniforms = {
+                "unPos": self.program["unPos"],
+                "unSize": self.program["unSize"],
+            
+                "r": self.program["r"],
+                "g": self.program["g"],
+                "b": self.program["b"],
+                "a": self.program["a"],
 
+                "unFlx": self.program["unFlx"],
+                "unFly": self.program["unFly"],
+            }
+        elif self.shader_type == 1:
+            self.uniforms = {
+                "unPos": self.program["unPos"],
+                "unSize": self.program["unSize"],
+                "r": self.program["r"],
+                "g": self.program["g"],
+                "b": self.program["b"],
+                "a": self.program["a"],
+            }
+        elif self.shader_type == 2:
+            self.uniforms = {
+                "r": self.program["r"],
+                "g": self.program["g"],
+                "b": self.program["b"],
+                "a": self.program["a"]
+            }
+        else:
+            self.uniforms = custom_shader._uniforms
 
 
 
@@ -71,30 +96,44 @@ class MainRenderer:
         self.game = game
         self.resources = game.assets
 
-        self.layers = defaultdict(list)
+        self.shaders = {}
+
 
         # Buffers
         vertices_only = array("f", [0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         vertices = array("f", [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         indices = array("I", [0, 1, 2, 2, 3, 0])
 
+        # Create render context
+        self._ctx = moderngl.create_context()
+        self._ctx.enable(moderngl.BLEND)
+        self._ctx.blend_func = (moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA)
+
+        self._ctx.viewport = (0, 0, game.width, game.height)
+        self._ctx.point_size = 10.0
+        self._ctx.line_width = 5.0
+
         
 
-        self.ebo = game._ctx.buffer(indices)
-        self.vbo = game._ctx.buffer(vertices)
-        self.vbo_only = game._ctx.buffer(vertices_only)
+        self.ebo = self._ctx.buffer(indices)
+        self.vbo = self._ctx.buffer(vertices)
+        self.vbo_only = self._ctx.buffer(vertices_only)
+        self.vbo_instance = self._ctx.buffer(reserve=1024 * 1024)
 
         self.projection = glm.ortho(0, game.width, game.height, 0, -1, 1)
         
 
-        self.ubo = game._ctx.buffer(reserve=64)
+        self.ubo = self._ctx.buffer(reserve=64)
         self.ubo.bind_to_uniform_block(0)
         self.ubo.write(self.projection.to_bytes())
 
 
         # Layers
-        self.default_shader = ShaderEntry(game, 0, default=True, vbo=self.vbo, ebo=self.ebo, vbo_only=self.vbo_only)
-        self.default_texture = create_error_texture(game._ctx)
+        self.default_shader = ShaderEntry(self._ctx, 0, shader_type=0, vbo=self.vbo, ebo=self.ebo, vbo_instance=self.vbo_instance)
+        #self.default_shader_mesh = ShaderEntry(self._ctx, 0, shader_type=1, vbo=self.vbo_only, ebo=self.ebo, vbo_instance=None)
+        self.default_shader_instance = ShaderEntry(self._ctx, 0, shader_type=2, vbo=self.vbo, ebo=self.ebo, vbo_instance=self.vbo_instance)
+
+        self.default_texture = create_error_texture(self._ctx)
 
         self.current_shader = self.default_shader
 
@@ -110,51 +149,74 @@ class MainRenderer:
         self.projection = glm.ortho(0, self.game.width, self.game.height, 0, -1, 1)
         self.ubo.write(self.projection.to_bytes())
 
-        
 
-    def clearPrompt(self):
-        self.layers.clear()
+    def _clearColor(self, r, g, b):
+        self._ctx.clear(r, g, b, 1)
 
 
-    def submitMesh(self, size=(1, 1), position=(0, 0), r=1, g=1, b=1, a=1, layer=1, shader: str="default"):
+    def regShader(self, shader_key, your_shader):
+        self.shaders.update({shader_key: ShaderEntry(self._ctx, your_shader, shader_type=-1)})
+
+
+    def delShader(self, shader_key):
+        shader = self.shaders.pop(shader_key, None)
+        if shader is not None:
+            shader.uniforms.clear()
+            shader.program.release()
+            shader.vao.release()
+
+
+    def renderQuad(self, r=1, g=1, b=1, a=1, shader_key="quad", mode=0):
         pass
 
 
-    def submitSprite(self, texture: str, *, size=(1, 1), position=(0, 0), r=1, g=1, b=1, a=1, layer=1, flipx=False, flipy=False, shader: str="default"):
-        self.layers[layer].append(
-                RenderPassCommand(texture=texture, 
-                                  size=size, 
-                                  position=position, 
-                                  r=r, 
-                                  g=g, 
-                                  b=b,
-                                  a=a, 
-                                  layer=layer, 
-                                  flipx=flipx, 
-                                  flipy=flipy, 
-                                  shader=shader)
-            )
-        
+    # 2f 2f i i / i
+    # position size flx fly
+    def renderInstance(self, texture_key, *, r=1, g=1, b=1, a=1, shader_key="instance", mode=0, instances=[]):
+        if self.last_shader_name != shader_key:
+            self.last_shader_name = shader_key
+
+            self.current_shader = (
+                self.shaders.get(
+                    shader_key,
+                    self.default_shader_instance
+                )
+                )
+
+        shader = self.current_shader
 
 
+        if self.last_texture_name != texture_key:
+            self.last_texture_name = texture_key
 
-    def renderSprite(self):
-        all_layers = sorted(self.layers.keys())
+            texture = (self.resources.textures.get(texture_key, self.default_texture))
 
-        for layer in all_layers:
+            texture.use(0)
 
-            commands = self.layers[layer]
+    
 
-            for cmd in commands:
-                self._renderCommand(cmd)
+        data = numpy.array(instances, dtype="f4").flatten()
 
+        self.vbo_instance.orphan()
+
+        self.vbo_instance.write(data)
+
+        shader.uniforms["r"].value = r
+        shader.uniforms["g"].value = g
+        shader.uniforms["b"].value = b
+        shader.uniforms["a"].value = a
+
+        shader.vao.render(
+            RENDER_MODES[mode],
+            instances=len(instances)
+        )
 
 
     
-    def render(self, texture_key, *, size=(1, 1), position=(0, 0), r=1, g=1, b=1, a=1, layer=1, flx=False, fly=False, shader_key="default", mode=0):
+    def render(self, texture_key, *, size=(1, 1), position=(0, 0), r=1, g=1, b=1, a=1, flx=False, fly=False, shader_key="default", mode=0):
         if self.last_shader_name != shader_key:
             self.last_shader_name = shader_key
-            self.current_shader = self.resources.shaders.get(shader_key, self.default_shader)
+            self.current_shader = self.shaders.get(shader_key, self.default_shader)
             
         shader = self.current_shader
         uniforms = shader.uniforms
@@ -167,7 +229,6 @@ class MainRenderer:
 
         uniforms["unPos"].value = position
         uniforms["unSize"].value = size
-        uniforms["unLayer"].value = layer
        
         uniforms["r"].value = r
         uniforms["g"].value = g
@@ -181,36 +242,5 @@ class MainRenderer:
 
 
 
-        
 
-
-    def _renderCommand(self, cmd: RenderPassCommand):
-        if self.last_shader_name != cmd.shader:
-            self.last_shader_name = cmd.shader
-            self.current_shader = self.resources.shaders.get(cmd.shader, self.default_shader)
-            
-        shader = self.current_shader
-        uniforms = shader.uniforms
-        vao = shader.vao
-
-        if self.last_texture_name != cmd.texture:
-            self.last_texture_name = cmd.texture
-            texture = self.resources.textures.get(cmd.texture, self.default_texture)
-            texture.use(0)
-            
-
-        uniforms["unPos"].value = cmd.position
-        uniforms["unSize"].value = cmd.size
-        uniforms["unLayer"].value = cmd.layer
-       
-        uniforms["r"].value = cmd.r
-        uniforms["g"].value = cmd.g
-        uniforms["b"].value = cmd.b 
-        uniforms["a"].value = cmd.a
-
-        uniforms["unFlx"].value = cmd.flipx
-        uniforms["unFly"].value = cmd.flipy
-        
-
-        vao.render()
 

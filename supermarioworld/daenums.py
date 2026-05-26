@@ -12,6 +12,13 @@ class TextureFilters(IntEnum):
     LINEAR_LINE = 5
 
 
+class RenderModes(IntEnum):
+    TRIANGLES = 0
+    LINE_LOOP = 1
+    LINE_STRIP = 2
+    POINTS = 3
+    TRIANGLE_FAN = 4
+
 
 class CharacterState(IntEnum):
     DEFAULT = 0

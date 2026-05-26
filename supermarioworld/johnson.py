@@ -21,3 +21,12 @@ class Johnson:
 
 
 
+def readData(path: str) -> dict:
+    with open(path, "r") as f: 
+        data = json.load(f)
+    return data
+
+
+def saveData(path: str, data: dict) -> None: 
+    with open(path, "w") as f:
+        json.dump(data, f, indent=4)
