@@ -48,6 +48,8 @@ class OverWorld(EmptyScene):
 
     def onRender(self):
         self.game.clearColor(0.53, 0.99, 1)
+
+        
         for texture_key, instances in self._map_instance_batches.items():
             self.renderer.renderInstance(texture_key, instances=instances)
 

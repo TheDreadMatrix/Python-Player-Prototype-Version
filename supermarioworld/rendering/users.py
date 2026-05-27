@@ -1,9 +1,10 @@
 from supermarioworld.core.gl_utils.gl_textures import pygame, load_texture_text
+from supermarioworld.package_typing import GameType
 
 
 
 class FadeLabel:
-    def __init__(self, game):
+    def __init__(self, game: GameType):
         self.game = game
 
         self.renderer = game.renderer
@@ -20,24 +21,33 @@ class FadeLabel:
 
 
 class TextLabel:
-    def __init__(self, game, text_id: str, text: str, font_key: str=None, size_font: int=20, color_text: tuple=(255, 255, 255)):
+    def __init__(self, game: GameType, text_id: str, text: str, font_key: str=None, size_font: int=20, color_text: tuple=(255, 255, 255)):
         self._ctx = game.renderer._ctx
-        self.renderer = game.renderer
         self.resources = game.assets
 
         self.text = text
+
         self.texture_id = text_id
+
         self.position = (0, 0)
+
         self.size = (200, 80)
-        self.layer = 1
-        self.rgb = (1, 1, 1)
-        self.alpha = 1
+      
+        self.r = 1
+        self.g = 1
+        self.b = 1
+        self.a = 1
+
         self.flipx = False
         self.flipy = False
 
-        self.shader_id = "default"
 
-        self.font = pygame.font.Font(self.resources.font_surfaces[font_key], size_font) if font_key else pygame.font.SysFont('arial', size_font) 
+        font_path = self.resources.font_surfaces.get(font_key)
+
+        if font_path:
+            self.font = pygame.font.Font(font_path, size_font)
+        else:
+            self.font = pygame.font.SysFont("arial", size_font)
        
 
         self.texture_note = None
@@ -46,7 +56,7 @@ class TextLabel:
     
     def _rebuildText(self, color_text, filter, anisotropy):
         if self.texture_note is not None:
-            self.texture_note.release()
+            self.resources.delImage(self.texture_id)
             
         self.texture_note, self.size = load_texture_text(self._ctx, self.font, self.text, color_text, filter, anisotropy)
         self.resources._regRawImage(self.texture_id, self.texture_note)

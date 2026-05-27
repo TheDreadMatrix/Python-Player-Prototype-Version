@@ -47,3 +47,9 @@ class Keys(IntEnum):
     B = 1
     C = 2
     D = 3
+
+
+class Mouses(IntEnum):
+    LEFT = 0
+    MIDDLE = 1
+    RIGHT = 2

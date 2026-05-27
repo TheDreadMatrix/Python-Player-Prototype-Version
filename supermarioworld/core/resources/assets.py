@@ -15,13 +15,13 @@ class AssetsResources:
         self.musics = {}
         self.textures = {}
 
-        self.atlas_surfaces = {}
-        self.font_surfaces = {"default": "arial"}
+        self.atlas_surfaces: dict[str, pg.SurfaceType] = {}
+        self.font_surfaces: dict[str, str] = {}
 
-    def pushAtlas(self, atlas_key, atlas_path):
+    def regAtlas(self, atlas_key, atlas_path):
         self.atlas_surfaces.update({atlas_key: pg.image.load(self.game.paths.ImagesPath(atlas_path)).convert_alpha()})
 
-    def pushFont(self, font_key, font_path):
+    def regFont(self, font_key, font_path):
         self.font_surfaces.update({font_key: self.game.paths.FontsPath(font_path)})
 
 
@@ -31,10 +31,12 @@ class AssetsResources:
 
 
     def regCutOutImage(self, texture_key, atlas_key, x, y, w, h, texture_filter=0, texture_anisotropy=0):
-        self.textures.update({texture_key: 
-                              load_texture_cutout(self.game.renderer._ctx, 
-                                self.atlas_surfaces[atlas_key], 
-                               x, y, w, h, texture_filter, texture_anisotropy)})
+        atlas = self.atlas_surfaces.get(atlas_key)
+
+        if atlas is None:
+            raise ValueError(f"Atlas '{atlas_key}' not registered")
+
+        self.textures.update({texture_key: load_texture_cutout(self.game.renderer._ctx, atlas, x, y, w, h, texture_filter, texture_anisotropy)})
 
 
     def _regRawImage(self, texture_key, texture):
@@ -51,10 +53,16 @@ class AssetsResources:
 
 
     def delSound(self, sound_key):
-        self.sounds.pop(sound_key)
+        self.sounds.pop(sound_key, None)
 
     def delMusic(self, music_key):
-        self.musics.pop(music_key)
+        self.musics.pop(music_key, None)
+
+    def delAtlas(self, atlas_key):
+        self.atlas_surfaces.pop(atlas_key, None)
+
+    def delFont(self, font_key):
+        self.font_surfaces.pop(font_key, None)
 
 
 

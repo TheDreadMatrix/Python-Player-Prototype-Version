@@ -5,7 +5,7 @@ import pygame as pg
 import moderngl as mgl
 
 from supermarioworld.scenes.base import EmptyScene
-from supermarioworld.rendering.easygui import TextLabel
+from supermarioworld.rendering.users import TextLabel
 from supermarioworld.tilemaps.spatial_hash import SpatialHash
 
 
@@ -13,7 +13,7 @@ class OverworldEditor(EmptyScene):
     def __init__(self, game):
         super().__init__(game)
 
-        self.assets.pushAtlas("overworld", "overworld/overworld.png")
+        self.assets.regAtlas("overworld", "overworld/overworld.png")
 
         self.audio.load("CS")
         self.audio.play(loops=-1)
@@ -69,19 +69,19 @@ class OverworldEditor(EmptyScene):
         self._load_current_map()
 
     def _create_labels(self):
-        self.title_label = TextLabel(self.game, self.renderer, "ow-title", "OVERWORLD EDITOR", size_font=24)
+        self.title_label = TextLabel(self.game, "ow-title", "OVERWORLD EDITOR", size_font=24)
         self.title_label.position = (20, 20)
 
-        self.map_label = TextLabel(self.game, self.renderer, "ow-map", "", size_font=20)
+        self.map_label = TextLabel(self.game, "ow-map", "", size_font=20)
         self.map_label.position = (20, 56)
 
-        self.layer_label = TextLabel(self.game, self.renderer, "ow-layer", "", size_font=18)
+        self.layer_label = TextLabel(self.game, "ow-layer", "", size_font=18)
         self.layer_label.position = (380, 56)
 
-        self.tile_label = TextLabel(self.game, self.renderer, "ow-tile", "", size_font=18)
+        self.tile_label = TextLabel(self.game, "ow-tile", "", size_font=18)
         self.tile_label.position = (20, 72)
 
-        self.status_label = TextLabel(self.game, self.renderer, "ow-status", "", size_font=18)
+        self.status_label = TextLabel(self.game, "ow-status", "", size_font=18)
         self.status_label.position = (20, self.game.height - 30)
 
     def _load_json(self, path):

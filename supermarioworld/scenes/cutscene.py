@@ -10,7 +10,7 @@ class CutsceneScene(EmptyScene):
         
 
         if CURRENT_PLAYER.hasPassedCutscene(cutscene_id):
-            self.request.redirectScene(redirect_scene if not isinstance(redirect_scene, int) else CURRENT_PLAYER.current_overworld)
+            self.request.redirectScene(redirect_scene if not isinstance(redirect_scene, int) else f"base:{CURRENT_PLAYER.current_overworld}")
         else:
             CURRENT_PLAYER.setCutsceneAsWatched("cutscene-1")
             CURRENT_PLAYER.save()

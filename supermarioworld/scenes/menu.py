@@ -1,7 +1,8 @@
 from supermarioworld.scenes.base import EmptyScene
 
 
-from supermarioworld.rendering.easygui import TextLabel
+from supermarioworld.rendering.users import TextLabel
+from supermarioworld.rendering.animation import Animation, AnimationCutOut
 
 
 
@@ -58,26 +59,33 @@ class Menu(EmptyScene):
         game.assets.regImage("background", "menu/background.png")
 
 
-        game.assets.pushAtlas("blocks", "levels/tile-blocks.png")
-        game.assets.pushAtlas("koopas", "atlas/koopas.png")
-        game.assets.pushFont("pixel", "PixelFont.ttf")
+        game.assets.regAtlas("blocks", "levels/tile-blocks.png")
+        game.assets.regAtlas("koopas", "atlas/koopas.png")
+        game.assets.regFont("pixel", "PixelFont.ttf")
 
         game.assets.regCutOutImage("b1", "blocks", 16, 200, 16, 16)
         game.assets.regCutOutImage("b4", "blocks", 32, 40, 16, 16)
 
+        self.renderer.createFbo("my-fbo", (game.width, game.height))
+
+        self.animation = Animation(game, 
+                                   frame_paths=["tests/1.png", "tests/2.png", "tests/3.png"],
+                                   durations=[0.1, 0.2, 0.1],
+                                   key_images=["m1", "m2", "m3"]
+                                   )
         
 
-        self.text_play = TextLabel(game, self.renderer, "text-1", "Play", size_font=32, font_key="pixel")
+        self.text_play = TextLabel(game, "text-1", "Play", size_font=32, font_key="pixel")
         self.text_play.position = (game.width // 2 - self.text_play.size[0] // 2 - 10, 250)
-        self.text_play.rgb = (1, 1, 0)
+        
 
-        self.text_options = TextLabel(game, self.renderer, "text-2", "Options", size_font=32, font_key="pixel")
+        self.text_options = TextLabel(game, "text-2", "Options", size_font=32, font_key="pixel")
         self.text_options.position = (game.width // 2 - self.text_options.size[0] // 2 - 10, 350)
-        self.text_options.rgb = (1, 1, 0)
+       
 
-        self.text_quit = TextLabel(game, self.renderer, "text-3", "Quit", size_font=32, font_key="pixel")
+        self.text_quit = TextLabel(game, "text-3", "Quit", size_font=32, font_key="pixel")
         self.text_quit.position = (game.width // 2 - self.text_quit.size[0] // 2 - 10, 450)
-        self.text_quit.rgb = (1, 1, 0)
+        
         
         
         self.positions = list(range(0, 48 * 50, 48))
@@ -110,13 +118,13 @@ class Menu(EmptyScene):
     
     def onUpdate(self):
         self.timer += self.game.delta_time 
-        self.request.setTitle(f"{self.game.getFps():.2f}")
-        
+       
+        self.animation.update()
         
         self.audio.play(loops=-1, fade_in=2)
 
         # moving background
-        self.our_y = glm.sin(self.timer) * 0.7
+        self.our_y = glm.sin(self.timer) * 10
       
 
         self.x_1 += 36 * self.game.delta_time
@@ -206,6 +214,7 @@ class Menu(EmptyScene):
     def onRender(self):
         self.game.clearColor(0.53, 0.99, 1)
         
+        self.renderer.beginFbo("my-fbo")
 
         self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_1, self.our_y))
         self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_2, self.our_y))
@@ -217,8 +226,9 @@ class Menu(EmptyScene):
         self.renderer.renderInstance("b1", instances=self.instances_b1)    
         self.renderer.renderInstance("b4", instances=self.instances_b4)
 
-        
-        
+        self.renderer.endFbo()
+        self.renderer.renderFbo("my-fbo", size=(self.game.width, self.game.height), r=1, g=1, b=1)
+
         self.renderer.render("title-border", size=(self.game.width, self.game.height))
         
 
@@ -228,10 +238,13 @@ class Menu(EmptyScene):
 
         
        
-        
-
-      
     def onSave(self):
+        self.renderer.deleteFbo("my-fbo")
+        self.animation.delAnimation()
+
+        self.game.assets.delAtlas("blocks")
+        self.game.assets.delFont("pixel")
+
         self.game.assets.delImage("title")
         self.game.assets.delImage("title-border")
         self.game.assets.delImage("background")

@@ -1,35 +1,31 @@
 import json
+from supermarioworld.package_typing import GameType
 from supermarioworld.johnson import readData
 
 
 class OverWorldMap:
-    def __init__(self, game, notation_file):
+    def __init__(self, game: GameType, notation_file: str):
         
         self.assets = game.assets
         self.paths = game.paths
 
         self.atlas_key = "overworld"
-        self.notation_file = notation_file
         self.maps_dir = "overworld/maps"
 
         self.tile_size = 8
         self.draw_tile_size = 24
         
 
-        notation_data = self._load_json(self.notation_file)
+        notation_data = readData(self.paths.ConfigPath(notation_file))
 
         self.notation = notation_data["tiles"]
-        game.assets.pushAtlas("overworld", notation_data["img-ref"])
+        game.assets.regAtlas("overworld", notation_data["img-ref"])
 
         self.map_data = {}
         self.layers = []
         self.commands = []
         self._registered_keys = set()
 
-    def _load_json(self, relative_config_path: str):
-        cfg_path = self.paths.ConfigPath(relative_config_path)
-        with open(cfg_path, "r", encoding="utf-8") as f:
-            return json.load(f)
 
     def _resolve_map_name(self, map_ref: str | int | None = None) -> str:
         if map_ref is None:
@@ -40,7 +36,7 @@ class OverWorldMap:
 
     def _load_map(self, map_name: str):
         path = f"{self.maps_dir}/{map_name}.json"
-        self.map_data = self._load_json(path)
+        self.map_data = readData(self.paths.ConfigPath(path))
 
     def _iter_tile_layers(self):
         for key, value in self.map_data.items():

@@ -21,6 +21,26 @@ RENDER_MODES = {
     4: moderngl.TRIANGLE_FAN
 }
 
+
+class RenderTarget:
+    def __init__(self, ctx: moderngl.Context, size):
+        self.texture = ctx.texture(size, 4)
+        self.fbo = ctx.framebuffer(
+            color_attachments=[self.texture]
+        )
+
+    def use(self):
+        self.fbo.use()
+
+    def clear(self):
+        self.fbo.clear(0, 0, 0, 0)
+
+    def delete(self):
+        self.fbo.release()
+        self.texture.release()
+        
+
+
 class ShaderEntry:
     def __init__(self, ctx: moderngl.Context, custom_shader, shader_type=0, vbo=None, ebo=None, vbo_instance=None):
         self.ctx = ctx
@@ -96,7 +116,8 @@ class MainRenderer:
         self.game = game
         self.resources = game.assets
 
-        self.shaders = {}
+        self.shaders: dict[str, ShaderEntry] = {}
+        self.fbos: dict[str, RenderTarget] = {}
 
 
         # Buffers
@@ -136,6 +157,7 @@ class MainRenderer:
         self.default_texture = create_error_texture(self._ctx)
 
         self.current_shader = self.default_shader
+        self.current_fbo = None
 
         # Cache
         self.last_texture_name = None
@@ -153,6 +175,37 @@ class MainRenderer:
     def _clearColor(self, r, g, b):
         self._ctx.clear(r, g, b, 1)
 
+    def _renderTexture(self, texture, *, size=(1,1), position=(0,0),
+                   r=1, g=1, b=1, a=1,
+                   flx=False, fly=False,
+                   shader_key="default", mode=0):
+
+        if self.last_shader_name != shader_key:
+            self.last_shader_name = shader_key
+            self.current_shader = self.shaders.get(
+                shader_key,
+                self.default_shader
+            )
+
+        shader = self.current_shader
+        uniforms = shader.uniforms
+        vao = shader.vao
+
+        texture.use(0)
+
+        uniforms["unPos"].value = position
+        uniforms["unSize"].value = size
+
+        uniforms["r"].value = r
+        uniforms["g"].value = g
+        uniforms["b"].value = b
+        uniforms["a"].value = a
+
+        uniforms["unFlx"].value = flx
+        uniforms["unFly"].value = fly
+
+        vao.render(RENDER_MODES[mode])
+
 
     def regShader(self, shader_key, your_shader):
         self.shaders.update({shader_key: ShaderEntry(self._ctx, your_shader, shader_type=-1)})
@@ -164,6 +217,31 @@ class MainRenderer:
             shader.uniforms.clear()
             shader.program.release()
             shader.vao.release()
+
+
+    def createFbo(self, frame_key, size):
+        self.fbos.update({frame_key: RenderTarget(self._ctx, size)})
+
+    def deleteFbo(self, frame_key):
+        fbo = self.fbos.pop(frame_key, None)
+        fbo.delete()
+
+    def beginFbo(self, frame_key):
+        if frame_key not in self.fbos:
+            return
+        
+        self.current_fbo = self.fbos[frame_key]
+        self.current_fbo.use()
+        self.current_fbo.clear()
+
+    def endFbo(self):
+        self._ctx.screen.use()
+        
+
+    def renderFbo(self, frame_key, *, position=(0, 0), size=(1, 1), r=1, g=1, b=1, a=1, flx=False, fly=True, shader_key="default", mode=0):
+        tex = self.fbos[frame_key].texture if frame_key in self.fbos else self.default_texture
+        self._renderTexture(tex, position=position, size=size, r=r, g=g, b=b, a=a, flx=flx, fly=fly, shader_key=shader_key, mode=mode)
+        
 
 
     def renderQuad(self, r=1, g=1, b=1, a=1, shader_key="quad", mode=0):
