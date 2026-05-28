@@ -69,10 +69,10 @@ class SuperMariWorldApplication:
     def _initSubstence(self):
         self._scene_name = ""
 
-        self._scenes = Bootloader(self)
-        self._scenes.onLoad(self)
-        self._scenes.onInitScene(self)
-        self._scenes._postInitScene()
+        self.router = Bootloader(self)
+        self.router.onLoad(self)
+        self.router.onInitScene(self)
+        self.router._postInitScene()
        
 
         
@@ -89,7 +89,7 @@ class SuperMariWorldApplication:
     
 
     def _update(self):
-        self._scenes.update()
+        self.router.update()
 
 
         for event in pg.event.get():
@@ -101,7 +101,7 @@ class SuperMariWorldApplication:
 
                 self.renderer._eventResize()
 
-            self._scenes.event(event=event)
+            self.router.event(event=event)
         
         
 
@@ -109,7 +109,7 @@ class SuperMariWorldApplication:
     def _render(self):
         self.renderer._clearColor(0.7, 0.6, 0.8)
 
-        self._scenes.render()
+        self.router.render()
        
         pg.display.flip()
         
@@ -124,7 +124,7 @@ class SuperMariWorldApplication:
 
             
 
-        self._scenes.save()
+        self.router.save()
         
         self.account.save()
         pg.quit()

@@ -1,7 +1,7 @@
 from supermarioworld.scenes.base import EmptyScene
 
 from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
-
+import pygame as pg
 
 
 class OverWorld(EmptyScene):
@@ -26,10 +26,12 @@ class OverWorld(EmptyScene):
 
         self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{BASE_BIOME_DICT.get(biome)}.json")
         self.overworld_map.load(map_ref)
-        self._map_instance_batches = {}
+        
         self._build_instance_batches()
+        print(len(self._map_instance_batches))
 
     def _build_instance_batches(self):
+        self._map_instance_batches = {}
         batches = {}
         for cmd in self.overworld_map.commands:
             batches.setdefault(cmd["texture"], []).append(
@@ -43,7 +45,9 @@ class OverWorld(EmptyScene):
     
 
     def onEvent(self, event):
-        return super().onEvent(event)
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_ESCAPE:
+                self.request.redirectScene("base:overworld-editor")
     
 
     def onRender(self):

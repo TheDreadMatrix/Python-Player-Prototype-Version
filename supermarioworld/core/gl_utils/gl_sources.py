@@ -57,6 +57,22 @@ _DEFAULT_FRAGMENT_SOURCE = """
 
 
 _DEFAULT_VERTEX_SOURCE_MESH = """
+        #version 330 core
+
+        in vec2 inPos;
+
+        layout(std140) uniform Projection{
+            mat4 unProj;
+        };
+
+        uniform vec2 unPos;
+        uniform vec2 unSize;
+
+        void main(){
+            vec2 finalPos = inPos * unSize + unPos;
+            
+            gl_Position = unProj * vec4(finalPos, 0.0, 1.0);
+        }
 
 """
 

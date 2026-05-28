@@ -19,6 +19,7 @@ import glm
 class Menu(EmptyScene):
     def __init__(self, game):
         super().__init__(game)
+        
 
         #MUSIC
         self.audio.load("title")
@@ -89,25 +90,30 @@ class Menu(EmptyScene):
         
         
         self.positions = list(range(0, 48 * 50, 48))
-        self.instances_b1 = []
 
+        self.batches = {
+            "b1": [],
+            "b4": []
+        }
+
+        # b1
         for position in self.positions:
-
-            self.instances_b1.append([
+            self.batches["b1"].append([
                 position, 500,
                 48, 48,
                 0, 0
             ])
-        self.instances_b4 = []
 
+        # b4
         for position in self.positions:
-            self.instances_b4.append([
+
+            self.batches["b4"].append([
                 position, 548,
                 48, 48,
                 0, 0
             ])
 
-            self.instances_b4.append([
+            self.batches["b4"].append([
                 position, 596,
                 48, 48,
                 0, 0
@@ -222,9 +228,10 @@ class Menu(EmptyScene):
         self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), r=0, g=0, b=0, a=0.7)
         self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 60))
 
+        self.renderer.renderQuad(position=(300, 100), r=1, g=0, b=0, mode=1)
 
-        self.renderer.renderInstance("b1", instances=self.instances_b1)    
-        self.renderer.renderInstance("b4", instances=self.instances_b4)
+        for texture_key, instances in self.batches.items():
+            self.renderer.renderInstance(texture_key, instances=instances)
 
         self.renderer.endFbo()
         self.renderer.renderFbo("my-fbo", size=(self.game.width, self.game.height), r=1, g=1, b=1)

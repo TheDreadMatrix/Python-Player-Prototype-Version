@@ -4,6 +4,8 @@ from collections import defaultdict
 import pygame as pg
 import moderngl as mgl
 
+from supermarioworld.johnson import readData, saveData
+
 from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.rendering.users import TextLabel
 from supermarioworld.tilemaps.spatial_hash import SpatialHash
@@ -35,7 +37,7 @@ class OverworldEditor(EmptyScene):
         self._drag_palette = False
         self._drag_palette_off = (0, 0)
 
-        self.notation = self._load_json(game.paths.ConfigPath("overworld/notations/tile-notation-valley.json"))["tiles"]
+        self.notation = readData(game.paths.ConfigPath("overworld/notations/tile-notation-valley.json"))["tiles"]
         self.palette_keys = [k for k, v in self.notation.items() if isinstance(v, list) and len(v) >= 2]
         self.selected_tile = self.palette_keys[0] if self.palette_keys else None
 
@@ -84,14 +86,6 @@ class OverworldEditor(EmptyScene):
         self.status_label = TextLabel(self.game, "ow-status", "", size_font=18)
         self.status_label.position = (20, self.game.height - 30)
 
-    def _load_json(self, path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-
-    def _save_json(self, path, data):
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-
     def _register_palette_textures(self):
         for tile_key in self.palette_keys:
             x, y = self.notation[tile_key][:2]
@@ -126,7 +120,7 @@ class OverworldEditor(EmptyScene):
             return
 
         self.map_path = self.map_files[self.map_index]
-        self.map_json = self._load_json(self.map_path)
+        self.map_json = readData(self.map_path)
         self.layer_keys = [k for k, v in self.map_json.items() if k.startswith("tile-map-") and isinstance(v, list)]
         self.layer_index = 0
         self._normalize_active_layer()
@@ -313,7 +307,7 @@ class OverworldEditor(EmptyScene):
         if self.map_path is None:
             self._set_status("No map file to save")
             return
-        self._save_json(self.map_path, self.map_json)
+        saveData(self.map_path, self.map_json)
         self.dirty = False
         self._set_status(f"Saved: {self.map_path}")
 
@@ -413,6 +407,9 @@ class OverworldEditor(EmptyScene):
 
     def onEvent(self, event):
         if event.type == pg.KEYDOWN:
+            if event.key == pg.K_ESCAPE:
+                self.request.redirectScene("base:overworld-1")
+
             if event.key == pg.K_LEFTBRACKET:
                 self._switch_map(-1)
             elif event.key == pg.K_RIGHTBRACKET:
@@ -587,5 +584,4 @@ class OverworldEditor(EmptyScene):
 
     def onSave(self):
         for key in self.assets_to_release:
-            if key in self.assets.textures:
-                self.assets.delImage(key)
+            self.assets.delImage(key)

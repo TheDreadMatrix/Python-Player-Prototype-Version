@@ -151,7 +151,7 @@ class MainRenderer:
 
         # Layers
         self.default_shader = ShaderEntry(self._ctx, 0, shader_type=0, vbo=self.vbo, ebo=self.ebo, vbo_instance=self.vbo_instance)
-        #self.default_shader_mesh = ShaderEntry(self._ctx, 0, shader_type=1, vbo=self.vbo_only, ebo=self.ebo, vbo_instance=None)
+        self.default_shader_mesh = ShaderEntry(self._ctx, 0, shader_type=1, vbo=self.vbo_only, ebo=self.ebo, vbo_instance=None)
         self.default_shader_instance = ShaderEntry(self._ctx, 0, shader_type=2, vbo=self.vbo, ebo=self.ebo, vbo_instance=self.vbo_instance)
 
         self.default_texture = create_error_texture(self._ctx)
@@ -244,8 +244,20 @@ class MainRenderer:
         
 
 
-    def renderQuad(self, r=1, g=1, b=1, a=1, shader_key="quad", mode=0):
-        pass
+    def renderQuad(self, position=(0, 0), size=(100, 100), r=1, g=1, b=1, a=1, mode=0):
+        shader = self.default_shader_mesh
+
+        uniforms = shader.uniforms
+
+        uniforms["unPos"].value = position
+        uniforms["unSize"].value = size
+        uniforms["r"].value = r
+        uniforms["g"].value = g
+        uniforms["b"].value = b 
+        uniforms["a"].value = a
+
+        shader.vao.render(RENDER_MODES[mode])
+        
 
 
     # 2f 2f i i / i
