@@ -1,0 +1,33 @@
+{
+    "start": {
+        "title": "Red Forest START-DOME"
+    },
+
+    "level-10": {
+        "title": "Red Forest 0"
+    },
+
+    "level-11": {
+        "title": "Red Forest 1"
+    },
+
+    "level-12": {
+        "title": "Red Forest 2"
+    },
+
+    "level-13": {
+        "title": "Red Forest 3"
+    },
+
+    "level-14": {
+        "title": "Red Forest 4"
+    },
+
+    "level-15": {
+        "title": "Rayskie`s castle"
+    },
+
+    "level-end": {
+        "title": "Red Forest STAR-DOME"
+    }
+}

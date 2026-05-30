@@ -49,6 +49,9 @@ class PlayerAccountManager:
     def setMusicVolume(self, volume):
         self.settings_data["music"] = volume
 
+    def __repr__(self):
+        return f"{self.settings_data["current-player"]}"
+
 
 
 

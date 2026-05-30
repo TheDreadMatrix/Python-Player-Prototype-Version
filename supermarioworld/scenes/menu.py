@@ -13,13 +13,14 @@ import glm
 
 
 
+
   
 
 
 class Menu(EmptyScene):
     def __init__(self, game):
         super().__init__(game)
-        
+   
 
         #MUSIC
         self.audio.load("title")
@@ -52,6 +53,7 @@ class Menu(EmptyScene):
         self.switching = False
         self.switching_game = False
         self.switch_target_scene = ""
+        
 
 
         # SPRITES
@@ -62,7 +64,7 @@ class Menu(EmptyScene):
 
         game.assets.regAtlas("blocks", "levels/tile-blocks.png")
         game.assets.regAtlas("koopas", "atlas/koopas.png")
-        game.assets.regFont("pixel", "PixelFont.ttf")
+        
 
         game.assets.regCutOutImage("b1", "blocks", 16, 200, 16, 16)
         game.assets.regCutOutImage("b4", "blocks", 32, 40, 16, 16)
@@ -172,6 +174,9 @@ class Menu(EmptyScene):
             return
 
         if event.type == pg.KEYDOWN:
+            if event.key == pg.K_ESCAPE:
+                self.request.restartScene()
+
             if event.key == pg.K_w:
                 self.sound_choose.play()
                 self.selected -= 1
@@ -185,6 +190,7 @@ class Menu(EmptyScene):
                     self.selected = 0
 
             if event.key == pg.K_q:
+               
                 self.sound_pointer.play()
                 if not self.switching_game:
                     selected_option = self.options[self.selected]

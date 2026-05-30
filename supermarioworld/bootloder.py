@@ -17,6 +17,10 @@ from supermarioworld.daenums import LevelBiome, OverWorldBiome, REDIRECT_TO_OVER
 
 class Bootloader(SceneManager):
     def onLoad(self, game):
+        # Fonts
+        game.assets.regFont("pixel", "PixelFont.ttf")
+
+        # Musics
         game.assets.regMusic("title", "title-name.mp3")
 
 
@@ -27,16 +31,25 @@ class Bootloader(SceneManager):
         game.assets.regMusic("B", "level/2.ogg")
         game.assets.regMusic("CS", "level/3.ogg")
 
+
+        # Sounds
+        game.assets.regSound("cancel", "cancel.wav")
         game.assets.regSound("choose", "map.wav")
         game.assets.regSound("pause", "pause.wav")
         game.assets.regSound("pointer", "pointer.mp3")
+
+        game.assets.regSound("losing", "lost.mp3")
+        game.assets.regSound("success", "success.mp3")
+
+        game.assets.regSound("coin", "coins.mp3")
+        game.assets.regSound("jumping", "jump.mp3")
+        game.assets.regSound("scroll", "scroll.wav")
+
+        
         
 
     def onInitScene(self, game):
-        self.START_SCENE = "base:menu"
-
-        self.registerScene("base:overworld-editor-developer", lambda: EmptyScene(game=game))
-        self.registerScene("base:level-editor-developer", lambda: EmptyScene(game=game))
+        self.START_SCENE = "base:overworld-1"
 
         self.registerScene("base:level-editor", lambda: LevelEditor(game=game))
         self.registerScene("base:overworld-editor", lambda: OverworldEditor(game=game))
@@ -44,15 +57,17 @@ class Bootloader(SceneManager):
         self.registerScene("base:menu", lambda: Menu(game=game))
         self.registerScene("base:settings", lambda: Settings(game=game))
         self.registerScene("base:quit", lambda: QuitScene(game=game))
+        
         self.registerScene("base:cutscene-1", lambda: CutsceneScene(game=game, cutscene_id="cutscene-1", redirect_scene=REDIRECT_TO_OVERWORLD))
         self.registerScene("base:ending", lambda: CutsceneScene(game=game, cutscene_id="ending", redirect_scene=REDIRECT_TO_OVERWORLD))
+
         self.registerScene("base:tutorial", lambda: Tutorial(game=game))
         self.registerScene("base:bonus-game-1", lambda: EmptyScene(game=game))
         self.registerScene("base:bonus-game-2", lambda: EmptyScene(game=game))
 
         self.registerScene("base:overworld-1", lambda: OverWorld(game=game, biome=OverWorldBiome.VALLEY, music_name="overworld-1", map_ref="overworld-1"))
-        self.registerScene("base:overworld-2", lambda: OverWorld(game=game, biome=OverWorldBiome.UNDERGROUND, music_name="overworld-2", map_ref="overworld-2"))
-        self.registerScene("base:overworld-3", lambda: OverWorld(game=game, biome=OverWorldBiome.RED_FOREST, music_name="overworld-3", map_ref="overworld-3"))
+        self.registerScene("base:overworld-2", lambda: OverWorld(game=game, biome=OverWorldBiome.UNDERGROUND, music_name="overworld-4", map_ref="overworld-2"))
+        self.registerScene("base:overworld-3", lambda: OverWorld(game=game, biome=OverWorldBiome.RED_FOREST, music_name="overworld-4", map_ref="overworld-3"))
         self.registerScene("base:overworld-4", lambda: OverWorld(game=game, biome=OverWorldBiome.MAGMA, music_name="overworld-4", map_ref="overworld-4"))
         self.registerScene("base:overworld-star", lambda: OverWorld(game=game, biome=OverWorldBiome.SPECIAL, music_name="overworld-star", map_ref="overworld-star"))
 

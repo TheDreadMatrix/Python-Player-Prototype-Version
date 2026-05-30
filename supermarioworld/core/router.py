@@ -10,6 +10,8 @@ class SceneManager:
         pass
 
     def _postInitScene(self):
+        self.game._scene_name = self.START_SCENE
+        self._manager_state = self.START_SCENE
         self._current_scene = self.scene_dict.get(self.START_SCENE 
                                                   if self.game._run_scene is None 
                                                   else self.game._run_scene)()
@@ -29,6 +31,14 @@ class SceneManager:
         self.scene_dict.update({name: scene_factory})
 
 
+    def _restartScene(self):
+        self._manager_state = self.game.getScene()
+        
+        self._current_scene.onSave()
+        self._current_scene = None
+        self._current_scene = self.scene_dict.get(self._manager_state)()
+
+
     def save(self):
         pass
 
@@ -36,6 +46,7 @@ class SceneManager:
 
     def update(self):
         state_scene = self.game.getScene()
+        
             
         if state_scene != self._manager_state:
             self._current_scene.onSave()

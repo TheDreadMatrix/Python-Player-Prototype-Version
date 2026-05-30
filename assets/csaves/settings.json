@@ -1,6 +1,6 @@
 {
     "current-player": 0,
     "frametime": 140,
-    "music": 1,
-    "sound": 0.1
+    "music": 0.1,
+    "sound": 0.5
 }

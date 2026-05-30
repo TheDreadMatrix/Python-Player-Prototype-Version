@@ -9,12 +9,12 @@ class Johnson:
         if not self.path.exists():
             raise FileNotFoundError(f"File not found: {str(self.path)}")
 
-    def readData(self):
+    def readData(self) -> dict[str]:
         with open(self.path, "r") as f:
             data = json.load(f)
         return data
     
-    def saveData(self, data):
+    def saveData(self, data: dict[str]):
         with open(self.path, "w") as f:
             json.dump(data, f, indent=4)
 

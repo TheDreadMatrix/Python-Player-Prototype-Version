@@ -9,7 +9,7 @@ class GameRequest:
         pygame.display.set_caption(title)
 
     def restartScene(self):
-        pass
+        self.game.router._restartScene()
 
     def redirectScene(self, scene):
         self.game._scene_name = scene

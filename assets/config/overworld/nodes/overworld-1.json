@@ -1,0 +1,119 @@
+{
+    "start": {
+        "title": "Daemon`s house",
+        "redirect": "base:tutorial",
+        "position": [100, 200],
+        
+        "right": {
+            "target": "level-1",
+
+            "path": [
+                [285, 200]
+            ],
+
+            "path-animation": [
+                "right"
+            ]
+        }
+
+    },
+
+    "level-1": {
+        "title": "Valley of Ones 1",
+        "redirect": "base:level-1",
+        "position": [285, 200],
+
+        "left": {
+            "target": "start",
+
+            "path": [
+                [100, 200]
+            ],
+
+            "path-animation": [
+                "left"
+            ]
+        },
+
+        "right": {
+            "target": "level-2",
+            
+            "path": [
+                [440, 200]
+            ],
+
+            "path-animation": ["right"]
+        }
+    },
+
+    "level-2": {
+        "title": "Valley of Ones 2",
+        "redirect": "base:level-2",
+        "position": [440, 200],
+
+         "left": {
+            "target": "level-1",
+
+            "path": [
+                [285, 200]
+            ],
+            "path-animation": ["left"]
+        },
+
+        "right": {
+            "target": "level-3",
+
+            "path": [
+                [450, 200],
+                [500, 220],
+                [620, 220]
+            ],
+            "path-animation": ["right", "right", "right"]
+        }
+
+    },
+
+    "level-3": {
+        "title": "Valley of Ones 3",
+        "redirect": "base:level-3",
+        "position": [620, 220],
+
+        "left": {
+            "target": "level-2",
+
+            "path": [
+                [620, 220], [500, 220], [450, 200]
+            ],
+
+            "path-animation": ["left", "left", "left"]
+        },
+
+        "right": {
+            "target": "level-4",
+
+            "path-animation": ["right"]
+        }
+    },
+
+    "level-4": {
+        "title": "Ampliy`s castle",
+        "redirect": "base:level-4",
+        "position": [600, 300],
+
+        "left": {
+            "target": "start",
+            "path": [[100, 100]],
+            "path-animation": ["left"]
+        }
+    },
+
+    "level-secret": {
+        "title": "Valley of Ones secret",
+        "redirect": "base:overworld-2"
+    },
+
+    "level-end": {
+        "title": "Valley of Ones STAR-DOME",
+        "redirect": "base:oveworld-3"
+    }
+}

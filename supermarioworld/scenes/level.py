@@ -8,8 +8,10 @@ class Level(EmptyScene):
         super().__init__(game)
 
         self.audio.load(music_name)
-        self.audio.setVolume(self.game.settings_read["music"])
+        self.audio.setVolume(self.account.getMusicVolume())
         self.audio.play(loops=-1, fade_in=3)
+
+        self.request.setTitle(self.game.getScene())
 
     def onUpdate(self):
         return super().onUpdate()

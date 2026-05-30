@@ -21,7 +21,7 @@ class FadeLabel:
 
 
 class TextLabel:
-    def __init__(self, game: GameType, text_id: str, text: str, font_key: str=None, size_font: int=20, color_text: tuple=(255, 255, 255)):
+    def __init__(self, game: GameType, text_id: str, text: str="SOME-TEXT", font_key: str=None, size_font: int=20):
         self._ctx = game.renderer._ctx
         self.resources = game.assets
 
@@ -52,19 +52,19 @@ class TextLabel:
 
         self.texture_note = None
 
-        self._rebuildText(color_text, 0, 0)
+        self._rebuildText(color_text=(0, 0, 0), tex_filter=0, anisotropy=0)
     
-    def _rebuildText(self, color_text, filter, anisotropy):
+    def _rebuildText(self, color_text, tex_filter, anisotropy):
         if self.texture_note is not None:
             self.resources.delImage(self.texture_id)
             
-        self.texture_note, self.size = load_texture_text(self._ctx, self.font, self.text, color_text, filter, anisotropy)
+        self.texture_note, self.size = load_texture_text(self._ctx, self.font, self.text, color_text, tex_filter, anisotropy)
         self.resources._regRawImage(self.texture_id, self.texture_note)
 
 
-    def setText(self, text: str, color_text: tuple=(255, 255, 255), filter: int=0, anisotropy: int=0):
+    def setText(self, text: str, r_text: float=0, g_text: float=0, b_text: float=0, tex_filter: int=0, anisotropy: int=0):
         if self.text != text:
             self.text = text
-            self._rebuildText(color_text, filter, anisotropy)
+            self._rebuildText(color_text=(round(r_text * 255), round(g_text * 255), round(b_text * 255)), tex_filter=tex_filter, anisotropy=anisotropy)
 
             
