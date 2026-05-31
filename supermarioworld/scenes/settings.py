@@ -12,7 +12,7 @@ class Settings(EmptyScene):
         pass
     
     def onRender(self):
-        self.game._ctx.clear(0, 1, 0)
+        self.game.clearColor(0, 1, 0)
     
     def onSave(self):
         pass

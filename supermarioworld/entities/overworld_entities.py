@@ -24,9 +24,11 @@ class TileEntity:
 class OverWorldPlayer:
     def __init__(self, game: GameType, map_ref: str):
         self.DEFAULT_NODE = {"title": "NODE CANT BE FOUND."}
+        self.MAP_REF = map_ref
 
         self.main_nodes = Johnson(game.paths.ConfigPath(f"overworld/nodes/{map_ref}.json")).readData()
         self.current_node = self.main_nodes.get(game.account.getCurrentPlayer().current_overworld_level, self.DEFAULT_NODE)
+        self.current_node_key = game.account.getCurrentPlayer().current_overworld_level
         
         self.position = self.current_node.get("position", (0, 0))
         self.moving = False
@@ -45,14 +47,18 @@ class OverWorldPlayer:
         # Sounds
         self.sound_choose = game.audio.giveSound("choose")
         self.sound_cancel = game.audio.giveSound("cancel")
+        self.sound_exit = game.audio.giveSound("pause")
 
         
         # Rendering
         self.renderer = game.renderer
         self.request = game.request
+        self.account = game.account
         
 
         game.assets.regAtlas("chr-spr", "overworld/overworld-sprites.png")
+
+        
 
         self.animation_choose = AnimationCutOut(game, "chr-spr", frames=[(8, 136, 16, 16)], durations=[], key_images=["mc-1"])
 
@@ -78,6 +84,10 @@ class OverWorldPlayer:
     def startMove(self, node_data):
         if self.moving:
             return
+        
+        if not self.account.getCurrentPlayer().hasOverworldNodeOpened(node_data.get("target")):
+            self.sound_cancel.play()
+            return 
 
         self.moving = True
         self.path = node_data.get("path", [])
@@ -91,10 +101,7 @@ class OverWorldPlayer:
 
         animation_name = self.path_animations[self.path_index]
 
-        return self.animation_dict.get(
-            animation_name,
-            self.animation_down
-        )
+        return self.animation_dict.get(animation_name, self.animation_down)
 
 
     def updatePlayer(self, dt):
@@ -107,7 +114,11 @@ class OverWorldPlayer:
 
         if self.redirecting:
             self.redirect_timer += dt
-            if self.redirect_timer > 0.5:
+            if self.redirect_timer > 2.5:
+                self.account.getCurrentPlayer().current_overworld = self.MAP_REF
+                self.account.getCurrentPlayer().current_overworld_level = self.current_node_key
+                
+                self.account.getCurrentPlayer().save()
                 self.request.redirectScene(self.redirect_scene)
 
             return
@@ -116,6 +127,7 @@ class OverWorldPlayer:
             return
 
         if self.path_index >= len(self.path):
+            self.current_node_key = self.target
             self.current_node = self.main_nodes.get(self.target, self.DEFAULT_NODE)
             self.position = self.current_node.get("position", (0, 0))
             self.sound_choose.play()
@@ -142,16 +154,19 @@ class OverWorldPlayer:
         vx = dx / distance
         vy = dy / distance
 
-        self.position = (
-            self.position[0] + vx * step,
-            self.position[1] + vy * step
-        )
+        self.position = (self.position[0] + vx * step, self.position[1] + vy * step)
         
         
 
 
 
     def handleEventNodes(self, event):
+        if self.moving:
+            return
+        
+        if self.redirecting:
+            return
+
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_w:
                 up_node = self.current_node.get("up")
@@ -181,11 +196,20 @@ class OverWorldPlayer:
                 else:
                     self.sound_cancel.play()
 
+            # Rederecting to scene
             if event.key == pg.K_q:
                 redirect = self.current_node.get("redirect")
                 if redirect and not self.moving:
                     self.redirecting = True
                     self.redirect_scene = redirect
+
+
+            # Exit to menu
+            if event.key == pg.K_e:
+                if not self.moving:
+                    self.redirecting = True 
+                    self.redirect_scene = "base:menu"
+                    self.sound_exit.play()
                     
 
 

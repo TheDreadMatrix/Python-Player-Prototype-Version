@@ -1,13 +1,13 @@
 from supermarioworld.scenes.base import EmptyScene
 
 
-from supermarioworld.rendering.users import TextLabel
-from supermarioworld.rendering.animation import Animation, AnimationCutOut
+from supermarioworld.rendering.users import TextLabel, FadeLabel
 
 
 
 
 import pygame as pg
+import math
 import glm
 
 
@@ -36,20 +36,20 @@ class Menu(EmptyScene):
         self.accounts = {"P-0": 0, "P-1": 1, "P-2": 2}
 
 
-        #ATTRIBUTES
-        self.timer_appear = 0
-        self.timer_dissappear = 1
+        # Alpha fading and some redirecting
+        self.timer = 0
 
         self.our_y = -100
         self.x_1, self.x_2 = 0, self.game.width
 
-        self.alpha = 0
-        self.timer = 0
+        self.fade_label = FadeLabel(game)
+        self.fade_label.fadeIn(speed=0.6)
+
+        
         self.options = ["PLAY MODE", "SETTINGS", "QUIT"]
         self.selected = 0
 
         self.switch_timer = 0
-        self.switch_delay = 2.5
         self.switching = False
         self.switching_game = False
         self.switch_target_scene = ""
@@ -70,12 +70,6 @@ class Menu(EmptyScene):
         game.assets.regCutOutImage("b4", "blocks", 32, 40, 16, 16)
 
         self.renderer.createFbo("my-fbo", (game.width, game.height))
-
-        self.animation = Animation(game, 
-                                   frame_paths=["tests/1.png", "tests/2.png", "tests/3.png"],
-                                   durations=[0.1, 0.2, 0.1],
-                                   key_images=["m1", "m2", "m3"]
-                                   )
         
 
         self.text_play = TextLabel(game, "text-1", "Play", size_font=32, font_key="pixel")
@@ -125,14 +119,15 @@ class Menu(EmptyScene):
 
     
     def onUpdate(self):
-        self.timer += self.game.delta_time 
+        self.timer += self.game.delta_time
+        self.fade_label.update() 
        
-        self.animation.update()
+        
         
         self.audio.play(loops=-1, fade_in=2)
 
         # moving background
-        self.our_y = glm.sin(self.timer) * 10
+        self.our_y = math.sin(self.timer) * 10
       
 
         self.x_1 += 36 * self.game.delta_time
@@ -149,20 +144,10 @@ class Menu(EmptyScene):
 
 
         # fade effect
-        if self.alpha != 1:
-            self.timer_appear += self.game.delta_time * 0.6
-            self.alpha = glm.clamp(0, self.timer_appear, 1)
-
         if self.switching:
-            self.timer_dissappear -= self.game.delta_time * 0.6
-            self.alpha = glm.clamp(self.timer_dissappear, 0.0, 1.0)
-
-            self.audio.fadeOut(3)
-
-            
             self.switch_timer += self.game.delta_time
 
-            if self.switch_timer >= self.switch_delay and self.switch_target_scene:
+            if self.switch_timer >= 2.5 and self.switch_target_scene:
                 self.game.request.redirectScene(self.switch_target_scene)
 
 
@@ -203,14 +188,20 @@ class Menu(EmptyScene):
                     else:
                         self.switching = True
                         self.switch_timer = 0
-                        self.switch_target_scene = "settings" if selected_option == "SETTINGS" else "quit"
+                        self.switch_target_scene = "base:settings" if selected_option == "SETTINGS" else "base:quit"
+
+                        self.audio.fadeOut(3)
+                        self.fade_label.fadeOut(speed=0.6)
 
                 else:
                     self.account.loadPlayer(self.accounts.get(self.options[self.selected], 0))
                     
                     self.switching = True
                     self.switch_timer = 0
-                    self.switch_target_scene = "base:cutscene-1"
+                    self.switch_target_scene = f"base:{self.account.getCurrentPlayer().current_overworld}"
+
+                    self.audio.fadeOut(3)
+                    self.fade_label.fadeOut(speed=0.6)
 
    
             if event.key == pg.K_z and self.switching_game:
@@ -234,7 +225,6 @@ class Menu(EmptyScene):
         self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), r=0, g=0, b=0, a=0.7)
         self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 60))
 
-        self.renderer.renderQuad(position=(300, 100), r=1, g=0, b=0, mode=1)
 
         for texture_key, instances in self.batches.items():
             self.renderer.renderInstance(texture_key, instances=instances)
@@ -249,14 +239,13 @@ class Menu(EmptyScene):
         self.renderer.render(self.text_options.texture_id, size=self.text_options.size, position=self.text_options.position)
         self.renderer.render(self.text_quit.texture_id, size=self.text_quit.size, position=self.text_quit.position)
 
+        self.fade_label.render()
+
         
        
     def onSave(self):
         self.renderer.deleteFbo("my-fbo")
-        self.animation.delAnimation()
-
-        self.game.assets.delAtlas("blocks")
-        self.game.assets.delFont("pixel")
+  
 
         self.game.assets.delImage("title")
         self.game.assets.delImage("title-border")

@@ -6,16 +6,57 @@ from supermarioworld.package_typing import GameType
 class FadeLabel:
     def __init__(self, game: GameType):
         self.game = game
-
         self.renderer = game.renderer
 
         self.size = (game.width, game.height)
         self.position = (0, 0)
-        self.layer = 1
 
+        self.alpha = 0.0
+
+        self.speed = 1.0
+
+        self.fading_in = False
+        self.fading_out = False
+
+    def fadeIn(self, speed=1.0):
+        self.speed = speed
+        self.alpha = 1.0
+        self.fading_in = True
+        self.fading_out = False
+
+    def fadeOut(self, speed=1.0):
+        self.speed = speed
+        self.alpha = 0.0
+        self.fading_out = True
+        self.fading_in = False
+
+    def update(self):
+        if self.fading_in:
+            self.alpha -= self.speed * self.game.delta_time
+
+            if self.alpha <= 0:
+                self.alpha = 0
+                self.fading_in = False
+
+        elif self.fading_out:
+            self.alpha += self.speed * self.game.delta_time
+
+            if self.alpha >= 1:
+                self.alpha = 1
+                self.fading_out = False
 
     def render(self):
-        self.renderer.submitQuad()
+        if self.alpha <= 0:
+            return
+
+        self.renderer.renderQuad(
+            position=self.position,
+            size=self.size,
+            r=0,
+            g=0,
+            b=0,
+            a=self.alpha
+        )
 
 
 

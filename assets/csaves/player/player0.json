@@ -15,8 +15,23 @@
         "cutscene-1": true
     },
     "overworld": {
-        "current-overworld": "overworld-1",
-        "current-level": "start",
-        "unlocked-level": []
+        "active": "overworld-1",
+        "worlds": {
+            "overworld-1": {
+                "current-level": "start",
+                "nodes": {
+                    "start": true,
+                    "level-1": true,
+                    "level-2": true,
+                    "level-3": false,
+                    "level-4": false,
+                    "level-end": false
+                }
+            },
+            "overworld-2": {},
+            "overworld-3": {},
+            "overworld-4": {},
+            "overworld-star": {}
+        }
     }
 }

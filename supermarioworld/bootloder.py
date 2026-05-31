@@ -72,7 +72,7 @@ class Bootloader(SceneManager):
         self.registerScene("base:overworld-star", lambda: OverWorld(game=game, biome=OverWorldBiome.SPECIAL, music_name="overworld-star", map_ref="overworld-star"))
 
         self.registerScene("base:level-1", lambda: Level(game=game, biome=LevelBiome.VALLEY, music_name="A"))
-        self.registerScene("base:level-2", lambda: Level(game=game, biome=LevelBiome.VALLEY, music_name="A"))
+        self.registerScene("base:level-2", lambda: Level(game=game, biome=LevelBiome.VALLEY, music_name="B"))
         self.registerScene("base:level-3", lambda: Level(game=game, biome=LevelBiome.VALLEY, music_name="A"))
         self.registerScene("base:level-4", lambda: Level(game=game, biome=LevelBiome.CASTLE, music_name="CS"))
         self.registerScene("base:level-5", lambda: Level(game=game, biome=LevelBiome.UNDERGROUND, music_name="B"))

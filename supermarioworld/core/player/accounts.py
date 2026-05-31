@@ -73,6 +73,15 @@ class PlayerAccount:
         self.data["cutscene"][cutscene_id] = True
 
 
+    def openOverworldNode(self, node_id):
+        active_world = self.data["overworld"]["active"]
+        self.data["overworld"]["worlds"][active_world]["nodes"][node_id] = True
+
+    def hasOverworldNodeOpened(self, node_id):
+        active_world = self.data["overworld"]["active"]
+        return self.data["overworld"]["worlds"][active_world]["nodes"].get(node_id, False)
+
+
     @property
     def coins(self):
         return self.data["player"]["coins"]
@@ -141,19 +150,21 @@ class PlayerAccount:
     
     @property
     def current_overworld(self):
-        return self.data["overworld"]["current-overworld"]
+        return self.data["overworld"]["active"]
     
     @current_overworld.setter
     def current_overworld(self, value):
-        self.data["overworld"]["current-overworld"] = value
+        self.data["overworld"]["active"] = value
     
     @property
     def current_overworld_level(self):
-        return self.data["overworld"]["current-level"]
+        active_world = self.data["overworld"]["active"]
+        return self.data["overworld"]["worlds"][active_world]["current-level"]
     
     @current_overworld_level.setter
     def current_overworld_level(self, value):
-        self.data["overworld"]["current-level"] = value
+        active_world = self.data["overworld"]["active"]
+        self.data["overworld"]["worlds"][active_world]["current-level"] = value
     
     @property
     def unlocked_overworld_level_ls(self):
@@ -162,3 +173,7 @@ class PlayerAccount:
     @unlocked_overworld_level_ls.setter
     def unlocked_overworld_level_ls(self, value):
         self.data["overworld"]["unlocked-level"] = value
+
+
+    def __repr__(self):
+        return f"<PlayerAccount - {self.getSlot()}>"

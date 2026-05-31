@@ -3,7 +3,7 @@ from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
 from supermarioworld.entities.overworld_entities import OverWorldPlayer
 
-from supermarioworld.rendering.users import TextLabel
+from supermarioworld.rendering.users import TextLabel, FadeLabel
 
 import pygame as pg
 
@@ -45,6 +45,12 @@ class OverWorld(EmptyScene):
         self.player = OverWorldPlayer(game, map_ref=map_ref)
 
         self.text_titles = TextLabel(game, "titles", font_key="pixel", size_font=18)
+        self.text_account = TextLabel(game, "text-account", f"#PS - {self.account.getCurrentPlayer().getSlot()}", font_key="pixel", size_font=18)
+
+
+        self.OUT_FADE = False
+        self.fade_label = FadeLabel(game=game)
+        self.fade_label.fadeIn(speed=1.5)
         
         self._build_instance_batches()
         
@@ -62,6 +68,14 @@ class OverWorld(EmptyScene):
     def onUpdate(self):
         self.request.setTitle(f"{self.game.getFps():.2f}")
 
+        self.fade_label.update()
+        # Fade out effect
+        if self.player.redirecting and not self.OUT_FADE:
+            self.audio.fadeOut(2)
+            self.fade_label.fadeOut(speed=1.5)
+            self.OUT_FADE = True
+
+        # If we coming to new node
         if self.text_titles.text != self.player._getTitleNode():
             self.text_titles.setText(self.player._getTitleNode())
 
@@ -88,6 +102,9 @@ class OverWorld(EmptyScene):
 
         self.renderer.render("overworld-border", size=(self.game.width, self.game.height))
         self.renderer.render(self.text_titles.texture_id, size=self.text_titles.size, position=(165, 70))
+        self.renderer.render(self.text_account.texture_id, size=self.text_account.size, position=(600, 70))
+
+        self.fade_label.render()
     
 
     def onSave(self):

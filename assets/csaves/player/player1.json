@@ -16,7 +16,7 @@
     },
     "overworld": {
         "current-overworld": "overworld-1",
-        "current-level": "start",
+        "current-level": "level-1",
         "unlocked-level": []
     }
 }
