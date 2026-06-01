@@ -1,33 +1,41 @@
 {
     "start": {
-        "title": "Red Forest START-DOME"
+        "title": "Red Forest START-DOME",
+        "redirect": "base:overworld-1"
     },
 
     "level-10": {
-        "title": "Red Forest 0"
+        "title": "Red Forest 1",
+        "redirect": "base:level-10"
     },
 
     "level-11": {
-        "title": "Red Forest 1"
+        "title": "Red Forest 2",
+        "redirect": "base:level-11"
     },
 
     "level-12": {
-        "title": "Red Forest 2"
+        "title": "Red Forest 3",
+        "redirect": "base:level-12"
     },
 
     "level-13": {
-        "title": "Red Forest 3"
+        "title": "Red Forest 4",
+        "redirect": "base:level-13"
     },
 
     "level-14": {
-        "title": "Red Forest 4"
+        "title": "Red Forest 5",
+        "redirect": "base:level-14"
     },
 
     "level-15": {
-        "title": "Rayskie`s castle"
+        "title": "Rayskie`s castle",
+        "redirect": "base:level-15"
     },
 
     "level-end": {
-        "title": "Red Forest STAR-DOME"
+        "title": "Red Forest STAR-DOME",
+        "redirect": "base:overworld-4"
     }
 }

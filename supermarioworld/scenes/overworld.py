@@ -4,6 +4,7 @@ from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
 from supermarioworld.entities.overworld_entities import OverWorldPlayer
 
 from supermarioworld.rendering.users import TextLabel, FadeLabel
+from supermarioworld.rendering.camera import Camera
 
 import pygame as pg
 
@@ -11,6 +12,10 @@ import pygame as pg
 class OverWorld(EmptyScene):
     def __init__(self, game, biome: str, music_name: str, map_ref: str):
         super().__init__(game)
+
+        # Camera
+        self.camera = Camera(screen_width=game.width, screen_height=game.height, smooth=0.02)
+        self.camera.setBounds(0, 0, 2500, 2500)
 
         # Audio
         self.audio.load(music_name)
@@ -46,27 +51,20 @@ class OverWorld(EmptyScene):
 
         self.text_titles = TextLabel(game, "titles", font_key="pixel", size_font=18)
         self.text_account = TextLabel(game, "text-account", f"#PS - {self.account.getCurrentPlayer().getSlot()}", font_key="pixel", size_font=18)
+        self.text_points = TextLabel(game, "text-points", text="MOVING: 'WASD', SELECT: 'Q', EXIT TO MENU: 'E'", font_key="pixel", size_font=15)
 
 
         self.OUT_FADE = False
         self.fade_label = FadeLabel(game=game)
         self.fade_label.fadeIn(speed=1.5)
-        
-        self._build_instance_batches()
-        
-
-    def _build_instance_batches(self):
-        self._map_instance_batches = {}
-        batches = {}
-        for cmd in self.overworld_map.commands:
-            batches.setdefault(cmd["texture"], []).append(  
-                [cmd["position"][0], cmd["position"][1], cmd["size"][0], cmd["size"][1], 0.0, 0.0]
-            )
-        self._map_instance_batches = batches
+     
 
 
     def onUpdate(self):
         self.request.setTitle(f"{self.game.getFps():.2f}")
+
+        self.overworld_map.update(self.player)
+        self.camera.follow(self.player.position[0], self.player.position[1])
 
         self.fade_label.update()
         # Fade out effect
@@ -94,22 +92,21 @@ class OverWorld(EmptyScene):
     def onRender(self):
         self.game.clearColor(self.r, self.g, self.b)
 
-        
-        for texture_key, instances in self._map_instance_batches.items():
-            self.renderer.renderInstance(texture_key, instances=instances)
+    
+        self.overworld_map.renderMap(self.camera)
 
-        self.player.renderPlayer()
+        self.player.renderPlayer(self.camera)
 
         self.renderer.render("overworld-border", size=(self.game.width, self.game.height))
         self.renderer.render(self.text_titles.texture_id, size=self.text_titles.size, position=(165, 70))
         self.renderer.render(self.text_account.texture_id, size=self.text_account.size, position=(600, 70))
+        self.renderer.render(self.text_points.texture_id, size=self.text_points.size, position=(65, 495))
 
         self.fade_label.render()
     
 
     def onSave(self):
-        for texture_key, _ in self._map_instance_batches.items():
-            self.assets.delImage(texture_key)
+        self.overworld_map.delRes()
         self.assets.delImage("overworld-border")
         self.player.deletePlayerRes()
     

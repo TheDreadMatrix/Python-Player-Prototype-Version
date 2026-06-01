@@ -1,12 +1,32 @@
-import json
 from supermarioworld.package_typing import GameType
 from supermarioworld.johnson import readData
+
+from supermarioworld.tilemaps.spatial_hash import ChunkHasher
+
+from dataclasses import dataclass
+
+
+@dataclass
+class TileEntity:
+    tile: str
+    x: float
+    y: float 
+    s_w: float
+    s_h: float
+    flx: bool
+    fly: bool
+
 
 
 class OverWorldMap:
     def __init__(self, game: GameType, notation_file: str):
-        
+        # Spatial
+        self.spatial_hash = ChunkHasher(cell_sizes=(512, 512))
+        self.tiles = []
+
+        # Some registration
         self.assets = game.assets
+        self.renderer = game.renderer
         self.paths = game.paths
 
         self.atlas_key = "overworld"
@@ -87,30 +107,87 @@ class OverWorldMap:
             )
             self._registered_keys.add(tile_key)
 
-    def _build_commands(self):
-        commands = []
+    def _build_entities(self):
+        entities = []
+
         for layer_index, layer in enumerate(self.layers, start=1):
+
+            flx = layer_index > 1
+            fly = layer_index > 1
+
             for row_i, row in enumerate(layer):
                 for col_i, tile_key in enumerate(row):
+
                     normalized_key = self._normalize_tile_key(tile_key)
+
                     if normalized_key is None:
                         continue
-                    commands.append(
-                        {
-                            "texture": normalized_key,
-                            "position": (col_i * self.draw_tile_size, row_i * self.draw_tile_size),
-                            "size": (self.draw_tile_size, self.draw_tile_size),
-                            "layer": layer_index,
-                        }
+
+                    entities.append(
+                        TileEntity(
+                            tile=normalized_key,
+                            x=col_i * self.draw_tile_size,
+                            y=row_i * self.draw_tile_size,
+                            s_w=self.draw_tile_size,
+                            s_h=self.draw_tile_size,
+                            flx=flx,
+                            fly=fly
+                        )
                     )
-        self.commands = commands
+        
+        self.spatial_hash.setEntities(entities)
 
     def load(self, map_ref: str | int | None = None):
         map_name = self._resolve_map_name(map_ref)
+
         self._load_map(map_name)
+
         self.layers = list(self._iter_tile_layers())
+
         self._register_used_tiles()
-        self._build_commands()
+
+        self._build_entities()
+
         return self.commands
+    
+
+    def update(self, player):
+        cell = self.spatial_hash.getCellSizes(player.position[0], player.position[1])
+
+        if cell != player.current_cells:
+            self.tiles = self.spatial_hash.getEntities(player.position[0], player.position[1])
+            player.current_cells = cell
+
+    
+
+
+    def renderMap(self, camera):
+        batches = {}
+        
+
+        for tile in self.tiles:
+            x, y = camera.apply(tile.x, tile.y)
+            batches.setdefault(tile.tile, []).append(
+                [
+                    x,
+                    y,
+                    tile.s_w,
+                    tile.s_h,
+                    tile.flx,
+                    tile.fly
+                ]
+            )
+
+        for texture_key, instances in batches.items():
+            self.renderer.renderInstance(
+                texture_key,
+                instances=instances
+            )
+    
+
+
+    def delRes(self):
+        for tile_key in self._registered_keys:
+            self.assets.delImage(tile_key)
 
    

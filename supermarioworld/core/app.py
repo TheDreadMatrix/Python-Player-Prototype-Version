@@ -49,7 +49,7 @@ class SuperMariWorldApplication:
         self.width = self._window.get_width()
         self.height = self._window.get_height()
 
-        icon = pg.image.load(self.paths.AssetPath("icon.jpg"))
+        icon = pg.image.load(self.paths.AssetPath("icon.png"))
 
         pg.display.set_caption("Super Mario World: 91 Retitle")
         pg.display.set_icon(icon)

@@ -1,0 +1,9 @@
+{
+    "worlds": {
+        "overworld-new-1": {
+            "nodes": "new_overworld:overworld-1",
+            "maps": "new_overworld:overworld-1",
+            "notation": "new_overworld:overworld-1"
+        }
+    }
+}

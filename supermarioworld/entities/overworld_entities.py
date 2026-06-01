@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-
-
 from supermarioworld.package_typing import GameType
 from supermarioworld.johnson import Johnson
 
@@ -10,14 +7,6 @@ import pygame as pg
 import math
 
 
-@dataclass
-class TileEntity:
-    x: float
-    y: float 
-    s_w: float
-    s_h: float
-    flx: bool
-    fly: bool
 
 
 
@@ -26,6 +15,10 @@ class OverWorldPlayer:
         self.DEFAULT_NODE = {"title": "NODE CANT BE FOUND."}
         self.MAP_REF = map_ref
 
+        # For spatial hashing
+        self.current_cells = None
+
+        # Nodes
         self.main_nodes = Johnson(game.paths.ConfigPath(f"overworld/nodes/{map_ref}.json")).readData()
         self.current_node = self.main_nodes.get(game.account.getCurrentPlayer().current_overworld_level, self.DEFAULT_NODE)
         self.current_node_key = game.account.getCurrentPlayer().current_overworld_level
@@ -172,29 +165,25 @@ class OverWorldPlayer:
                 up_node = self.current_node.get("up")
                 if up_node:
                     self.startMove(up_node)
-                else:
-                    self.sound_cancel.play()
+                
 
             if event.key == pg.K_s:
                 down_node = self.current_node.get("down")
                 if down_node:
                     self.startMove(down_node)
-                else:
-                    self.sound_cancel.play()
+                
 
             if event.key == pg.K_d:
                 right_node = self.current_node.get("right")
                 if right_node:
                     self.startMove(right_node)
-                else:
-                    self.sound_cancel.play()
+                
 
             if event.key == pg.K_a:
                 left_node = self.current_node.get("left")
                 if left_node:
                     self.startMove(left_node)
-                else:
-                    self.sound_cancel.play()
+                
 
             # Rederecting to scene
             if event.key == pg.K_q:
@@ -214,8 +203,10 @@ class OverWorldPlayer:
 
 
 
-    def renderPlayer(self): 
-        if self.redirecting:
+    def renderPlayer(self, camera): 
+        x, y, = camera.apply(self.position[0], self.position[1])
+
+        if self.redirecting and self.redirect_scene != "base:menu":
             animation = self.animation_choose
 
         elif self.moving:
@@ -224,7 +215,7 @@ class OverWorldPlayer:
         else:
             animation = self.animation_down
 
-        self.renderer.render(animation.getTextureKey(), size=(48, 48), position=self.position)
+        self.renderer.render(animation.getTextureKey(), size=(48, 48), position=(x, y))
         
         
 

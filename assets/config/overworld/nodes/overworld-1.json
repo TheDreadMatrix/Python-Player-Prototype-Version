@@ -98,7 +98,7 @@
     "level-4": {
         "title": "Ampliy`s castle",
         "redirect": "base:level-4",
-        "position": [600, 300],
+        "position": [1000, 1000],
 
         "left": {
             "target": "start",
