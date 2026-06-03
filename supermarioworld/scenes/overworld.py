@@ -6,15 +6,13 @@ from supermarioworld.entities.overworld_entities import OverWorldPlayer
 from supermarioworld.rendering.users import TextLabel, FadeLabel
 from supermarioworld.rendering.camera import Camera
 
-import pygame as pg
-
 
 class OverWorld(EmptyScene):
     def __init__(self, game, biome: str, music_name: str, map_ref: str):
         super().__init__(game)
 
         # Camera
-        self.camera = Camera(screen_width=game.width, screen_height=game.height, smooth=0.02)
+        self.camera = Camera(game=game, screen_width=game.width, screen_height=game.height, smooth=0.7)
         self.camera.setBounds(0, 0, 2500, 2500)
 
         # Audio
@@ -81,11 +79,6 @@ class OverWorld(EmptyScene):
     
 
     def onEvent(self, event):
-        # for test
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_ESCAPE:
-                self.request.restartScene()
-
         self.player.handleEventNodes(event=event)
     
 

@@ -18,7 +18,7 @@
         "active": "overworld-1",
         "worlds": {
             "overworld-1": {
-                "current-level": "level-4",
+                "current-level": "level-3",
                 "nodes": {
                     "start": true,
                     "level-1": true,
@@ -28,7 +28,13 @@
                     "level-end": false
                 }
             },
-            "overworld-2": {},
+            "overworld-2": {
+                "current-level": "start",
+                "nodes": {
+                    "start": true,
+                    "level-5": true
+                }
+            },
             "overworld-3": {},
             "overworld-4": {},
             "overworld-star": {}

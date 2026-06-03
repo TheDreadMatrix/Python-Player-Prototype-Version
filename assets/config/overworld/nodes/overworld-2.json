@@ -1,12 +1,33 @@
 {
     "start": {
         "title": "Diamond Caves START-DOME",
-        "redirect": "base:overworld-1"
+        "redirect": "base:overworld-1",
+        "position": [300, 400],
+
+        "up": {
+            "target": "level-5",
+
+            "path": [
+                [300, 400],
+                [300, 620],
+                [300, 720]
+            ],
+            "path-animation": ["up", "up", "right"]
+        }
     },
 
     "level-5": {
         "title": "Diamond Caves 1",
-        "redirect": "base:level-5"
+        "redirect": "base:level-5",
+        "position": [300, 720],
+        "down": {
+            "target": "start",
+
+            "path": [
+                [285, 200]
+            ],
+            "path-animation": ["down"]
+        }
     },
 
     "level-6": {

@@ -1,10 +1,15 @@
+import math
+
 class Camera:
     def __init__(
         self,
+        game, 
         screen_width: int,
         screen_height: int,
         smooth: float = 0.1
     ):
+        self.game = game
+
         self.x = 0.0
         self.y = 0.0
 
@@ -34,8 +39,9 @@ class Camera:
         target_cam_x = target_x - self.screen_width / 2
         target_cam_y = target_y - self.screen_height / 2
 
-        self.x += (target_cam_x - self.x) * self.smooth
-        self.y += (target_cam_y - self.y) * self.smooth
+        alpha = 1 - math.exp(-self.smooth * self.game.delta_time)
+        self.x += (target_cam_x - self.x) * alpha
+        self.y += (target_cam_y - self.y) * alpha
 
         self.x = max(
             self.bound_left,

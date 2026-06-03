@@ -8,7 +8,7 @@ from supermarioworld.rendering.users import TextLabel, FadeLabel
 
 import pygame as pg
 import math
-import glm
+
 
 
 

@@ -8,7 +8,7 @@ from supermarioworld.johnson import readData, saveData
 
 from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.rendering.users import TextLabel
-from supermarioworld.tilemaps.spatial_hash import SpatialHash
+
 
 
 class OverworldEditor(EmptyScene):

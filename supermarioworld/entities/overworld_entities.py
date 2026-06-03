@@ -19,6 +19,8 @@ class OverWorldPlayer:
         self.current_cells = None
 
         # Nodes
+        game.account.getCurrentPlayer().current_overworld = map_ref
+
         self.main_nodes = Johnson(game.paths.ConfigPath(f"overworld/nodes/{map_ref}.json")).readData()
         self.current_node = self.main_nodes.get(game.account.getCurrentPlayer().current_overworld_level, self.DEFAULT_NODE)
         self.current_node_key = game.account.getCurrentPlayer().current_overworld_level

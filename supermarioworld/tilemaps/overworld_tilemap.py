@@ -21,7 +21,7 @@ class TileEntity:
 class OverWorldMap:
     def __init__(self, game: GameType, notation_file: str):
         # Spatial
-        self.spatial_hash = ChunkHasher(cell_sizes=(512, 512))
+        self.spatial_hash = ChunkHasher(cell_sizes=(500, 450))
         self.tiles = []
 
         # Some registration
