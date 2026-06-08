@@ -7,6 +7,7 @@ def main():
 
 
     smw = SuperMariWorldApplication(__file__)
+    smw._DEBUG = True
     smw._initSubstence()
     smw._run()
     

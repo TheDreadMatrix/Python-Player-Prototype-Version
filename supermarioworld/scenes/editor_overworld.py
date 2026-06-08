@@ -1,4 +1,3 @@
-import json
 from collections import defaultdict
 
 import pygame as pg
@@ -6,6 +5,7 @@ import moderngl as mgl
 
 from supermarioworld.johnson import readData, saveData
 
+from supermarioworld.tilemaps.spatial_hash import ChunkHasher
 from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.rendering.users import TextLabel
 
@@ -17,7 +17,7 @@ class OverworldEditor(EmptyScene):
 
         self.assets.regAtlas("overworld", "overworld/overworld.png")
 
-        self.audio.load("CS")
+        self.audio.load("CS-B")
         self.audio.play(loops=-1)
 
         # game.paths.ConfigFolder("oveworld/maps")
@@ -59,7 +59,7 @@ class OverworldEditor(EmptyScene):
         self._prev_mouse_buttons = (False, False, False)
         self._prev_mouse_pos = pg.mouse.get_pos()
         self.undo_stack = []
-        self._tile_hash = SpatialHash(16)
+        self._tile_hash = ChunkHasher(cell_sizes=(256, 256))
         self._tile_hash_dirty = True
         self._cached_map_batches = {}
         self._cached_grid_instances = []

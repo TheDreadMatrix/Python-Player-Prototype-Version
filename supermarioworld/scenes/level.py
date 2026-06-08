@@ -8,10 +8,16 @@ class Level(EmptyScene):
         super().__init__(game)
 
         self.audio.load(music_name)
-        self.audio.setVolume(self.account.getMusicVolume())
         self.audio.play(loops=-1, fade_in=3)
 
-        self.request.setTitle(self.game.getScene())
+        BASE_BIOME_CLEAR_COLOR = {
+            0: (0.53, 0.99, 1),
+            1: (0.227, 0.184, 0.388),
+            2: (0.561, 0.02, 0.263),
+            3: (0.549, 0, 0.212),
+        }
+
+        self.clear_color = BASE_BIOME_CLEAR_COLOR.get(biome, (0, 0, 0))
 
     def onUpdate(self):
         return super().onUpdate()
@@ -19,10 +25,19 @@ class Level(EmptyScene):
 
     def onEvent(self, event):
         return super().onEvent(event)
+
+
+    def preRender(self):
+        self.game.clearColor(self.clear_color[0], self.clear_color[1], self.clear_color[2])
+
+
+    def postRender(self):
+        pass
     
 
     def onRender(self):
-        return super().onRender()
+        self.preRender()
+        self.postRender()
     
 
     def onSave(self):

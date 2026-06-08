@@ -25,6 +25,7 @@ RENDER_MODES = {
 class RenderTarget:
     def __init__(self, ctx: moderngl.Context, size):
         self.texture = ctx.texture(size, 4)
+        
         self.fbo = ctx.framebuffer(
             color_attachments=[self.texture]
         )

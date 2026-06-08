@@ -8,7 +8,7 @@ from supermarioworld.core.runtime.corepaths import CorePath
 from supermarioworld.core.runtime.daemonapi import GameRequest
 
 from supermarioworld.core.player.accounts import PlayerAccountManager
-from supermarioworld.core.resources.assets import AssetsResources
+from supermarioworld.core.resources import AssetsResources
 
 from supermarioworld.core.audio import AudioStream
 
@@ -40,6 +40,7 @@ class SuperMariWorldApplication:
         self._clock = pg.time.Clock()
         self._running = True
         self._run_scene = None
+        self._DEBUG = False
 
         self.delta_time = 0
         
@@ -49,7 +50,7 @@ class SuperMariWorldApplication:
         self.width = self._window.get_width()
         self.height = self._window.get_height()
 
-        icon = pg.image.load(self.paths.AssetPath("icon.png"))
+        icon = pg.image.load(self.paths.AssetPath("icon.ico"))
 
         pg.display.set_caption("Super Mario World: 91 Retitle")
         pg.display.set_icon(icon)
@@ -59,7 +60,7 @@ class SuperMariWorldApplication:
 
         # Scenes and user side
         self.assets = AssetsResources(self)
-        self.audio = AudioStream(self.assets)
+        self.audio = AudioStream(self)
 
         # Renderer
         self.renderer = MainRenderer(self)
@@ -93,6 +94,8 @@ class SuperMariWorldApplication:
 
 
         for event in pg.event.get():
+            self.router.event(event=event)
+
             if event.type == pg.QUIT:
                 self._running = False
 
@@ -101,7 +104,7 @@ class SuperMariWorldApplication:
 
                 self.renderer._eventResize()
 
-            self.router.event(event=event)
+            
         
         
 

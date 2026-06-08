@@ -59,7 +59,7 @@ class OverWorldPlayer:
 
         self.animation_left = AnimationCutOut(game, "chr-spr", frames=[(8, 64, 16, 16), (32, 64, 16, 16)], durations=[0.2, 0.2], key_images=["ml-1", "ml-2"])
         self.animation_down = AnimationCutOut(game, "chr-spr", frames=[(8, 16, 16, 16), (32, 16, 16, 16), (56, 16, 16, 16), (80, 16, 16, 16)], durations=[0.3, 0.5, 0.3, 0.5], key_images=["md-1", "md-2", "md-3", "md-4"])
-        self.animation_up = AnimationCutOut(game, "chr-spr", frames=[(8, 40, 16, 16), (32, 40, 16, 16), (56, 40, 16, 16), (80, 40, 16, 16)], durations=[0.3, 0.5, 0.3, 0.5], key_images=["mu-1", "mu-2", "mu-3", "mu-4"])
+        self.animation_up = AnimationCutOut(game, "chr-spr", frames=[(8, 40, 16, 16), (32, 40, 16, 16), (56, 40, 16, 16), (80, 40, 16, 16)], durations=[0.2, 0.4, 0.2, 0.4], key_images=["mu-1", "mu-2", "mu-3", "mu-4"])
         self.animation_right = AnimationCutOut(game, "chr-spr", frames=[(56, 64, 16, 16), (80, 64, 16, 16)], durations=[0.2, 0.2], key_images=["mr-1", "mr-2"])
 
         self.current_animation = self.animation_down
@@ -99,7 +99,7 @@ class OverWorldPlayer:
         return self.animation_dict.get(animation_name, self.animation_down)
 
 
-    def updatePlayer(self, dt):
+    def updatePlayer(self, camera, dt):
         # Animations
         self.current_animation = self.getCurrentPathAnimation()
         self.current_animation.update()
@@ -111,6 +111,7 @@ class OverWorldPlayer:
             self.redirect_timer += dt
             if self.redirect_timer > 2.5:
                 self.account.getCurrentPlayer().current_overworld = self.MAP_REF
+                self.account.getCurrentPlayer().current_overworld_camera_pos = camera.apply(self.position[0], self.position[1])
                 self.account.getCurrentPlayer().current_overworld_level = self.current_node_key
                 
                 self.account.getCurrentPlayer().save()
@@ -156,6 +157,12 @@ class OverWorldPlayer:
 
 
     def handleEventNodes(self, event):
+        if event.type == pg.QUIT:
+            self.account.getCurrentPlayer().current_overworld = self.MAP_REF
+            self.account.getCurrentPlayer().current_overworld_camera_pos = [0, 0]
+            self.account.getCurrentPlayer().current_overworld_level = self.current_node_key
+            self.account.getCurrentPlayer().save()
+
         if self.moving:
             return
         
@@ -205,7 +212,7 @@ class OverWorldPlayer:
 
 
 
-    def renderPlayer(self, camera): 
+    def renderPlayer(self, camera, r=1, g=1, b=1): 
         x, y, = camera.apply(self.position[0], self.position[1])
 
         if self.redirecting and self.redirect_scene != "base:menu":
@@ -217,7 +224,7 @@ class OverWorldPlayer:
         else:
             animation = self.animation_down
 
-        self.renderer.render(animation.getTextureKey(), size=(48, 48), position=(x, y))
+        self.renderer.render(animation.getTextureKey(), size=(48, 48), position=(x, y), r=r, g=g, b=b)
         
         
 

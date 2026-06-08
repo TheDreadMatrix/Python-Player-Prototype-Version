@@ -43,16 +43,10 @@ class OverWorldMap:
 
         self.map_data = {}
         self.layers = []
-        self.commands = []
+        
         self._registered_keys = set()
 
 
-    def _resolve_map_name(self, map_ref: str | int | None = None) -> str:
-        if map_ref is None:
-            return self.biome
-        if isinstance(map_ref, int):
-            return f"overworld-{map_ref}"
-        return map_ref
 
     def _load_map(self, map_name: str):
         path = f"{self.maps_dir}/{map_name}.json"
@@ -137,10 +131,8 @@ class OverWorldMap:
         
         self.spatial_hash.setEntities(entities)
 
-    def load(self, map_ref: str | int | None = None):
-        map_name = self._resolve_map_name(map_ref)
-
-        self._load_map(map_name)
+    def load(self, map_ref):
+        self._load_map(map_ref)
 
         self.layers = list(self._iter_tile_layers())
 
@@ -148,7 +140,6 @@ class OverWorldMap:
 
         self._build_entities()
 
-        return self.commands
     
 
     def update(self, player):
@@ -161,7 +152,7 @@ class OverWorldMap:
     
 
 
-    def renderMap(self, camera):
+    def renderMap(self, camera, r=1, g=1, b=1):
         batches = {}
         
 
@@ -178,10 +169,11 @@ class OverWorldMap:
                 ]
             )
 
+        
         for texture_key, instances in batches.items():
             self.renderer.renderInstance(
                 texture_key,
-                instances=instances
+                instances=instances, r=r, g=g, b=b
             )
     
 
@@ -189,5 +181,10 @@ class OverWorldMap:
     def delRes(self):
         for tile_key in self._registered_keys:
             self.assets.delImage(tile_key)
+
+        self.tiles.clear()
+        self._registered_keys.clear()
+        self.map_data.clear()
+        self.layers.clear()
 
    

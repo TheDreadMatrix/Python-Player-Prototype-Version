@@ -65,14 +65,14 @@ class TextLabel:
     def __init__(self, game: GameType, text_id: str, text: str="SOME-TEXT", font_key: str=None, size_font: int=20):
         self._ctx = game.renderer._ctx
         self.resources = game.assets
+        self.renderer = game.renderer
 
         self.text = text
 
         self.texture_id = text_id
 
         self.position = (0, 0)
-
-        self.size = (200, 80)
+        self.size = (0, 0)
       
         self.r = 1
         self.g = 1
@@ -98,6 +98,8 @@ class TextLabel:
     def _rebuildText(self, color_text, tex_filter, anisotropy):
         if self.texture_note is not None:
             self.resources.delImage(self.texture_id)
+            self.texture_note.release()
+            self.texture_note = None
             
         self.texture_note, self.size = load_texture_text(self._ctx, self.font, self.text, color_text, tex_filter, anisotropy)
         self.resources._regRawImage(self.texture_id, self.texture_note)
@@ -108,4 +110,13 @@ class TextLabel:
             self.text = text
             self._rebuildText(color_text=(round(r_text * 255), round(g_text * 255), round(b_text * 255)), tex_filter=tex_filter, anisotropy=anisotropy)
 
+
+    def render(self):
+        self.renderer.render(self.texture_id, size=self.size, position=self.position, r=self.r, g=self.g, b=self.b, a=self.a, flx=self.flipx, fly=self.flipy)
+
             
+    def delRes(self):
+        if self.texture_note is not None:
+            self.resources.delImage(self.texture_id)
+            self.texture_note.release()
+            self.texture_note = None

@@ -2,6 +2,7 @@ from supermarioworld.scenes.base import EmptyScene
 
 
 from supermarioworld.rendering.users import TextLabel, FadeLabel
+from supermarioworld.rendering.shaders import CustomShader
 
 
 
@@ -24,13 +25,14 @@ class Menu(EmptyScene):
 
         #MUSIC
         self.audio.load("title")
-        self.audio.setVolume(game.account.getMusicVolume())
+        self.audio.play(fade_in=3000, loops=-1)
 
         
         self.sound_choose = game.audio.giveSound("choose")
         self.sound_cancer = game.audio.giveSound("pause")
         self.sound_pointer = game.audio.giveSound("pointer")
 
+    
         
         # Account
         self.accounts = {"P-0": 0, "P-1": 1, "P-2": 2}
@@ -70,6 +72,7 @@ class Menu(EmptyScene):
         game.assets.regCutOutImage("b4", "blocks", 32, 40, 16, 16)
 
         self.renderer.createFbo("my-fbo", (game.width, game.height))
+
         
 
         self.text_play = TextLabel(game, "text-1", "Play", size_font=32, font_key="pixel")
@@ -122,9 +125,6 @@ class Menu(EmptyScene):
         self.timer += self.game.delta_time
         self.fade_label.update() 
        
-        
-        
-        self.audio.play(loops=-1, fade_in=2)
 
         # moving background
         self.our_y = math.sin(self.timer) * 10
@@ -140,7 +140,7 @@ class Menu(EmptyScene):
             self.x_2 = self.x_1 - self.game.width
 
     
-        
+        # 
 
 
         # fade effect
@@ -150,7 +150,7 @@ class Menu(EmptyScene):
             if self.switch_timer >= 2.5 and self.switch_target_scene:
                 self.game.request.redirectScene(self.switch_target_scene)
 
-
+ 
 
         
             
@@ -190,7 +190,7 @@ class Menu(EmptyScene):
                         self.switch_timer = 0
                         self.switch_target_scene = "base:settings" if selected_option == "SETTINGS" else "base:quit"
 
-                        self.audio.fadeOut(3)
+                        self.audio.fadeOut(2500)
                         self.fade_label.fadeOut(speed=0.6)
 
                 else:
@@ -200,7 +200,7 @@ class Menu(EmptyScene):
                     self.switch_timer = 0
                     self.switch_target_scene = f"base:{self.account.getCurrentPlayer().current_overworld}"
 
-                    self.audio.fadeOut(3)
+                    self.audio.fadeOut(3000)
                     self.fade_label.fadeOut(speed=0.6)
 
    
@@ -215,29 +215,34 @@ class Menu(EmptyScene):
         
     
     def onRender(self):
+        self.renderer.beginFbo("my-fbo")
         self.game.clearColor(0.53, 0.99, 1)
         
-        self.renderer.beginFbo("my-fbo")
+        
 
         self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_1, self.our_y))
         self.renderer.render("background", size=(self.game.width, self.game.height), position=(self.x_2, self.our_y))
 
-        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), r=0, g=0, b=0, a=0.7)
-        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 60))
-
-
         for texture_key, instances in self.batches.items():
             self.renderer.renderInstance(texture_key, instances=instances)
 
-        self.renderer.endFbo()
-        self.renderer.renderFbo("my-fbo", size=(self.game.width, self.game.height), r=1, g=1, b=1)
-
         self.renderer.render("title-border", size=(self.game.width, self.game.height))
+
         
 
-        self.renderer.render(self.text_play.texture_id, size=self.text_play.size, position=self.text_play.position)
-        self.renderer.render(self.text_options.texture_id, size=self.text_options.size, position=self.text_options.position)
-        self.renderer.render(self.text_quit.texture_id, size=self.text_quit.size, position=self.text_quit.position)
+        
+        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), r=0, g=0, b=0, a=0.7)
+        self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 60))
+
+        self.text_play.render()
+        self.text_options.render()  
+        self.text_quit.render()
+
+        
+
+
+        self.renderer.endFbo()
+        self.renderer.renderFbo("my-fbo", size=(self.game.width, self.game.height), r=1, g=1, b=1)
 
         self.fade_label.render()
 
@@ -245,6 +250,10 @@ class Menu(EmptyScene):
        
     def onSave(self):
         self.renderer.deleteFbo("my-fbo")
+        
+        self.text_quit.delRes()
+        self.text_options.delRes()
+        self.text_play.delRes()
   
 
         self.game.assets.delImage("title")

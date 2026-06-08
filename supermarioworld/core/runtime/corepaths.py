@@ -1,19 +1,15 @@
 from pathlib import Path
-import sys, os
+import sys
 
 
 class CorePath:
     def __init__(self, file_execution):
-        
-        if getattr(sys, "frozen", False):
-            self._runtime_dir = Path(os.getenv("APPDATA")) / ".superkartoshkaworld"
-        else:
-            self._runtime_dir = Path(file_execution).resolve().parent / "assets"
+        # copying assets to APPDATA and we not using MEIPASS 
 
         if hasattr(sys, "_MEIPASS"):
-            self._resource_dir = Path(sys._MEIPASS) / "assets"
+            self._resource_dir = Path("assets")
         else:
-            self._resource_dir = self._runtime_dir 
+            self._resource_dir = Path(file_execution).resolve().parent / "assets"
 
 
         self._fonts_dir = self._resource_dir / "fonts"
@@ -23,8 +19,8 @@ class CorePath:
         self._sound_dir = self._resource_dir / "sounds"
 
         
-        self._config_dir = self._runtime_dir / "config"
-        self._csaves_dir = self._runtime_dir / "csaves"
+        self._config_dir = self._resource_dir / "config"
+        self._csaves_dir = self._resource_dir / "csaves"
 
 
     def _ensure_file(self, path: Path, kind: str) -> Path:

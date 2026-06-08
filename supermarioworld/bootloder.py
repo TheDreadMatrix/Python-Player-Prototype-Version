@@ -12,7 +12,7 @@ from supermarioworld.scenes.cutscene import CutsceneScene
 from supermarioworld.scenes.editor_overlevel import LevelEditor
 from supermarioworld.scenes.editor_overworld import OverworldEditor
 
-from supermarioworld.daenums import LevelBiome, OverWorldBiome, REDIRECT_TO_OVERWORLD
+from supermarioworld.enums.gameplay import OverWorldBiome, LevelBiome, REDIRECT_TO_OVERWORLD
 
 
 
@@ -42,23 +42,23 @@ class Bootloader(SceneManager):
 
 
         # Sounds
-        game.assets.regSound("cancel", "cancel.wav")
-        game.assets.regSound("choose", "map.wav")
-        game.assets.regSound("pause", "pause.wav")
-        game.assets.regSound("pointer", "pointer.mp3")
+        game.assets.regSound("cancel", "wav/cancel.wav")
+        game.assets.regSound("choose", "wav/map.wav")
+        game.assets.regSound("pause", "wav/pause.wav")
+        game.assets.regSound("scroll", "wav/scroll.wav")
 
-        game.assets.regSound("losing", "lost.mp3")
-        game.assets.regSound("success", "success.mp3")
+        game.assets.regSound("pointer", "mp3/pointer.mp3")
+        game.assets.regSound("losing", "mp3/lost.mp3")
+        game.assets.regSound("success", "mp3/success.mp3")
 
-        game.assets.regSound("coin", "coins.mp3")
-        game.assets.regSound("jumping", "jump.mp3")
-        game.assets.regSound("scroll", "scroll.wav")
-
+        game.assets.regSound("coin", "mp3/coins.mp3")
+        game.assets.regSound("jumping", "mp3/jump.mp3")
         
+      
         
 
     def onInitScene(self, game):
-        self.START_SCENE = "base:menu"
+        self.START_SCENE = "base:overworld-1"
 
         self.registerScene("base:level-editor", lambda: LevelEditor(game=game))
         self.registerScene("base:overworld-editor", lambda: OverworldEditor(game=game))

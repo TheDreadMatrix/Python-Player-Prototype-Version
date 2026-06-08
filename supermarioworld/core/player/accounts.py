@@ -39,6 +39,10 @@ class PlayerAccountManager:
     def setFps(self, fps):
         self.settings_data["frametime"] = fps
 
+    def setDebug(self, debug):
+        self.settings_data["debug"] = debug
+
+    def getDebug(self): return self.settings_data["debug"]
     def getFps(self): return self.settings_data["frametime"]
     def getSoundVolume(self): return self.settings_data["sound"]
     def getMusicVolume(self): return self.settings_data["music"]
@@ -80,6 +84,8 @@ class PlayerAccount:
     def hasOverworldNodeOpened(self, node_id):
         active_world = self.data["overworld"]["active"]
         return self.data["overworld"]["worlds"][active_world]["nodes"].get(node_id, False)
+
+
 
 
     @property
@@ -166,13 +172,16 @@ class PlayerAccount:
         active_world = self.data["overworld"]["active"]
         self.data["overworld"]["worlds"][active_world]["current-level"] = value
     
+
     @property
-    def unlocked_overworld_level_ls(self):
-        return self.data["overworld"]["unlocked-level"]
+    def current_overworld_camera_pos(self):
+        active_world = self.data["overworld"]["active"]
+        return self.data["overworld"]["worlds"][active_world].get("camera-pos", [0, 0])
     
-    @unlocked_overworld_level_ls.setter
-    def unlocked_overworld_level_ls(self, value):
-        self.data["overworld"]["unlocked-level"] = value
+    @current_overworld_camera_pos.setter
+    def current_overworld_camera_pos(self, value):
+        active_world = self.data["overworld"]["active"]
+        self.data["overworld"]["worlds"][active_world]["camera-pos"] = value
 
 
     def __repr__(self):
