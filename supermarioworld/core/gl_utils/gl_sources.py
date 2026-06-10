@@ -1,38 +1,49 @@
 
-
+# Default shader
 _DEFAULT_VERTEX_SOURCE = """
         #version 330 core
-        in vec2 inPos;
-        in vec2 inCoord;
+        in vec2 gluminary_input_Position;
+        in vec2 gluminary_input_Coordinate;
 
         layout(std140) uniform Projection{
-            mat4 unProj;
+            mat4 gluminary_Projection;
         };
 
-        uniform vec2 unPos;
-        uniform vec2 unSize;
+        uniform vec2 gluminary_Position;
+        uniform vec2 gluminary_Size;
 
-        uniform bool unFlx;
-        uniform bool unFly;
+        uniform bool gluminary_Flx;
+        uniform bool gluminary_Fly;
 
-        out vec2 DM_Coord;
+        out vec2 gluminary_Coordinate;
 
-        void main(){
-            vec2 finalPos = inPos * unSize + unPos;
+
+        vec4 getPosition(){
+            vec2 pre_position = gluminary_input_Position * gluminary_Size + gluminary_Position;
             
-            gl_Position = unProj * vec4(finalPos, 0.0, 1.0);
-            
-            vec2 finalCoord = inCoord;
+            vec4 final_position = gluminary_Projection * vec4(pre_position, 0, 1);
+            return final_position;
+        }
 
-            if (unFlx) {
+        void giveFragmentUvCoordinate(){
+            vec2 finalCoord = gluminary_input_Coordinate;
+
+            if (gluminary_Flx) {
                 finalCoord.x = 1.0 - finalCoord.x;
             }
 
-            if (unFly) {
+            if (gluminary_Fly) {
                 finalCoord.y = 1.0 - finalCoord.y;
             }
 
-            DM_Coord = finalCoord;
+            gluminary_Coordinate = finalCoord;
+        }
+
+
+        void main(){
+            gl_Position = getPosition();
+            
+            giveFragmentUvCoordinate();
         }
     """
 
@@ -40,22 +51,29 @@ _DEFAULT_VERTEX_SOURCE = """
 _DEFAULT_FRAGMENT_SOURCE = """
         #version 330 core
 
-        in vec2 DM_Coord;
-        out vec4 OutColor;
+        in vec2 gluminary_Coordinate;
+        out vec4 gluminary_FragColor;
 
-        uniform sampler2D DM_Texture;
+        uniform sampler2D gluminary_Texture;
 
-        uniform float r;
-        uniform float g;
-        uniform float b;
-        uniform float a;
+        uniform float gluminary_r;
+        uniform float gluminary_g;
+        uniform float gluminary_b;
+        uniform float gluminary_a;
+
+        
+        vec4 getColorFromTexture(){
+            return texture(gluminary_Texture, gluminary_Coordinate) * vec4(gluminary_r, gluminary_g, gluminary_b, gluminary_a);
+        }
+
 
         void main(){
-            OutColor = texture(DM_Texture, DM_Coord) * vec4(r, g, b, a);
+            gluminary_FragColor = getColorFromTexture();
         }
     """
 
 
+# Mesh shaders
 _DEFAULT_VERTEX_SOURCE_MESH = """
         #version 330 core
 
@@ -93,58 +111,57 @@ _DEFAULT_FRAGMENT_SOURCE_MESH = """
 """
 
 
-
+# Instance shaders
 _DEFAULT_VERTEX_SOURCE_INSTANCE = """
         #version 330 core
 
-in vec2 inPos;
-in vec2 inCoord;
-
-/* INSTANCE DATA */
-
-in vec2 instancePos;
-in vec2 instanceSize;
-
-in float instanceFlx;
-in float instanceFly;
+in vec2 gluminary_input_Position;
+in vec2 gluminary_input_Coordinate;
 
 
-/* UBO */
+in vec2 gluminary_instance_Position;
+in vec2 gluminary_instance_Size;
+
+in float gluminary_instance_Flx;
+in float gluminary_instance_Fly;
+
+
 
 layout(std140) uniform Projection {
-    mat4 unProj;
+    mat4 gluminary_Projection;
 };
 
-out vec2 DM_Coord;
 
-void main() {
+uniform vec2 gluminary_Position;
 
-    /* =========================
-       INSTANCE TRANSFORM
-    ========================= */
+out vec2 gluminary_Coordinate;
 
-    vec2 finalPos =
-        inPos * instanceSize +
-        instancePos;
+vec4 getPosition(){
+    vec2 pre_position = gluminary_input_Position * gluminary_instance_Size + gluminary_instance_Position + gluminary_Position;
+            
+    vec4 final_position = gluminary_Projection * vec4(pre_position, 0, 1);
+    return final_position;
+}
 
-    gl_Position =
-        unProj *
-        vec4(finalPos, 0.0, 1.0);
+void giveFragmentUvCoordinate(){
+    vec2 finalCoord = gluminary_input_Coordinate;
 
-    /* =========================
-       UV
-    ========================= */
-
-    vec2 finalCoord = inCoord;
-
-    if (instanceFlx > 0.5) {
+    if (gluminary_instance_Flx > 0) {
         finalCoord.x = 1.0 - finalCoord.x;
     }
 
-    if (instanceFly > 0.5) {
+    if (gluminary_instance_Fly > 0) {
         finalCoord.y = 1.0 - finalCoord.y;
     }
 
-    DM_Coord = finalCoord;
+    gluminary_Coordinate = finalCoord;
+}
+
+
+
+void main() {
+    gl_Position = getPosition();
+
+    giveFragmentUvCoordinate();
 }
     """

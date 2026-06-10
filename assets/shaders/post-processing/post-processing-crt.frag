@@ -1,4 +1,4 @@
-#include vertex
+#include custom_fragment_texture
 
 
 uniform float time;
@@ -14,19 +14,19 @@ float rand(vec2 co){
 
 void main()
 {
-    vec2 uv = DM_Coord * 2.0 - 1.0;
+    vec2 uv = gluminary_Coordinate * 2.0 - 1.0;
     uv += uv * (uv.x*uv.x + uv.y*uv.y) * curvature;
     uv = uv * 0.5 + 0.5;
 
     if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0){
-        OutColor = vec4(0.0);
+        gluminary_FragColor = vec4(0.0);
         return;
     }
 
     vec3 color;
-    color.r = texture(DM_Texture, uv + vec2(chromaOffset, 0.0)).r;
-    color.g = texture(DM_Texture, uv).g;
-    color.b = texture(DM_Texture, uv - vec2(chromaOffset, 0.0)).b;
+    color.r = texture(gluminary_Texture, uv + vec2(chromaOffset, 0.0)).r;
+    color.g = texture(gluminary_Texture, uv).g;
+    color.b = texture(gluminary_Texture, uv - vec2(chromaOffset, 0.0)).b;
 
     float scanline = sin(uv.y * 1080.0 + time * 2.0) * scanlineIntensity;
     float noise = (rand(uv + time) - 0.5) * noiseIntensity;
@@ -35,5 +35,5 @@ void main()
     color += noise;
     color *= 0.8;
 
-    OutColor = vec4(color * vec3(1, 0.9, 0.8), 1.0) * vec4(rgb, alpha);
+    gluminary_FragColor = vec4(color * vec3(1, 0.9, 0.8), 1.0) * vec4(gluminary_r, gluminary_g, gluminary_b, gluminary_a);
 }

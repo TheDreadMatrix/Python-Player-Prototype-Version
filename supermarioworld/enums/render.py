@@ -9,14 +9,6 @@ class TextureFilter(IntEnum):
     LINEAR_LINE = 5
 
 
-class ShaderMode(IntEnum):
-    TEXTURE = 0
-    INSTANCE = 1
-
-    MESH = 2
-    MESH_INSTANCE = 3
-
-
 class RenderMode(IntEnum):
     TRIANGLES = 0
     LINE_LOOP = 1

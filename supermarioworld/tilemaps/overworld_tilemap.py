@@ -39,6 +39,7 @@ class OverWorldMap:
         notation_data = readData(self.paths.ConfigPath(notation_file))
 
         self.notation = notation_data["tiles"]
+        
         game.assets.regAtlas("overworld", notation_data["img-ref"])
 
         self.map_data = {}
@@ -51,6 +52,7 @@ class OverWorldMap:
     def _load_map(self, map_name: str):
         path = f"{self.maps_dir}/{map_name}.json"
         self.map_data = readData(self.paths.ConfigPath(path))
+        
 
     def _iter_tile_layers(self):
         for key, value in self.map_data.items():
@@ -129,6 +131,7 @@ class OverWorldMap:
                         )
                     )
         
+        
         self.spatial_hash.setEntities(entities)
 
     def load(self, map_ref):
@@ -154,25 +157,16 @@ class OverWorldMap:
 
     def renderMap(self, camera, r=1, g=1, b=1):
         batches = {}
-        
+        x, y = camera.apply(0, 0)
 
         for tile in self.tiles:
-            x, y = camera.apply(tile.x, tile.y)
-            batches.setdefault(tile.tile, []).append(
-                [
-                    x,
-                    y,
-                    tile.s_w,
-                    tile.s_h,
-                    tile.flx,
-                    tile.fly
-                ]
-            )
+            batches.setdefault(tile.tile, []).append([tile.x, tile.y, tile.s_w, tile.s_h, tile.flx, tile.fly])
 
         
         for texture_key, instances in batches.items():
             self.renderer.renderInstance(
                 texture_key,
+                position=(x, y), 
                 instances=instances, r=r, g=g, b=b
             )
     

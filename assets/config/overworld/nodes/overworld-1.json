@@ -3,6 +3,12 @@
         "title": "Daemon`s house",
         "redirect": "base:tutorial",
         "position": [100, 200],
+
+        "node-animation": {
+            "type": "cutout",
+            "atlas-key": "overworld-builds",
+            "pass": []
+        },
         
         "right": {
             "target": "level-1",

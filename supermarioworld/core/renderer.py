@@ -49,14 +49,15 @@ class ShaderEntry:
 
         if shader_type == 0:
             self.program = ctx.program(_DEFAULT_VERTEX_SOURCE, _DEFAULT_FRAGMENT_SOURCE)
-            self.program["DM_Texture"] = 0
+            self.program["gluminary_Texture"] = 0
+            
 
         elif shader_type == 1:
             self.program = ctx.program(_DEFAULT_VERTEX_SOURCE_MESH, _DEFAULT_FRAGMENT_SOURCE_MESH)
 
         elif shader_type == 2:
             self.program = ctx.program(_DEFAULT_VERTEX_SOURCE_INSTANCE, _DEFAULT_FRAGMENT_SOURCE)
-            self.program["DM_Texture"] = 0
+            self.program["gluminary_Texture"] = 0
 
         else:
             self.program = custom_shader._program
@@ -68,29 +69,36 @@ class ShaderEntry:
 
     def _buildVao(self, vbo, ebo, vbo_instance, custom_shader):
         if self.shader_type == 0:
-            self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inCoord")], index_buffer=ebo)
+            self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f 2f", "gluminary_input_Position", "gluminary_input_Coordinate")], index_buffer=ebo)
         elif self.shader_type == 1:
             self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f", "inPos")], index_buffer=ebo)
         elif self.shader_type == 2:
-            self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f 2f", "inPos", "inCoord"), 
-                                                            (vbo_instance, "2f 2f 1f 1f/i", "instancePos", "instanceSize", "instanceFlx", "instanceFly")], index_buffer=ebo)
+            self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f 2f", "gluminary_input_Position", "gluminary_input_Coordinate"), 
+                                                            (vbo_instance, "2f 2f 1f 1f/i", 
+                                                             "gluminary_instance_Position", 
+                                                             "gluminary_instance_Size", 
+                                                             "gluminary_instance_Flx", 
+                                                             "gluminary_instance_Fly")], index_buffer=ebo)
         else:
             self.vao = custom_shader._vao
 
     def _buildUniforms(self, custom_shader):
+        # Default shader
         if self.shader_type == 0:
             self.uniforms = self.uniforms = {
-                "unPos": self.program["unPos"],
-                "unSize": self.program["unSize"],
+                "unPos": self.program["gluminary_Position"],
+                "unSize": self.program["gluminary_Size"],
             
-                "r": self.program["r"],
-                "g": self.program["g"],
-                "b": self.program["b"],
-                "a": self.program["a"],
+                "r": self.program["gluminary_r"],
+                "g": self.program["gluminary_g"],
+                "b": self.program["gluminary_b"],
+                "a": self.program["gluminary_a"],
 
-                "unFlx": self.program["unFlx"],
-                "unFly": self.program["unFly"],
+                "unFlx": self.program["gluminary_Flx"],
+                "unFly": self.program["gluminary_Fly"],
             }
+
+        # Quad shader
         elif self.shader_type == 1:
             self.uniforms = {
                 "unPos": self.program["unPos"],
@@ -100,12 +108,15 @@ class ShaderEntry:
                 "b": self.program["b"],
                 "a": self.program["a"],
             }
+
+        # Instance
         elif self.shader_type == 2:
             self.uniforms = {
-                "r": self.program["r"],
-                "g": self.program["g"],
-                "b": self.program["b"],
-                "a": self.program["a"]
+                "r": self.program["gluminary_r"],
+                "g": self.program["gluminary_g"],
+                "b": self.program["gluminary_b"],
+                "a": self.program["gluminary_a"],
+                "unPos": self.program["gluminary_Position"]
             }
         else:
             self.uniforms = custom_shader._uniforms
@@ -120,7 +131,7 @@ class MainRenderer:
         self.shaders: dict[str, ShaderEntry] = {}
         self.fbos: dict[str, RenderTarget] = {}
 
-
+  
         # Buffers
         vertices_only = array("f", [0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
         vertices = array("f", [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
@@ -152,16 +163,18 @@ class MainRenderer:
 
         # Layers
         self.default_shader = ShaderEntry(self._ctx, 0, shader_type=0, vbo=self.vbo, ebo=self.ebo, vbo_instance=self.vbo_instance)
+        
         self.default_shader_mesh = ShaderEntry(self._ctx, 0, shader_type=1, vbo=self.vbo_only, ebo=self.ebo, vbo_instance=None)
         self.default_shader_instance = ShaderEntry(self._ctx, 0, shader_type=2, vbo=self.vbo, ebo=self.ebo, vbo_instance=self.vbo_instance)
 
         self.default_texture = create_error_texture(self._ctx)
 
         self.current_shader = self.default_shader
-        self.current_fbo = None
+        self._fbo_stack = []
 
         # Cache
         self.last_texture_name = None
+
         self.last_shader_name = None
 
         
@@ -176,10 +189,7 @@ class MainRenderer:
     def _clearColor(self, r, g, b):
         self._ctx.clear(r, g, b, 1)
 
-    def _renderTexture(self, texture, *, size=(1,1), position=(0,0),
-                   r=1, g=1, b=1, a=1,
-                   flx=False, fly=False,
-                   shader_key="default", mode=0):
+    def _renderTexture(self, texture, *, size=(1,1), position=(0,0), r=1, g=1, b=1, a=1, flx=False, fly=False, shader_key="default"):
 
         if self.last_shader_name != shader_key:
             self.last_shader_name = shader_key
@@ -205,7 +215,7 @@ class MainRenderer:
         uniforms["unFlx"].value = flx
         uniforms["unFly"].value = fly
 
-        vao.render(RENDER_MODES[mode])
+        vao.render()
 
 
     def regShader(self, shader_key, your_shader):
@@ -228,20 +238,32 @@ class MainRenderer:
         fbo.delete()
 
     def beginFbo(self, frame_key):
-        if frame_key not in self.fbos:
+        fbo = self.fbos.get(frame_key)
+
+        if not fbo:
             return
-        
-        self.current_fbo = self.fbos[frame_key]
-        self.current_fbo.use()
-        self.current_fbo.clear()
+
+        self._fbo_stack.append(fbo)
+
+        fbo.use()
+        fbo.clear()
 
     def endFbo(self):
-        self._ctx.screen.use()
+        if not self._fbo_stack:
+            self._ctx.screen.use()
+            return
+
+        self._fbo_stack.pop()
+
+        if self._fbo_stack:
+            self._fbo_stack[-1].use()
+        else:
+            self._ctx.screen.use()
         
 
-    def renderFbo(self, frame_key, *, position=(0, 0), size=(1, 1), r=1, g=1, b=1, a=1, flx=False, fly=True, shader_key="default", mode=0):
+    def renderFbo(self, frame_key, *, position=(0, 0), size=(1, 1), r=1, g=1, b=1, a=1, flx=False, fly=True, shader_key="default"):
         tex = self.fbos[frame_key].texture if frame_key in self.fbos else self.default_texture
-        self._renderTexture(tex, position=position, size=size, r=r, g=g, b=b, a=a, flx=flx, fly=fly, shader_key=shader_key, mode=mode)
+        self._renderTexture(tex, position=position, size=size, r=r, g=g, b=b, a=a, flx=flx, fly=fly, shader_key=shader_key)
         
 
 
@@ -263,25 +285,17 @@ class MainRenderer:
 
     # 2f 2f i i / i
     # position size flx fly
-    def renderInstance(self, texture_key, *, r=1, g=1, b=1, a=1, shader_key="instance", mode=0, instances=[]):
+    def renderInstance(self, texture_key, *, position=(0, 0), r=1, g=1, b=1, a=1, shader_key="instance", instances=[]):
         if self.last_shader_name != shader_key:
             self.last_shader_name = shader_key
-
-            self.current_shader = (
-                self.shaders.get(
-                    shader_key,
-                    self.default_shader_instance
-                )
-                )
+            self.current_shader = (self.shaders.get(shader_key, self.default_shader_instance))
 
         shader = self.current_shader
 
 
         if self.last_texture_name != texture_key:
             self.last_texture_name = texture_key
-
             texture = (self.resources.textures.get(texture_key, self.default_texture))
-
             texture.use(0)
 
     
@@ -296,15 +310,15 @@ class MainRenderer:
         shader.uniforms["g"].value = g
         shader.uniforms["b"].value = b
         shader.uniforms["a"].value = a
+        shader.uniforms["unPos"].value = position
 
-        shader.vao.render(
-            RENDER_MODES[mode],
-            instances=len(instances)
-        )
+        shader.vao.render(instances=len(instances))
+
+        
 
 
     
-    def render(self, texture_key, *, size=(1, 1), position=(0, 0), r=1, g=1, b=1, a=1, flx=False, fly=False, shader_key="default", mode=0):
+    def render(self, texture_key, *, size=(1, 1), position=(0, 0), r=1, g=1, b=1, a=1, flx=False, fly=False, shader_key="default"):
         if self.last_shader_name != shader_key:
             self.last_shader_name = shader_key
             self.current_shader = self.shaders.get(shader_key, self.default_shader)
@@ -329,7 +343,7 @@ class MainRenderer:
         uniforms["unFlx"].value = flx
         uniforms["unFly"].value = fly
         
-        vao.render(RENDER_MODES[mode])
+        vao.render()
 
 
 

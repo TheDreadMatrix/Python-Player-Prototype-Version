@@ -179,35 +179,11 @@ class _RendererType:
     def delShader(self, shader_key: str) -> None: ...
 
     def renderQuad(self, position: tuple=(0, 0), size: tuple=(100, 100), r: float=1, g: float=1, b: float=1, a: float=1, mode: int=0) -> None: ...
-    def renderInstance(self, texture_key: str, *, r: float=1, g: float=1, b: float=1, a: float=1, shader_key: str="instance", mode: int=0, instances: list[float]=[]) -> None: ...
+    def renderInstance(self, texture_key: str, *, position: tuple=(0, 0), r: float=1, g: float=1, b: float=1, a: float=1, shader_key: str="instance", instances: list[float]=[]) -> None: ...
     
-    def renderFbo(self, frame_key: str, 
-                  *, 
-                  position: tuple=(0, 0), 
-                  size: tuple=(1, 1), 
-                  r: float=1, 
-                  g: float=1, 
-                  b: float=1,
-                  flx: bool=False,
-                  fly: bool=True,
-                  shader_key: str="default",
-                  mode: int=0
-                  ) -> None: ...
+    def renderFbo(self, frame_key: str, *, position: tuple=(0, 0), size: tuple=(1, 1), r: float=1, g: float=1, b: float=1, a: float=1, flx: bool=False, fly: bool=True, shader_key: str="default") -> None: ...
 
-    def render(self, 
-               texture_key: str, 
-               *, 
-               size: tuple=(1, 1), 
-               position: tuple=(0, 0), 
-               r: float=1.0,
-               g: float=1.0,
-               b: float=1.0,
-               a: float=1.0,
-               flx: bool=False,
-               fly: bool=False,
-               shader_key: str="default",
-               mode: int=0
-               ) -> None: ...
+    def render(self, texture_key: str, *, size: tuple=(1, 1), position: tuple=(0, 0), r: float=1.0, g: float=1.0, b: float=1.0, a: float=1.0, flx: bool=False, fly: bool=False, shader_key: str="default") -> None: ...
 
 
 
@@ -230,7 +206,6 @@ class GameType(typing.Protocol):
     account: _PlayerAccountManagerProtocol
     audio: _StreamType
 
-    settings_read: dict
 
     def getFps(self) -> float: ...
     def getScene(self) -> str: ...

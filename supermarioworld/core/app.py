@@ -110,7 +110,7 @@ class SuperMariWorldApplication:
 
 
     def _render(self):
-        self.renderer._clearColor(0.7, 0.6, 0.8)
+        self.renderer._clearColor(0, 0, 0)
 
         self.router.render()
        

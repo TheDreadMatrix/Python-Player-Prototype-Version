@@ -11,9 +11,12 @@ import math
 
 
 class OverWorldPlayer:
-    def __init__(self, game: GameType, map_ref: str):
+    def __init__(self, game: GameType, map_ref: str, move_speed: int=160):
         self.DEFAULT_NODE = {"title": "NODE CANT BE FOUND."}
         self.MAP_REF = map_ref
+
+        # Speed
+        self.move_speed = move_speed
 
         # For spatial hashing
         self.current_cells = None
@@ -37,7 +40,7 @@ class OverWorldPlayer:
 
         self.path_index = 0
         self.target = None
-        self.move_speed = 160
+        
 
         # Sounds
         self.sound_choose = game.audio.giveSound("choose")
@@ -53,7 +56,6 @@ class OverWorldPlayer:
 
         game.assets.regAtlas("chr-spr", "overworld/overworld-sprites.png")
 
-        
 
         self.animation_choose = AnimationCutOut(game, "chr-spr", frames=[(8, 136, 16, 16)], durations=[], key_images=["mc-1"])
 

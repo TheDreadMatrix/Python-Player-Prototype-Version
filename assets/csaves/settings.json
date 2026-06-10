@@ -1,7 +1,7 @@
 {
     "current-player": 0,
-    "frametime": 140,
+    "frametime": 120,
     "music": 0.5,
     "sound": 1,
-    "debug": false
+    "debug": true
 }
