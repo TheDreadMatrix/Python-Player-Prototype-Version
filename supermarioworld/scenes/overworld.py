@@ -7,10 +7,12 @@ from supermarioworld.rendering.users import TextLabel, FadeLabel
 from supermarioworld.rendering.shaders import CustomShader
 from supermarioworld.camera import Camera
 
+from supermarioworld.configuration import NOTATION_BIOME_OVERWORLD
+
 
 
 class OverWorld(EmptyScene):
-    def __init__(self, game, biome: str, music_name: str, map_ref: str):
+    def __init__(self, game, biome: int, music_name: str, map_ref: str):
         super().__init__(game)
 
         
@@ -20,21 +22,13 @@ class OverWorld(EmptyScene):
         self.audio.load(music_name)
         self.audio.play(loops=-1, fade_in=2000)
 
-        
-
-        BASE_BIOME_DICT = {
-            0: "tile-notation-valley",
-            1: "tile-notation-underground",
-            2: "tile-notation-red-forest",
-            3: "tile-notation-magma",
-            4: "tile-notation-special"
-        }
+    
 
         # overworld player
         self.player = OverWorldPlayer(game, map_ref=map_ref)
 
         # Tile map
-        self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{BASE_BIOME_DICT.get(biome)}.json")
+        self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{NOTATION_BIOME_OVERWORLD.get(biome)}.json")
         self.overworld_map.load(map_ref)
 
         x, y = self.player.account.getCurrentPlayer().current_overworld_camera_pos
@@ -74,11 +68,10 @@ class OverWorld(EmptyScene):
 
         self.renderer.regShader("pxm", self.pixel_mosiac_shader)
         
-        self.timer_custom = 0
+        
 
 
     def onUpdate(self):
-        self.timer_custom += self.game.delta_time
         
 
         # Fade
@@ -116,7 +109,7 @@ class OverWorld(EmptyScene):
         
         # Fade out effect
         if self.player.redirecting and not self.OUT_FADE:
-            self.audio.fadeOut(800)
+            self.audio.fadeOut(2000)
             self.fade_label.fadeOut(speed=1.5)
             self.OUT_FADE = True
 
@@ -136,15 +129,18 @@ class OverWorld(EmptyScene):
     def onRender(self):
 
         # Render map
-        self.renderer.beginFbo("tile-map")
+        if self.player.redirecting:
+            self.renderer.beginFbo("tile-map")
 
         self.overworld_map.renderMap(self.camera)
 
-        self.renderer.endFbo()
+        if self.player.redirecting:
+            self.renderer.endFbo()
 
-        self.pixel_mosiac_shader.setUniformByOneTime("pixel_size", self.pixel_size)
-        self.pixel_mosiac_shader.setUniformByOneTime("texture_size", (self.game.width, self.game.height))
-        self.renderer.renderFbo("tile-map", size=(self.game.width, self.game.height), shader_key="pxm")
+            self.pixel_mosiac_shader.setUniformByOneTime("pixel_size", self.pixel_size)
+            self.pixel_mosiac_shader.setUniformByOneTime("texture_size", (self.game.width, self.game.height))
+
+            self.renderer.renderFbo("tile-map", size=(self.game.width, self.game.height), shader_key="pxm")
 
         # Render node
 

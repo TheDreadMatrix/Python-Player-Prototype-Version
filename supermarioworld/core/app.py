@@ -39,13 +39,15 @@ class SuperMariWorldApplication:
 
         self._clock = pg.time.Clock()
         self._running = True
+
+        
         self._run_scene = None
         self._DEBUG = False
 
         self.delta_time = 0
         
 
-        self._window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL)
+        self._window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
 
         self.width = self._window.get_width()
         self.height = self._window.get_height()

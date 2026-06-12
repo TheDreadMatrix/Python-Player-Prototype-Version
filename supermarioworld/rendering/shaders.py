@@ -33,11 +33,12 @@ Also for fragment uniforms:
 """
 
 
-# The problem if we including 2 times other shaders we dont recieve error but code cannot compiling with error 
+#commentary include is not working
+#fix for instance and quad shader
 class _IncludeProcessor:
     def __init__(self):
         self.includes = {}
-        self.used = set()
+        self.include_count_for_source = 0
 
         DEFAULT_FRAGMENT_REPLACER = """
         #version 330 core
@@ -108,37 +109,46 @@ class _IncludeProcessor:
     def register(self, name: str, code: str):
         self.includes[name] = code
 
+    
+
     def process(self, source: str):
-        self.used.clear()
+        self.include_count_for_source = 0
+        
 
         while "#include" in source:
             lines = source.split("\n")
             out = []
+           
 
             for line in lines:
                 line_stripped = line.strip()
 
                 if line_stripped.startswith("#include"):
+                    self.include_count_for_source += 1
+
+                    if self.include_count_for_source >= 2:
+                        raise SyntaxError("GLuminary supports only one #include directive per shader.")
+
                     parts = line_stripped.split()
                     if len(parts) != 2:
-                        raise SyntaxError(f"Invalid include syntax: {line}")
+                        raise SyntaxError(f"Include name is not defined: {line}")
 
                     name = parts[1]
 
-                    if name in self.used:
-                        raise SyntaxError(f"Duplicate include: {name}")
 
                     if name not in self.includes:
-                        raise SyntaxError(f"Unknown include: {name}")
+                        raise SyntaxError(f"Unknown include: '{name}'. GLuminary has {list(self.includes.keys())} include imports")
 
-                    self.used.add(name)
+                
                     out.append(self.includes[name])
 
                 else:
                     out.append(line)
 
+            
+            
             source = "\n".join(out)
-
+        
         return source
 
 
@@ -157,6 +167,8 @@ class CustomShader:
         # preprocess includes (BOTH)
         vertex_source = self.processor.process(vertex_source)
         fragment_source = self.processor.process(fragment_source)
+
+        
 
         # compile program
         self._program = game.renderer._ctx.program(

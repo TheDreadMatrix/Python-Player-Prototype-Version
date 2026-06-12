@@ -71,7 +71,21 @@ class Menu(EmptyScene):
         game.assets.regCutOutImage("b1", "blocks", 16, 200, 16, 16)
         game.assets.regCutOutImage("b4", "blocks", 32, 40, 16, 16)
 
-        self.renderer.createFbo("my-fbo", (game.width, game.height))
+        
+
+        # Pixel mosaic
+        self.pixel_size = 1
+        self.target_pixel_size = 1
+        self.pixel_speed = 60
+
+        self.renderer.createFbo("background", (game.width, game.height))
+
+
+        self.pixel_mosiac_shader = CustomShader(game, "testing/default.vert", "post-processing/post-processing-pxm.frag")
+        self.pixel_mosiac_shader.defineUniform("pixel_size", "pixelSize")
+        self.pixel_mosiac_shader.defineUniform("texture_size", "textureSize")
+
+        self.renderer.regShader("pxm", self.pixel_mosiac_shader)
 
         
 
@@ -140,7 +154,21 @@ class Menu(EmptyScene):
             self.x_2 = self.x_1 - self.game.width
 
     
-        # 
+        # pixel
+        if self.switching:
+            self.target_pixel_size = 128
+        else:
+            self.target_pixel_size = 1
+
+        
+
+        if self.pixel_size < self.target_pixel_size:
+            self.pixel_size += self.pixel_speed * self.game.delta_time
+            self.pixel_size = min(self.pixel_size, self.target_pixel_size)
+
+        elif self.pixel_size > self.target_pixel_size:
+            self.pixel_size -= self.pixel_speed * self.game.delta_time
+            self.pixel_size = max(self.pixel_size, self.target_pixel_size)
 
 
         # fade effect
@@ -215,7 +243,7 @@ class Menu(EmptyScene):
         
     
     def onRender(self):
-        self.renderer.beginFbo("my-fbo")
+        self.renderer.beginFbo("background")
         self.game.clearColor(0.53, 0.99, 1)
         
         
@@ -226,30 +254,35 @@ class Menu(EmptyScene):
         for texture_key, instances in self.batches.items():
             self.renderer.renderInstance(texture_key, instances=instances)
 
+
+        self.renderer.endFbo()
+
+        self.pixel_mosiac_shader.setUniformByOneTime("pixel_size", self.pixel_size)
+        self.pixel_mosiac_shader.setUniformByOneTime("texture_size", (self.game.width, self.game.height))
+
+        self.renderer.renderFbo("background", size=(self.game.width, self.game.height), shader_key="pxm")
+
         self.renderer.render("title-border", size=(self.game.width, self.game.height))
 
-        
 
         
         self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 70), r=0, g=0, b=0, a=0.7)
         self.renderer.render("title", size=(360, 160), position=(self.game.width // 2 - 180, 60))
 
+        
+
         self.text_play.render()
         self.text_options.render()  
         self.text_quit.render()
 
-        
-
-
-        self.renderer.endFbo()
-        self.renderer.renderFbo("my-fbo", size=(self.game.width, self.game.height), r=1, g=1, b=1)
 
         self.fade_label.render()
 
         
        
     def onSave(self):
-        self.renderer.deleteFbo("my-fbo")
+        self.renderer.deleteFbo("background")
+        self.renderer.delShader("pxm")
         
         self.text_quit.delRes()
         self.text_options.delRes()

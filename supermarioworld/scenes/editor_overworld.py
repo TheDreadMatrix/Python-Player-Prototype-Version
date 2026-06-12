@@ -1,89 +1,105 @@
 from collections import defaultdict
 
 import pygame as pg
-import moderngl as mgl
 
 from supermarioworld.johnson import readData, saveData
-
-from supermarioworld.tilemaps.spatial_hash import ChunkHasher
+from supermarioworld.package_typing import GameType
 from supermarioworld.scenes.base import EmptyScene
+
 from supermarioworld.rendering.users import TextLabel
+
+from supermarioworld.enums.render import RenderMode
+
+from supermarioworld.configuration import (NOTATION_BIOME_OVERWORLD, 
+                                           PALETTE_PER_ROW, OVERWORLD_EDITOR_COLS, OVERWORLD_EDITOR_ROWS, MIN_ZOOM_EDITOR, MAX_ZOOM_EDITOR)
 
 
 
 class OverworldEditor(EmptyScene):
-    def __init__(self, game):
+    def __init__(self, game: GameType, biome: int=0):
         super().__init__(game)
 
-        self.assets.regAtlas("overworld", "overworld/overworld.png")
-
         self.audio.load("CS-B")
-        self.audio.play(loops=-1)
+        self.audio.play(loops=-1, fade_in=2000)
 
-        # game.paths.ConfigFolder("oveworld/maps")
-        self.maps_dir = game.paths.ConfigFolder("overworld/maps")
+
 
         self.tile_size = 8
         self.cell_size = 32
         self.grid_origin = (20, 100)
-        self.min_grid_cols = 50
-        self.min_grid_rows = 50
+
         self.view_offset = [0, 0]
         self.zoom = 1.0
-        self.zoom_min = 0.1
-        self.zoom_max = 3.0
+  
+
         self.palette_scroll_rows = 0
+
         self.palette_pos = [0, 120]
         self._drag_palette = False
         self._drag_palette_off = (0, 0)
 
-        self.notation = readData(game.paths.ConfigPath("overworld/notations/tile-notation-valley.json"))["tiles"]
+        # Read file and atlas
+
+        notation = readData(game.paths.ConfigPath(f"overworld/notations/{NOTATION_BIOME_OVERWORLD.get(biome)}.json"))
+
+        self.notation = notation["tiles"]
+        self.assets.regAtlas("overworld", notation["img-ref"])
+
+
         self.palette_keys = [k for k, v in self.notation.items() if isinstance(v, list) and len(v) >= 2]
         self.selected_tile = self.palette_keys[0] if self.palette_keys else None
 
         self.assets_to_release = set()
-        self._register_palette_textures()
-        self._register_ui_textures()
 
-        # game.paths.findGlobal(self.maps_dir, file_category="*.json")
-        self.map_files = sorted([p for p in game.paths.findGlobal(self.maps_dir, file_category="*.json")])
+        # Create texture and text
+        self._register_palette_textures()
+        self._create_labels()
+        
+
+        # Connect other files
+        maps_dir = game.paths.ConfigFolder("overworld/maps")
+        self.map_files = game.paths.findGlobal(maps_dir, file_category="*.json")
         self.map_index = 0
+
+        
 
         self.map_path = None
         self.map_json = {}
+
         self.layer_keys = []
         self.layer_index = 0
+
         self.dirty = False
+
         self.status = "Ready"
         self.status_timer = 0.0
+
         self._prev_mouse_buttons = (False, False, False)
         self._prev_mouse_pos = pg.mouse.get_pos()
-        self.undo_stack = []
-        self._tile_hash = ChunkHasher(cell_sizes=(256, 256))
-        self._tile_hash_dirty = True
-        self._cached_map_batches = {}
-        self._cached_grid_instances = []
-        self._cached_palette_batches = {}
-        self._cached_ui_batches = {"ow-ui-btn": [], "ow-ui-btn-hot": []}
-        self._cached_label_batches = {}
 
-        self._create_labels()
+        self.undo_stack = []
+
+        self._cached_map_batches = {}
+
+        self._selected_rect = None
+    
+    
         self._load_current_map()
 
     def _create_labels(self):
-        self.title_label = TextLabel(self.game, "ow-title", "OVERWORLD EDITOR", size_font=24)
+        self.title_label = TextLabel(self.game, "ow-title", "OVERWORLD EDITOR", font_key="pixel", size_font=24)
         self.title_label.position = (20, 20)
 
-        self.map_label = TextLabel(self.game, "ow-map", "", size_font=20)
+        self.map_label = TextLabel(self.game, "ow-map", "", size_font=20, font_key="pixel")
         self.map_label.position = (20, 56)
 
-        self.layer_label = TextLabel(self.game, "ow-layer", "", size_font=18)
+        self.layer_label = TextLabel(self.game, "ow-layer", "", size_font=18, font_key="pixel")
         self.layer_label.position = (380, 56)
 
-        self.tile_label = TextLabel(self.game, "ow-tile", "", size_font=18)
+        self.tile_label = TextLabel(self.game, "ow-tile", "", size_font=18, font_key="pixel")
         self.tile_label.position = (20, 72)
 
-        self.status_label = TextLabel(self.game, "ow-status", "", size_font=18)
+        self.status_label = TextLabel(self.game, "ow-status", "", size_font=15, font_key="pixel")
         self.status_label.position = (20, self.game.height - 30)
 
     def _register_palette_textures(self):
@@ -92,24 +108,7 @@ class OverworldEditor(EmptyScene):
             self.assets.regCutOutImage(tile_key, "overworld", int(x), int(y), self.tile_size, self.tile_size)
             self.assets_to_release.add(tile_key)
 
-    def _register_ui_textures(self):
-        self._register_solid_texture("ow-ui-btn", (60, 70, 88, 230))
-        self._register_solid_texture("ow-ui-btn-hot", (85, 105, 135, 255))
-        self._register_solid_texture("ow-ui-grid", (255, 255, 255, 100))
-        self._register_solid_texture("ow-ui-select", (255, 235, 90, 220))
-        self._register_solid_texture("ow-ui-tile-frame", (220, 40, 40, 255))
-        self.assets_to_release.update({"ow-ui-btn", "ow-ui-btn-hot", "ow-ui-grid", "ow-ui-select", "ow-ui-tile-frame"})
 
-    def _register_solid_texture(self, key: str, rgba: tuple[int, int, int, int]):
-        surface = pg.Surface((1, 1), flags=pg.SRCALPHA)
-        surface.fill(rgba)
-        texture = self.renderer._ctx.texture(surface.get_size(), 4, pg.image.tobytes(surface, "RGBA"))
-        texture.filter = (mgl.NEAREST, mgl.NEAREST)
-        self.assets._regRawImage(key, texture)
-
-    def _render_batch(self, texture_key: str, instances):
-        if instances:
-            self.renderer.renderInstance(texture_key, instances=instances)
 
     def _load_current_map(self):
         if not self.map_files:
@@ -126,7 +125,7 @@ class OverworldEditor(EmptyScene):
         self._normalize_active_layer()
         self.dirty = False
         self.status = f"Loaded: {self.map_path}"
-        self._tile_hash_dirty = True
+    
 
     def _normalize_active_layer(self):
         if not self.layer_keys:
@@ -139,11 +138,11 @@ class OverworldEditor(EmptyScene):
         is_completely_empty = all((not cell) for row in layer for cell in row) if layer else True
 
         # Ensure every layer has enough editable space even if source JSON is tiny.
-        while len(layer) < self.min_grid_rows:
+        while len(layer) < OVERWORLD_EDITOR_ROWS:
             layer.append([])
 
         width = max((len(row) for row in layer), default=0)
-        width = max(width, self.min_grid_cols)
+        width = max(width, OVERWORLD_EDITOR_COLS)
         for row in layer:
             while len(row) < width:
                 row.append(default_tile if is_completely_empty else "")
@@ -154,14 +153,6 @@ class OverworldEditor(EmptyScene):
     def _active_layer(self):
         return self.map_json[self._active_layer_key()]
 
-    def _get_grid_size(self):
-        layer = self._active_layer()
-        rows = len(layer)
-        cols = max((len(row) for row in layer), default=0)
-        return cols, rows
-
-    def _map_cell_size(self):
-        return max(1, int(self.cell_size * self.zoom))
 
     def _set_status(self, text: str):
         self.status = text
@@ -178,7 +169,7 @@ class OverworldEditor(EmptyScene):
             return
         self.layer_index = (self.layer_index + delta) % len(self.layer_keys)
         self._normalize_active_layer()
-        self._tile_hash_dirty = True
+
         self._set_status(f"Layer: {self._active_layer_key()}")
 
     def _select_tile_delta(self, delta: int):
@@ -189,8 +180,11 @@ class OverworldEditor(EmptyScene):
         self.selected_tile = self.palette_keys[idx]
 
     def _paint(self, mouse_pos, erase: bool):
-        cols, rows = self._get_grid_size()
-        map_cell = self._map_cell_size()
+        layer = self._active_layer()
+        rows = len(layer)
+        cols = max((len(row) for row in layer), default=0)
+
+        map_cell = max(1, int(self.cell_size * self.zoom))
         gx, gy = self.grid_origin
         mx, my = mouse_pos
         mx -= self.view_offset[0]
@@ -209,7 +203,7 @@ class OverworldEditor(EmptyScene):
         self.undo_stack.append((self._active_layer_key(), tx, ty, current))
         layer[ty][tx] = new_value
         self.dirty = True
-        self._tile_hash_dirty = True
+
         return True
 
     def _undo_last(self):
@@ -229,7 +223,6 @@ class OverworldEditor(EmptyScene):
 
         row[tx] = prev_value
         self.dirty = True
-        self._tile_hash_dirty = True
         self._set_status("Undo")
 
     @staticmethod
@@ -250,7 +243,7 @@ class OverworldEditor(EmptyScene):
     def _palette_rects(self):
         rects = []
         start_x, start_y, _, _ = self._palette_view_rect()
-        per_row = self._palette_per_row()
+        per_row = PALETTE_PER_ROW
         pad = 4
         row_offset = self.palette_scroll_rows * (self.cell_size + pad)
         for i, tile_key in enumerate(self.palette_keys):
@@ -261,24 +254,23 @@ class OverworldEditor(EmptyScene):
             rects.append((tile_key, (x, y, self.cell_size, self.cell_size)))
         return rects
 
-    def _palette_per_row(self):
-        return 14
+    
 
     def _palette_view_rect(self):
         pad = 4
-        per_row = self._palette_per_row()
+        per_row = PALETTE_PER_ROW
         width = per_row * self.cell_size + (per_row - 1) * pad
         if self.palette_pos[0] == 0:
             self.palette_pos[0] = self.game.width - width - 20
-        x = max(0, min(self.game.width - width, self.palette_pos[0]))
+        x = max(-1, min(self.game.width - width, self.palette_pos[0]))
         top = max(0, min(self.game.height - self.cell_size, self.palette_pos[1]))
         self.palette_pos[0], self.palette_pos[1] = x, top
-        bottom = self.game.height - 60
+        bottom = self.game.height
         height = max(self.cell_size, bottom - top)
         return (x, top, width, height)
 
     def _palette_max_scroll_rows(self):
-        per_row = self._palette_per_row()
+        per_row = PALETTE_PER_ROW
         total_rows = (len(self.palette_keys) + per_row - 1) // per_row
         _, _, _, view_h = self._palette_view_rect()
         pad = 4
@@ -313,6 +305,7 @@ class OverworldEditor(EmptyScene):
 
     def onUpdate(self):
         self.request.setTitle(f"{self.game.getFps():.2f}")
+
         if self.status_timer > 0:
             self.status_timer -= self.game.delta_time
         else:
@@ -320,18 +313,12 @@ class OverworldEditor(EmptyScene):
 
         self._handle_mouse_input()
 
-        self.map_label.setText(f"Map: {'Map' if self.map_path else 'none'} {'*' if self.dirty else ''}")
+        self.map_label.setText(f"Map: {"Some map" if self.map_path else 'none'} {'*' if self.dirty else ''}")
         self.layer_label.setText(f"Layer: {self._active_layer_key() if self.layer_keys else 'none'}")
         self.tile_label.setText(f"Tile: {self.selected_tile if self.selected_tile else 'none'}")
         self.status_label.setText(self.status if self.status else "LMB draw | RMB erase | MMB pan | Wheel zoom | [/] map | ;/' layer | Q/E tile | Ctrl+S save")
-        self._rebuild_render_cache()
+        
 
-    def _rebuild_render_cache(self):
-        self._cached_map_batches = self._build_map_batches()
-        self._cached_grid_instances = self._build_grid_instances()
-        self._cached_palette_batches = self._build_palette_batches()
-        self._cached_ui_batches = self._build_ui_batches()
-        self._cached_label_batches = self._build_label_batches()
 
     def _handle_mouse_input(self):
         mouse_pos = pg.mouse.get_pos()
@@ -407,8 +394,6 @@ class OverworldEditor(EmptyScene):
 
     def onEvent(self, event):
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_ESCAPE:
-                self.request.redirectScene("base:overworld-1")
 
             if event.key == pg.K_LEFTBRACKET:
                 self._switch_map(-1)
@@ -439,7 +424,7 @@ class OverworldEditor(EmptyScene):
 
     def _change_zoom(self, delta: float):
         old_zoom = self.zoom
-        self.zoom = max(self.zoom_min, min(self.zoom_max, self.zoom + delta))
+        self.zoom = max(MIN_ZOOM_EDITOR, min(MAX_ZOOM_EDITOR, self.zoom + delta))
         if self.zoom != old_zoom:
             self._set_status(f"Zoom: {self.zoom:.1f}x")
 
@@ -449,138 +434,113 @@ class OverworldEditor(EmptyScene):
         for tile_key, rect in self._palette_rects():
             if self._in_rect(pos, rect):
                 self.selected_tile = tile_key
-                self._set_status(f"Selected {tile_key}")
                 return True
         return False
 
     def onRender(self):
+        self._cached_map_batches = self._build_map_batches()
+        
+
         self.game.clearColor(0.12, 0.2, 0.3)
-        self._render_from_cache()
 
-    def _render_from_cache(self):
         for texture_key, instances in self._cached_map_batches.items():
-            self._render_batch(texture_key, instances)
-        self._render_batch("ow-ui-grid", self._cached_grid_instances)
-        for texture_key, instances in self._cached_palette_batches.items():
-            self._render_batch(texture_key, instances)
-        for texture_key, instances in self._cached_ui_batches.items():
-            self._render_batch(texture_key, instances)
-        for texture_key, instances in self._cached_label_batches.items():
-            self._render_batch(texture_key, instances)
+            self.renderer.renderInstance(texture_key, instances=instances)
 
-    def _build_map_batches(self):
-        map_batches = defaultdict(list)
-        if not self.layer_keys:
-            return map_batches
-        map_cell = self._map_cell_size()
-        screen_w, screen_h = self.game.width, self.game.height
-        gx, gy = self.grid_origin
-        ox, oy = self.view_offset
-        layer = self._active_layer()
-        if self._tile_hash_dirty:
-            entities = []
-            for y, row in enumerate(layer):
-                for x, tile_key in enumerate(row):
-                    if tile_key and tile_key in self.notation:
-                        entities.append({"x": x, "y": y, "tile_key": tile_key})
-            self._tile_hash.setEntities(entities)
-            self._tile_hash_dirty = False
-        cx = ((screen_w / 2) - gx - ox) / map_cell
-        cy = ((screen_h / 2) - gy - oy) / map_cell
-        rx = (screen_w / 2) / map_cell + 2
-        ry = (screen_h / 2) / map_cell + 2
-        for e in self._tile_hash.getEntities(cx, cy, rx, ry):
-            px = gx + e["x"] * map_cell + ox
-            py = gy + e["y"] * map_cell + oy
-            if px + map_cell <= 0 or px >= screen_w or py + map_cell <= 0 or py >= screen_h:
-                continue
-            map_batches[e["tile_key"]].append([px, py, map_cell, map_cell, 0.0, 0.0])
-        return map_batches
-
-    def _build_grid_instances(self):
-        cols, rows = self._get_grid_size()
-        if cols == 0 or rows == 0:
-            return []
-        map_cell = self._map_cell_size()
-        screen_w, screen_h = self.game.width, self.game.height
-        gx, gy = self.grid_origin
-        ox, oy = self.view_offset
-        w = cols * map_cell
-        h = rows * map_cell
-        grid_instances = []
-        for ix in range(cols + 1):
-            px = gx + ix * map_cell + ox
-            py = gy + oy
-            if px < 0 or px >= screen_w:
-                continue
-            if py + h <= 0 or py >= screen_h:
-                continue
-            draw_y = max(py, 0)
-            draw_h = min(py + h, screen_h) - draw_y
-            if draw_h > 0:
-                grid_instances.append([px, draw_y, 1, draw_h, 0.0, 0.0])
-        for iy in range(rows + 1):
-            px = gx + ox
-            py = gy + iy * map_cell + oy
-            if py < 0 or py >= screen_h:
-                continue
-            if px + w <= 0 or px >= screen_w:
-                continue
-            draw_x = max(px, 0)
-            draw_w = min(px + w, screen_w) - draw_x
-            if draw_w > 0:
-                grid_instances.append([draw_x, py, draw_w, 1, 0.0, 0.0])
-        return grid_instances
-
-    def _build_palette_batches(self):
-        batches = defaultdict(list)
+        
         view_x, view_y, view_w, view_h = self._palette_view_rect()
-        batches["ow-ui-btn"].append([view_x, view_y, view_w, view_h, 0.0, 0.0])
+
+        self.renderer.renderQuad(position=(view_x, view_y), size=(view_w, view_h), r=0.5, g=0.5, b=0.5, a=0.7)
+
         for tile_key, rect in self._palette_rects():
             x, y, _, _ = rect
             if y + self.cell_size <= view_y or y >= view_y + view_h:
                 continue
-            batches[tile_key].append([x, y, self.cell_size, self.cell_size, 0.0, 0.0])
-            # Red frame around each tile button in palette.
-            batches["ow-ui-tile-frame"].append([x, y, self.cell_size, 1, 0.0, 0.0])
-            batches["ow-ui-tile-frame"].append([x, y + self.cell_size - 1, self.cell_size, 1, 0.0, 0.0])
-            batches["ow-ui-tile-frame"].append([x, y, 1, self.cell_size, 0.0, 0.0])
-            batches["ow-ui-tile-frame"].append([x + self.cell_size - 1, y, 1, self.cell_size, 0.0, 0.0])
-            if tile_key == self.selected_tile:
-                batches["ow-ui-select"].append([x, y + self.cell_size - 2, self.cell_size, 2, 0.0, 0.0])
-        return batches
 
-    def _build_ui_batches(self):
-        rects = self._ui_rects()
-        mouse_pos = pg.mouse.get_pos()
-        batches = {"ow-ui-btn": [], "ow-ui-btn-hot": []}
-        for key, rect in rects.items():
-            base = "ow-ui-btn-hot" if self._in_rect(mouse_pos, rect) else "ow-ui-btn"
-            target = batches["ow-ui-btn-hot"] if base == "ow-ui-btn-hot" else batches["ow-ui-btn"]
-            target.append([rect[0], rect[1], rect[2], rect[3], 0.0, 0.0])
-        return batches
+            self.renderer.render(tile_key, position=(x, y), size=(self.cell_size, self.cell_size))
+            
 
-    def _build_label_batches(self):
-        batches = defaultdict(list)
-        batches[self.title_label.texture_id].append([self.title_label.position[0], self.title_label.position[1], self.title_label.size[0], self.title_label.size[1], 0.0, 0.0])
-        batches[self.map_label.texture_id].append([self.map_label.position[0], self.map_label.position[1], self.map_label.size[0], self.map_label.size[1], 0.0, 0.0])
-        batches[self.layer_label.texture_id].append([self.layer_label.position[0], self.layer_label.position[1], self.layer_label.size[0], self.layer_label.size[1], 0.0, 0.0])
-        batches[self.tile_label.texture_id].append([self.tile_label.position[0], self.tile_label.position[1], self.tile_label.size[0], self.tile_label.size[1], 0.0, 0.0])
-        batches[self.status_label.texture_id].append([self.status_label.position[0], self.status_label.position[1], self.status_label.size[0], self.status_label.size[1], 0.0, 0.0])
+            if self.selected_tile == tile_key:
+                self._selected_rect = rect
+            
 
-        for text, pos in [("Save", (676, 22)), ("<", (652, 58)), (">", (758, 58)), ("<", (652, 92)), (">", (758, 92))]:
-            key, size = self._resolve_button_text_texture(text, pos)
-            batches[key].append([pos[0], pos[1], size[0], size[1], 0.0, 0.0])
-        return batches
+        if self._selected_rect:
+            x, y, w, h = self._selected_rect
+            self.renderer.renderQuad(position=(x, y), size=(w, h), r=1.0, g=0.0, b=0.0, a=1.0, mode=RenderMode.LINE_LOOP)
 
-    def _resolve_button_text_texture(self, text: str, pos: tuple[int, int]):
-        key = f"ow-btn-{text}-{pos[0]}-{pos[1]}"
-        if key not in self.assets.textures:
-            label = TextLabel(self.game, self.renderer, key, text, size_font=20)
-            self.assets_to_release.add(key)
-            self.assets_to_release.add(label.texture_id)
-            return label.texture_id, label.size
-        return key, (22, 24)
+               
+
+        
+
+        self.renderer.renderQuad(position=(640, 16), size=(140, 34), a=0.7)
+        self.renderer.renderQuad(position=(640, 56), size=(34, 28), a=0.7)
+        self.renderer.renderQuad(position=(746, 56), size=(34, 28), a=0.7)
+        self.renderer.renderQuad(position=(640, 90), size=(34, 28), a=0.7)
+        self.renderer.renderQuad(position=(746, 90), size=(34, 28), a=0.7)
+
+        self.title_label.render()
+        self.map_label.render()
+        self.tile_label.render()
+        self.status_label.render()
+        self.layer_label.render()
+
+        
+       
+        
+            
+
+    def _build_map_batches(self):
+        map_batches = defaultdict(list)
+
+        if not self.layer_keys:
+            return map_batches
+
+        map_cell = max(1, int(self.cell_size * self.zoom))
+        screen_w, screen_h = self.game.width, self.game.height
+        gx, gy = self.grid_origin
+        ox, oy = self.view_offset
+
+        layer = self._active_layer()
+
+    
+        inv_cell = 1.0 / map_cell
+
+        left   = int((-gx - ox) * inv_cell)
+        top    = int((-gy - oy) * inv_cell)
+        right  = int((screen_w - gx - ox) * inv_cell) + 1
+        bottom = int((screen_h - gy - oy) * inv_cell) + 1
+
+        layer_h = len(layer)
+        layer_w = len(layer[0]) if layer else 0
+
+        # clamp
+        left = max(0, left)
+        top = max(0, top)
+        right = min(layer_w, right)
+        bottom = min(layer_h, bottom)
+
+        for y in range(top, bottom):
+            row = layer[y]
+            py = gy + y * map_cell + oy
+
+            if py + map_cell <= 0 or py >= screen_h:
+                continue
+
+            for x in range(left, right):
+                tile_key = row[x]
+                if not tile_key or tile_key not in self.notation:
+                    continue
+
+                px = gx + x * map_cell + ox
+
+                if px + map_cell <= 0 or px >= screen_w:
+                    continue
+
+                map_batches[tile_key].append([px, py, map_cell, map_cell, 0.0, 0.0])
+
+        return map_batches
+
+
+   
 
     def onSave(self):
         for key in self.assets_to_release:

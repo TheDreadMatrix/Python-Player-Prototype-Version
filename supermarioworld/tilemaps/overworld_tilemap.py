@@ -1,20 +1,8 @@
 from supermarioworld.package_typing import GameType
 from supermarioworld.johnson import readData
 
-from supermarioworld.tilemaps.spatial_hash import ChunkHasher
+from supermarioworld.tilemaps.spatial_hash import ChunkHasher, TileEntity
 
-from dataclasses import dataclass
-
-
-@dataclass
-class TileEntity:
-    tile: str
-    x: float
-    y: float 
-    s_w: float
-    s_h: float
-    flx: bool
-    fly: bool
 
 
 

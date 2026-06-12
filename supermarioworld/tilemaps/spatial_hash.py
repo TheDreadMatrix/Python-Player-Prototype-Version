@@ -1,4 +1,15 @@
+from dataclasses import dataclass
 
+
+@dataclass
+class TileEntity:
+    tile: str
+    x: float
+    y: float 
+    s_w: float
+    s_h: float
+    flx: bool
+    fly: bool
 
 
 class ChunkHasher:
@@ -10,7 +21,7 @@ class ChunkHasher:
     def getCellSizes(self, x, y):
         return int(x // self.cell_width), int(y // self.cell_height)
 
-    def setEntities(self, entities: list):
+    def setEntities(self, entities: list[TileEntity]):
         self.grids.clear()
 
         for entity in entities:

@@ -15,7 +15,7 @@ class AssetsResources:
         self.musics = {}
         self.textures = {}
 
-        self.atlas_surfaces: dict[str, pg.SurfaceType] = {}
+        self.atlas_surfaces: dict[str, pg.Surface] = {}
         self.font_surfaces: dict[str, str] = {}
 
     def regAtlas(self, atlas_key, atlas_path):

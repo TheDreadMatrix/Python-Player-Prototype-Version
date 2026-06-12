@@ -15,8 +15,8 @@ class AudioStream:
             pg.mixer.music.load(self.game.assets.musics[music_key])
             pg.mixer.music.set_volume(self.game.account.getMusicVolume())
         except KeyError:
-            print(f"Music with key '{music_key}' not found in resources.")
-            exit(1)
+            raise KeyError(f"Music with key '{music_key}' not found in resources.")
+            
         self.passed = False
 
     def play(self, starts=0, fade_in=0, loops=0):
@@ -57,8 +57,12 @@ class SoundStream:
             self.sound = pg.mixer.Sound(self.game.assets.sounds[sound_key])
             self.sound.set_volume(self.game.account.getSoundVolume())
         except KeyError:
-            print(f"Sound with key '{sound_key}' not found in resources.")
-            exit(1)
+            raise KeyError(f"Sound with key '{sound_key}' not found in resources.")
+            
 
     def play(self, loops=0, fade_ms=0):
         self.sound.play(loops, fade_ms)
+
+
+    def setVolume(self, volume):
+        self.sound.set_volume(volume)

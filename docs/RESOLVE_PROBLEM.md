@@ -1,36 +1,16 @@
 
 
+Fix CustomShader:
+* Preprocessor Parser with comment
+* Uniforms and vao for each shader
+* Shader source for instance and quad shader
 
 
-onRender:
-
-    self.renderer.render("base:tex", pos, size, r, g, b, a, layer, mode, shader)
-    self.renderer.draw_rect(r, g, b, a, pos, size, layer, mode, shader)
-
-    self.renderer.renderInstance()
+Fix Overworld:
+* Level tile-map animation
+* Level level node in map layer 2
 
 
+Fix Menu:
+* UI
 
-
-
-Overworld
-
-MAKE 1 LAYER - GROUNDS
-MAKE 2 LAYER - ASSETS
-
-MAKE CAMERA  +
-MAKE SPATIAL HASH + 
-
-PROHIBITED AND PERMISSION LEVELS +
-REWORK PLAYER SLOT JSONS +
-
-
-Rendering
-
-MAKE INSTANCES FOR QUAD 
-MAKE SHADERS CUSTOM
-
-MAKE SHADERS VERTEX CUSTOM
-
-
-Controllers mouse keyboard event API
