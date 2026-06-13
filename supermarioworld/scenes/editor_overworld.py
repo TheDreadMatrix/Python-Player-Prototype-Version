@@ -1,11 +1,10 @@
-from collections import defaultdict
-
 import pygame as pg
 
 from supermarioworld.johnson import readData, saveData
 from supermarioworld.package_typing import GameType
 from supermarioworld.scenes.base import EmptyScene
 
+from supermarioworld.rendering.animation import AnimationCutOut
 from supermarioworld.rendering.users import TextLabel
 
 from supermarioworld.enums.render import RenderMode
@@ -39,17 +38,17 @@ class OverworldEditor(EmptyScene):
         self._drag_palette_off = (0, 0)
 
         # Read file and atlas
-
         notation = readData(game.paths.ConfigPath(f"overworld/notations/{NOTATION_BIOME_OVERWORLD.get(biome)}.json"))
 
         self.notation = notation["tiles"]
         self.assets.regAtlas("overworld", notation["img-ref"])
 
 
-        self.palette_keys = [k for k, v in self.notation.items() if isinstance(v, list) and len(v) >= 2]
+        self.palette_keys = [k for k, _ in self.notation.items()]
         self.selected_tile = self.palette_keys[0] if self.palette_keys else None
 
         self.assets_to_release = set()
+        self.animations: dict[str, AnimationCutOut] = {}
 
         # Create texture and text
         self._register_palette_textures()
@@ -80,6 +79,7 @@ class OverworldEditor(EmptyScene):
         self.undo_stack = []
 
         self._cached_map_batches = {}
+        
 
         self._selected_rect = None
     
@@ -104,7 +104,28 @@ class OverworldEditor(EmptyScene):
 
     def _register_palette_textures(self):
         for tile_key in self.palette_keys:
-            x, y = self.notation[tile_key][:2]
+            tile = self.notation[tile_key]
+
+            if isinstance(tile, dict) and "frames" in tile:
+                # ANIMATION
+                key_images = [f"{tile_key}_{i}" for i in range(len(tile["frames"]))]
+
+                anim = AnimationCutOut(
+                    game=self.game,
+                    key_atlas="overworld",
+                    frames=[(*f.get("xy", []), self.tile_size, self.tile_size) for f in tile["frames"]],
+                    durations=tile.get("durations", [0.1] * len(tile["frames"])),
+                    key_images=key_images,
+                )
+
+                self.animations[tile_key] = anim
+            else:
+                if isinstance(tile, list):
+                    x, y = self.notation[tile_key]
+                else:
+                    x, y = self.notation[tile_key].get("xy", (0, 0))
+
+
             self.assets.regCutOutImage(tile_key, "overworld", int(x), int(y), self.tile_size, self.tile_size)
             self.assets_to_release.add(tile_key)
 
@@ -304,7 +325,8 @@ class OverworldEditor(EmptyScene):
         self._set_status(f"Saved: {self.map_path}")
 
     def onUpdate(self):
-        self.request.setTitle(f"{self.game.getFps():.2f}")
+        for animation in self.animations.values():
+            animation.update()
 
         if self.status_timer > 0:
             self.status_timer -= self.game.delta_time
@@ -456,7 +478,13 @@ class OverworldEditor(EmptyScene):
             if y + self.cell_size <= view_y or y >= view_y + view_h:
                 continue
 
-            self.renderer.render(tile_key, position=(x, y), size=(self.cell_size, self.cell_size))
+            tex = self._get_texture_key(tile_key)
+            if isinstance(self.notation[tile_key], list): 
+                flx, fly = (0, 0)
+            else:
+                flx = self.notation[tile_key].get("flx", 0)
+                fly = self.notation[tile_key].get("fly", 0)
+            self.renderer.render(tex, position=(x, y), size=(self.cell_size, self.cell_size), flx=flx, fly=fly)
             
 
             if self.selected_tile == tile_key:
@@ -485,14 +513,18 @@ class OverworldEditor(EmptyScene):
 
         
        
-        
+    def _get_texture_key(self, tile_key):
+        if tile_key in self.animations:
+            return self.animations[tile_key].getTextureKey()
+        return tile_key
+
             
 
     def _build_map_batches(self):
-        map_batches = defaultdict(list)
+        batches = {}
 
         if not self.layer_keys:
-            return map_batches
+            return batches
 
         map_cell = max(1, int(self.cell_size * self.zoom))
         screen_w, screen_h = self.game.width, self.game.height
@@ -535,13 +567,23 @@ class OverworldEditor(EmptyScene):
                 if px + map_cell <= 0 or px >= screen_w:
                     continue
 
-                map_batches[tile_key].append([px, py, map_cell, map_cell, 0.0, 0.0])
+                tex = self._get_texture_key(tile_key)
+                if isinstance(self.notation[tile_key], list): 
+                    flx, fly = (0, 0)
+                else:
+                    flx = self.notation[tile_key].get("flx", 0)
+                    fly = self.notation[tile_key].get("fly", 0)
+                    
+                batches.setdefault(tex, []).append([px, py, map_cell, map_cell, flx, fly])
 
-        return map_batches
+        return batches
 
 
    
 
     def onSave(self):
+        for animation in self.animations.values():
+            animation.delAnimation()
+
         for key in self.assets_to_release:
             self.assets.delImage(key)
