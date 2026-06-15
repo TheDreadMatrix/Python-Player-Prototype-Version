@@ -2,19 +2,13 @@
     "start": {
         "title": "Daemon`s house",
         "redirect": "base:tutorial",
-        "position": [100, 200],
-
-        "node-animation": {
-            "type": "cutout",
-            "atlas-key": "overworld-builds",
-            "pass": []
-        },
+        "position": [165, 275],
         
         "right": {
             "target": "level-1",
 
             "path": [
-                [285, 200]
+                [575, 275]
             ],
 
             "path-animation": [
@@ -27,13 +21,13 @@
     "level-1": {
         "title": "Valley of Ones 1",
         "redirect": "base:level-1",
-        "position": [285, 200],
+        "position": [575, 275],
 
         "left": {
             "target": "start",
 
             "path": [
-                [100, 200]
+                [165, 275]
             ],
 
             "path-animation": [

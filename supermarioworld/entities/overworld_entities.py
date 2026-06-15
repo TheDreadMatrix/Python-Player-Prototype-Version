@@ -12,6 +12,8 @@ import math
 
 class OverWorldPlayer:
     def __init__(self, game: GameType, map_ref: str, move_speed: int=160):
+        self.game = game
+
         self.DEFAULT_NODE = {"title": "NODE CANT BE FOUND."}
         self.MAP_REF = map_ref
 
@@ -22,11 +24,13 @@ class OverWorldPlayer:
         self.current_cells = None
 
         # Nodes
-        game.account.getCurrentPlayer().current_overworld = map_ref
+        game.player.current_overworld = map_ref
 
         self.main_nodes = Johnson(game.paths.ConfigPath(f"overworld/nodes/{map_ref}.json")).readData()
-        self.current_node = self.main_nodes.get(game.account.getCurrentPlayer().current_overworld_level, self.DEFAULT_NODE)
-        self.current_node_key = game.account.getCurrentPlayer().current_overworld_level
+
+        self.current_node = self.main_nodes.get(game.player.current_overworld_level, self.DEFAULT_NODE)
+
+        self.current_node_key = game.player.current_overworld_level
         
         self.position = self.current_node.get("position", (0, 0))
         self.moving = False
@@ -82,7 +86,7 @@ class OverWorldPlayer:
         if self.moving:
             return
         
-        if not self.account.getCurrentPlayer().hasOverworldNodeOpened(node_data.get("target")):
+        if not self.game.player.hasOverworldNodeOpened(node_data.get("target")):
             self.sound_cancel.play()
             return 
 
@@ -112,11 +116,11 @@ class OverWorldPlayer:
         if self.redirecting:
             self.redirect_timer += dt
             if self.redirect_timer > 2.5:
-                self.account.getCurrentPlayer().current_overworld = self.MAP_REF
-                self.account.getCurrentPlayer().current_overworld_camera_pos = camera.apply(self.position[0], self.position[1])
-                self.account.getCurrentPlayer().current_overworld_level = self.current_node_key
+                self.game.player.current_overworld = self.MAP_REF
+                self.game.player.current_overworld_camera_pos = self.position
+                self.game.player.current_overworld_level = self.current_node_key
                 
-                self.account.getCurrentPlayer().save()
+                self.game.player.save()
                 self.request.redirectScene(self.redirect_scene)
 
             return
@@ -160,10 +164,11 @@ class OverWorldPlayer:
 
     def handleEventNodes(self, event):
         if event.type == pg.QUIT:
-            self.account.getCurrentPlayer().current_overworld = self.MAP_REF
-            self.account.getCurrentPlayer().current_overworld_camera_pos = [0, 0]
-            self.account.getCurrentPlayer().current_overworld_level = self.current_node_key
-            self.account.getCurrentPlayer().save()
+            self.game.player.current_overworld = self.MAP_REF
+            self.game.player.current_overworld_camera_pos = [0, 0]
+            self.game.player.current_overworld_level = self.current_node_key
+            
+            self.game.player.save()
 
         if self.moving:
             return

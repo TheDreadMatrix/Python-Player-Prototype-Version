@@ -1,4 +1,5 @@
 from supermarioworld.scenes.base import EmptyScene
+from supermarioworld.package_typing import GameType
 
 from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
 from supermarioworld.entities.overworld_entities import OverWorldPlayer
@@ -11,12 +12,10 @@ from supermarioworld.configuration import NOTATION_BIOME_OVERWORLD
 
 
 
-class OverWorld(EmptyScene):
-    def __init__(self, game, biome: int, music_name: str, map_ref: str):
-        super().__init__(game)
 
-        
-        self.DEBUG = self.account.getDebug()
+class OverWorld(EmptyScene):
+    def __init__(self, game: GameType, biome: int, music_name: str, map_ref: str):
+        super().__init__(game)
 
         # Audio
         self.audio.load(music_name)
@@ -27,11 +26,13 @@ class OverWorld(EmptyScene):
         # overworld player
         self.player = OverWorldPlayer(game, map_ref=map_ref)
 
+        
+
         # Tile map
         self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{NOTATION_BIOME_OVERWORLD.get(biome)}.json")
         self.overworld_map.load(map_ref)
 
-        x, y = self.player.account.getCurrentPlayer().current_overworld_camera_pos
+        x, y = game.player.current_overworld_camera_pos
   
         # Camera
         self.camera = Camera(game=game, screen_width=game.width, screen_height=game.height, smooth=0.7, x=x, y=y)
@@ -46,7 +47,7 @@ class OverWorld(EmptyScene):
         self.text_points = TextLabel(game, "text-points", text="MOVING: 'WASD', SELECT: 'Q', EXIT TO MENU: 'E'", font_key="pixel", size_font=15)
         self.text_lives = TextLabel(game, "text-lies", text=f"x{self.player.account.getCurrentPlayer().lives}", font_key="pixel", size_font=18)
 
-        self.text_fps = TextLabel(game, "text-fps", text=f"FPS: 140/{self.account.getFps()}", font_key="pixel", size_font=15)
+        self.text_fps = TextLabel(game, "text-fps", text=f"FPS: {self.account.getFps()}/{self.account.getFps()}", font_key="pixel", size_font=15)
         self.fps_timer = 0
 
         # Fade
@@ -155,9 +156,11 @@ class OverWorld(EmptyScene):
 
         
 
-        if self.DEBUG:
-            self.renderer.render(self.text_account.texture_id, size=self.text_account.size, position=(65, 520))
-            self.renderer.render(self.text_points.texture_id, size=self.text_points.size, position=(65, 495))
+        
+        self.renderer.render(self.text_account.texture_id, size=self.text_account.size, position=(65, 520))
+        self.renderer.render(self.text_points.texture_id, size=self.text_points.size, position=(65, 495))
+
+        if self.game._DEBUG:
             self.renderer.render(self.text_fps.texture_id, size=self.text_fps.size, position=(165, 10))
 
         self.fade_label.render()

@@ -1,0 +1,28 @@
+{
+    "tile-map-": [
+        {
+            "type": "level-node-house",
+            "xy": [165, 275]
+        },
+
+        {
+            "type": "level-node-1",
+            "xy": [575, 275]
+        },
+
+        {
+            "type": "level-node-2",
+            "xy": [440, 200]
+        },
+
+        {
+            "type": "level-node-3",
+            "xy": [620, 220]
+        },
+
+        {
+            "type": "level-node-castle-1",
+            "xy": [1000, 1000]
+        }
+    ]
+}

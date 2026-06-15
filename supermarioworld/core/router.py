@@ -1,6 +1,4 @@
 from supermarioworld.package_typing import GameType
-import gc
-
 
 
 
@@ -54,8 +52,6 @@ class SceneManager:
             self._current_scene = self.scene_dict.get(state_scene)()
             self._manager_state = state_scene
 
-            if self.game._DEBUG:
-                print(f"Allocators {len(gc.get_objects())}")
 
         self._current_scene.onUpdate()
 

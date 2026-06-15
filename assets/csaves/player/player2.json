@@ -18,7 +18,7 @@
         "active": "overworld-1",
         "worlds": {
             "overworld-1": {
-                "current-level": "start",
+                "current-level": "level-1",
                 "nodes": {
                     "start": true,
                     "level-1": true,
@@ -28,8 +28,8 @@
                     "level-end": false
                 },
                 "camera-pos": [
-                    100,
-                    280
+                    575,
+                    275
                 ]
             },
             "overworld-2": {},

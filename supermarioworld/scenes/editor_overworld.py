@@ -9,7 +9,7 @@ from supermarioworld.rendering.users import TextLabel
 
 from supermarioworld.enums.render import RenderMode
 
-from supermarioworld.configuration import (NOTATION_BIOME_OVERWORLD, 
+from supermarioworld.configuration import (NOTATION_BIOME_OVERWORLD, PIXEL_TILE_SIZE,
                                            PALETTE_PER_ROW, OVERWORLD_EDITOR_COLS, OVERWORLD_EDITOR_ROWS, MIN_ZOOM_EDITOR, MAX_ZOOM_EDITOR)
 
 
@@ -23,7 +23,6 @@ class OverworldEditor(EmptyScene):
 
 
 
-        self.tile_size = 8
         self.cell_size = 32
         self.grid_origin = (20, 100)
 
@@ -113,7 +112,7 @@ class OverworldEditor(EmptyScene):
                 anim = AnimationCutOut(
                     game=self.game,
                     key_atlas="overworld",
-                    frames=[(*f.get("xy", []), self.tile_size, self.tile_size) for f in tile["frames"]],
+                    frames=[(*f.get("xy", (0, 0)), *f.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))) for f in tile["frames"]],
                     durations=tile.get("durations", [0.1] * len(tile["frames"])),
                     key_images=key_images,
                 )
@@ -121,12 +120,14 @@ class OverworldEditor(EmptyScene):
                 self.animations[tile_key] = anim
             else:
                 if isinstance(tile, list):
-                    x, y = self.notation[tile_key]
+                    x, y = tile
+                    w, h = (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE)
                 else:
-                    x, y = self.notation[tile_key].get("xy", (0, 0))
+                    x, y = tile.get("xy", (0, 0))
+                    w, h = tile.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))
 
 
-            self.assets.regCutOutImage(tile_key, "overworld", int(x), int(y), self.tile_size, self.tile_size)
+            self.assets.regCutOutImage(tile_key, "overworld", x=x, y=y, w=w, h=h)
             self.assets_to_release.add(tile_key)
 
 

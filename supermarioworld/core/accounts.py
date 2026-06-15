@@ -39,10 +39,7 @@ class PlayerAccountManager:
     def setFps(self, fps):
         self.settings_data["frametime"] = fps
 
-    def setDebug(self, debug):
-        self.settings_data["debug"] = debug
 
-    def getDebug(self): return self.settings_data["debug"]
     def getFps(self): return self.settings_data["frametime"]
     def getSoundVolume(self): return self.settings_data["sound"]
     def getMusicVolume(self): return self.settings_data["music"]

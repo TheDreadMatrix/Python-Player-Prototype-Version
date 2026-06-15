@@ -7,7 +7,7 @@ from supermarioworld.bootloder import Bootloader
 from supermarioworld.core.runtime.corepaths import CorePath
 from supermarioworld.core.runtime.daemonapi import GameRequest
 
-from supermarioworld.core.player.accounts import PlayerAccountManager
+from supermarioworld.core.accounts import PlayerAccountManager
 from supermarioworld.core.resources import AssetsResources
 
 from supermarioworld.core.audio import AudioStream
@@ -42,7 +42,7 @@ class SuperMariWorldApplication:
 
         
         self._run_scene = None
-        self._DEBUG = False
+        self._DEBUG = True if os.getenv("DAEMON_SMW_DEBUG") else False 
 
         self.delta_time = 0
         
@@ -77,8 +77,9 @@ class SuperMariWorldApplication:
         self.router.onInitScene(self)
         self.router._postInitScene()
        
-
-        
+    @property
+    def player(self):
+        return self.account.getCurrentPlayer()
     
     def getFps(self):
         return self._clock.get_fps()
