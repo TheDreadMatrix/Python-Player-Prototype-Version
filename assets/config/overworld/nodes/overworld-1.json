@@ -39,36 +39,43 @@
             "target": "level-2",
             
             "path": [
-                [440, 200]
+                [575, 275], [710, 285], [720, 300], [720, 425]
             ],
 
-            "path-animation": ["right"]
+            "path-animation": ["right", "right", "down", "down"]
         }
     },
 
     "level-2": {
         "title": "Valley of Ones 2",
         "redirect": "base:level-2",
-        "position": [440, 200],
+        "position": [720, 425],
 
-         "left": {
+        "left": {
             "target": "level-1",
 
             "path": [
-                [285, 200]
+                [720, 425], [720, 300], [710, 285], [575, 275]
             ],
-            "path-animation": ["left"]
+            "path-animation": ["up", "up", "left", "left"]
+        },
+
+         "up": {
+            "target": "level-1",
+
+            "path": [
+                [720, 425], [720, 300], [710, 285], [575, 275]
+            ],
+            "path-animation": ["up", "up", "left", "left"]
         },
 
         "right": {
             "target": "level-3",
 
             "path": [
-                [450, 200],
-                [500, 220],
-                [620, 220]
+                [960, 425]
             ],
-            "path-animation": ["right", "right", "right"]
+            "path-animation": ["right"]
         }
 
     },
@@ -76,16 +83,16 @@
     "level-3": {
         "title": "Valley of Ones 3",
         "redirect": "base:level-3",
-        "position": [620, 220],
+        "position": [960, 425],
 
         "left": {
             "target": "level-2",
 
             "path": [
-                [620, 220], [500, 220], [450, 200]
+                [720, 425]
             ],
 
-            "path-animation": ["left", "left", "left"]
+            "path-animation": ["left"]
         },
 
         "right": {

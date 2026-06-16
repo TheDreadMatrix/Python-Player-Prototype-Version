@@ -10,8 +10,11 @@ class Johnson:
             raise FileNotFoundError(f"File not found: {str(self.path)}")
 
     def readData(self) -> dict[str]:
-        with open(self.path, "r") as f:
-            data = json.load(f)
+        try:
+            with open(self.path, "r") as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            data = {}
         return data
     
     def saveData(self, data: dict[str]):
@@ -22,8 +25,11 @@ class Johnson:
 
 
 def readData(path: str) -> dict:
-    with open(path, "r") as f: 
-        data = json.load(f)
+    try: 
+        with open(path, "r") as f: 
+            data = json.load(f)
+    except json.JSONDecodeError:
+        data = {}
     return data
 
 

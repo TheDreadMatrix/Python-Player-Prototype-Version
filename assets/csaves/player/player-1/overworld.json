@@ -1,0 +1,29 @@
+{
+    "active": "overworld-1",
+    "worlds": {
+        "overworld-1": {
+            "current-node": "start",
+            "nodes": {},
+            "camera-pos": [
+                165,
+                299.6387641374503
+            ]
+        },
+        "overworld-2": {
+            "current-node": "start",
+            "nodes": {}
+        },
+        "overworld-3": {
+            "current-node": "start",
+            "nodes": {}
+        },
+        "overworld-4": {
+            "current-node": "start",
+            "nodes": {}
+        },
+        "overworld-star": {
+            "current-node": "start",
+            "nodes": {}
+        }
+    }
+}

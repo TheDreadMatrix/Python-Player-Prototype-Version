@@ -415,8 +415,23 @@ class OverworldEditor(EmptyScene):
         self._prev_mouse_buttons = (left, middle, right)
         self._prev_mouse_pos = mouse_pos
 
+    def screen_to_world(self, pos):
+        mx, my = pos
+        gx, gy = self.grid_origin
+        ox, oy = self.view_offset
+
+        map_cell = self.cell_size * self.zoom
+
+        wx = (mx - gx - ox) / map_cell
+        wy = (my - gy - oy) / map_cell
+
+        return wx * self.cell_size - 75, wy * self.cell_size - 125
+
     def onEvent(self, event):
         if event.type == pg.KEYDOWN:
+            if event.key == pg.K_c:
+                tx, ty = self.screen_to_world(pg.mouse.get_pos())
+                self._set_status(f"{tx} - {ty}")
 
             if event.key == pg.K_LEFTBRACKET:
                 self._switch_map(-1)

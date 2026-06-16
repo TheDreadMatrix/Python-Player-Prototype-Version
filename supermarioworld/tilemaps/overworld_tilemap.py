@@ -27,11 +27,11 @@ class OverWorldMap:
         notation_data = readData(self.paths.ConfigPath(notation_file))
         notation_building_data = readData(self.paths.ConfigPath(notation_file_buildings))
 
-        self.notation = notation_data["tiles"]
-        self.notation_building = notation_building_data["tiles"]
+        self.notation = notation_data.get("tiles", {})
+        self.notation_building = notation_building_data.get("tiles", {})
         
-        game.assets.regAtlas("overworld", notation_data["img-ref"])
-        game.assets.regAtlas("overworld-buildings", notation_building_data["img-ref"])
+        game.assets.regAtlas("overworld", notation_data.get("img-ref", "overworld/overworld.png"))
+        game.assets.regAtlas("overworld-buildings", notation_building_data.get("img-ref", "overworld/overworld.png"))
 
         self.map_data = {}
         self.buildings = {}

@@ -117,7 +117,7 @@ class OverWorldPlayer:
             self.redirect_timer += dt
             if self.redirect_timer > 2.5:
                 self.game.player.current_overworld = self.MAP_REF
-                self.game.player.current_overworld_camera_pos = self.position
+                self.game.player.current_overworld_camera_pos = camera.apply(self.position[0], self.position[1])
                 self.game.player.current_overworld_level = self.current_node_key
                 
                 self.game.player.save()

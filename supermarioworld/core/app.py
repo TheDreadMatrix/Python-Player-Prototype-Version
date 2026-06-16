@@ -79,7 +79,11 @@ class SuperMariWorldApplication:
        
     @property
     def player(self):
-        return self.account.getCurrentPlayer()
+        return self.account.current_account
+    
+    @property
+    def DEBUG(self):
+        return self._DEBUG
     
     def getFps(self):
         return self._clock.get_fps()
@@ -97,6 +101,11 @@ class SuperMariWorldApplication:
 
 
         for event in pg.event.get():
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_F3:
+                    self._DEBUG = not self._DEBUG
+
+
             self.router.event(event=event)
 
             if event.type == pg.QUIT:
@@ -106,6 +115,7 @@ class SuperMariWorldApplication:
                 self.width, self.height = event.w, event.h
 
                 self.renderer._eventResize()
+
 
             
         

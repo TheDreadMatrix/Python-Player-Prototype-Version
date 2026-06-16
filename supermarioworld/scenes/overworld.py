@@ -43,9 +43,9 @@ class OverWorld(EmptyScene):
         self.assets.regImage("overworld-border", "overworld/overworld-border.png")
 
         self.text_titles = TextLabel(game, "titles", font_key="pixel", size_font=18)
-        self.text_account = TextLabel(game, "text-account", f"#PLAYER-ACCOUNT-SLOT - {self.account.getCurrentPlayer().getSlot()}", font_key="pixel", size_font=15)
+        self.text_account = TextLabel(game, "text-account", f"#P-{self.game.player.getSlot()}", font_key="pixel", size_font=15)
         self.text_points = TextLabel(game, "text-points", text="MOVING: 'WASD', SELECT: 'Q', EXIT TO MENU: 'E'", font_key="pixel", size_font=15)
-        self.text_lives = TextLabel(game, "text-lies", text=f"x{self.player.account.getCurrentPlayer().lives}", font_key="pixel", size_font=18)
+        self.text_lives = TextLabel(game, "text-lies", text=f"{self.game.player.lives}", font_key="pixel", size_font=18)
 
         self.text_fps = TextLabel(game, "text-fps", text=f"FPS: {self.account.getFps()}/{self.account.getFps()}", font_key="pixel", size_font=15)
         self.fps_timer = 0
@@ -122,6 +122,9 @@ class OverWorld(EmptyScene):
     
 
     def onEvent(self, event):
+        if event.type == 768 and self.game.DEBUG:
+            if event.key == 108:
+                self.request.restartScene()
         self.player.handleEventNodes(event=event)
         
         
@@ -143,7 +146,6 @@ class OverWorld(EmptyScene):
 
             self.renderer.renderFbo("tile-map", size=(self.game.width, self.game.height), shader_key="pxm")
 
-        # Render node
 
         # Render player
         self.player.renderPlayer(self.camera)
@@ -157,11 +159,11 @@ class OverWorld(EmptyScene):
         
 
         
-        self.renderer.render(self.text_account.texture_id, size=self.text_account.size, position=(65, 520))
+        self.renderer.render(self.text_account.texture_id, size=self.text_account.size, position=(25, self.game.height - 25))
         self.renderer.render(self.text_points.texture_id, size=self.text_points.size, position=(65, 495))
 
-        if self.game._DEBUG:
-            self.renderer.render(self.text_fps.texture_id, size=self.text_fps.size, position=(165, 10))
+        if self.game.DEBUG:
+            self.renderer.render(self.text_fps.texture_id, size=self.text_fps.size, position=(25, 25))
 
         self.fade_label.render()
 
