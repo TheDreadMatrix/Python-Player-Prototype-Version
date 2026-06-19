@@ -137,6 +137,7 @@ class Evalent(typing.Protocol):
 
 class GameType(typing.Protocol):
     delta_time: float
+    tick_time: float
     DEBUG: bool
     
     width: int

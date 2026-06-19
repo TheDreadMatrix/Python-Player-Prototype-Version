@@ -1,41 +1,7 @@
-
-TYPE_BLOCKS:
-
-DEFAULT 
-DAMAGE
-MOVING
-
-POWERUP attr count
-MOVING POWERUP attr count
-
-FAKE
-ONEWAY
-WATER
-LAVA
-
-SLOPE
-LIANA
+SUPER MANTIS WORLD 91 - DaemonDuck16
 
 
-TYPE_ENEMY:
-
-KOOPA
-GOOMBA
-BOOMBA
-BOO
-
-TYPE_POWERUP:
-
-CAPE
-FIREFLOWER
-SUPER
-DEFUALT
+main.py
 
 
-RENDER-MODE:
-
-KeyPushRender
-KeyMeshPushRender
-
-KeyAtlasPushRender
-KeyRawPushRender
+games/ <- output directory for exe

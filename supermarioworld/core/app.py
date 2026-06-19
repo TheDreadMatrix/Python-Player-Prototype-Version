@@ -27,6 +27,7 @@ import pygame as pg
 class SuperMariWorldApplication:
     def __init__(self, file_execution: str):
         
+        # Runtime
         self.request = GameRequest(self)
         self.paths = CorePath(file_execution=file_execution)
         
@@ -37,28 +38,32 @@ class SuperMariWorldApplication:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 
-        self._clock = pg.time.Clock()
-        self._running = True
-
-        
-        self._run_scene = None
-        self._DEBUG = True if os.getenv("DAEMON_SMW_DEBUG") else False 
-
-        self.delta_time = 0
         
 
-        self._window = pg.display.set_mode((800, 600), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
+        self._window = pg.display.set_mode((700, 580), flags=pg.DOUBLEBUF|pg.OPENGL|pg.RESIZABLE)
 
         self.width = self._window.get_width()
         self.height = self._window.get_height()
 
         icon = pg.image.load(self.paths.AssetPath("icon.ico"))
 
-        pg.display.set_caption("Super Mario World: 91 Retitle")
+        pg.display.set_caption("Super Martis World 91")
         pg.display.set_icon(icon)
         
-        # Configuration settings
+        # Configuration settings 
         self.account = PlayerAccountManager(self)
+
+        # Attributes
+        self._clock = pg.time.Clock()
+        self._running = True
+        self._focused = True
+
+        
+        self._run_scene = None
+        self._DEBUG = True if os.getenv("DAEMON_SMW_DEBUG") else False 
+
+        self.delta_time = 0
+        self.tick_time = 1 / self.account.getFps()
 
         # Scenes and user side
         self.assets = AssetsResources(self)
@@ -97,16 +102,27 @@ class SuperMariWorldApplication:
     
 
     def _update(self):
-        self.router.update()
+        if self._focused:
+            pg.mixer.music.unpause()
+            self.router.update()
+        else:
+            pg.mixer.music.pause()
 
 
         for event in pg.event.get():
+
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_F3:
                     self._DEBUG = not self._DEBUG
 
+            elif event.type == pg.WINDOWFOCUSLOST:
+                self._focused = False
 
-            self.router.event(event=event)
+            elif event.type == pg.WINDOWFOCUSGAINED:
+                self._focused = True
+
+            if self._focused:
+                self.router.event(event=event)
 
             if event.type == pg.QUIT:
                 self._running = False
@@ -123,6 +139,9 @@ class SuperMariWorldApplication:
 
 
     def _render(self):
+        if not self._focused:
+            return
+    
         self.renderer._clearColor(0, 0, 0)
 
         self.router.render()

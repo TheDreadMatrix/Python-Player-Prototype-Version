@@ -105,7 +105,7 @@ class OverWorldPlayer:
         return self.animation_dict.get(animation_name, self.animation_down)
 
 
-    def updatePlayer(self, camera, dt):
+    def updatePlayer(self, dt):
         # Animations
         self.current_animation = self.getCurrentPathAnimation()
         self.current_animation.update()
@@ -117,7 +117,6 @@ class OverWorldPlayer:
             self.redirect_timer += dt
             if self.redirect_timer > 2.5:
                 self.game.player.current_overworld = self.MAP_REF
-                self.game.player.current_overworld_camera_pos = camera.apply(self.position[0], self.position[1])
                 self.game.player.current_overworld_level = self.current_node_key
                 
                 self.game.player.save()
@@ -165,7 +164,6 @@ class OverWorldPlayer:
     def handleEventNodes(self, event):
         if event.type == pg.QUIT:
             self.game.player.current_overworld = self.MAP_REF
-            self.game.player.current_overworld_camera_pos = [0, 0]
             self.game.player.current_overworld_level = self.current_node_key
             
             self.game.player.save()

@@ -1,4 +1,4 @@
-import math
+
 
 class Camera:
     def __init__(self, game, screen_width: int, screen_height: int, smooth: float = 0.1, x: float = 0.0, y: float = 0.0):
@@ -24,27 +24,20 @@ class Camera:
         self.bound_bottom = bottom
 
     def follow(self, target_x: float, target_y: float):
-        target_cam_x = target_x - self.screen_width / 2
-        target_cam_y = target_y - self.screen_height / 2
+        target_x -= self.screen_width / 2
+        target_y -= self.screen_height / 2
 
-        alpha = 1 - math.exp(-self.smooth * self.game.delta_time)
-        self.x += (target_cam_x - self.x) * alpha
-        self.y += (target_cam_y - self.y) * alpha
+        self.x += (target_x - self.x) * self.smooth
+        self.y += (target_y - self.y) * self.smooth
 
         self.x = max(
             self.bound_left,
-            min(
-                self.x,
-                self.bound_right - self.screen_width
-            )
+            min(self.x, self.bound_right - self.screen_width)
         )
 
         self.y = max(
             self.bound_top,
-            min(
-                self.y,
-                self.bound_bottom - self.screen_height
-            )
+            min(self.y, self.bound_bottom - self.screen_height)
         )
 
     def apply(self, x: float, y: float):

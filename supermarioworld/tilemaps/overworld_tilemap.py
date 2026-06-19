@@ -106,6 +106,9 @@ class OverWorldMap:
 
         # Build tile
         for tile_build_dict in self.building_layers:
+            tile_type = tile_build_dict.get("type")
+            if tile_type is None:
+                continue
             normalized_key = self._normalize_tile_key(tile_build_dict["type"], tile_type="build")
             
             if normalized_key is not None:
@@ -157,6 +160,9 @@ class OverWorldMap:
 
         for tile_build_dict in self.building_layers:
             x, y = tile_build_dict.get("xy", (0, 0))
+            tile_type = tile_build_dict.get("type")
+            if tile_type is None:
+                continue
             normalized_key = self._normalize_tile_key(tile_build_dict["type"], tile_type="build")
 
             self.tiles_build.append(TileEntity(tile=normalized_key, x=x, y=y, s_w=DRAW_BIGGER_TILE_SIZE, s_h=DRAW_BIGGER_TILE_SIZE, flx=0, fly=0))

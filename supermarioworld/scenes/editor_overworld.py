@@ -7,7 +7,7 @@ from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.rendering.animation import AnimationCutOut
 from supermarioworld.rendering.users import TextLabel
 
-from supermarioworld.enums.render import RenderMode
+
 
 from supermarioworld.configuration import (NOTATION_BIOME_OVERWORLD, PIXEL_TILE_SIZE,
                                            PALETTE_PER_ROW, OVERWORLD_EDITOR_COLS, OVERWORLD_EDITOR_ROWS, MIN_ZOOM_EDITOR, MAX_ZOOM_EDITOR)
@@ -15,13 +15,8 @@ from supermarioworld.configuration import (NOTATION_BIOME_OVERWORLD, PIXEL_TILE_
 
 
 class OverworldEditor(EmptyScene):
-    def __init__(self, game: GameType, biome: int=0):
+    def __init__(self, game: GameType, biome: int=0, index_map: int=0):
         super().__init__(game)
-
-        self.audio.load("CS-B")
-        self.audio.play(loops=-1, fade_in=2000)
-
-
 
         self.cell_size = 32
         self.grid_origin = (20, 100)
@@ -57,33 +52,31 @@ class OverworldEditor(EmptyScene):
         # Connect other files
         maps_dir = game.paths.ConfigFolder("overworld/maps")
         self.map_files = game.paths.findGlobal(maps_dir, file_category="*.json")
-        self.map_index = 0
+        self.map_index = index_map
 
         
-
         self.map_path = None
         self.map_json = {}
 
-        self.layer_keys = []
-        self.layer_index = 0
-
-        self.dirty = False
-
+        # Status
         self.status = "Ready"
         self.status_timer = 0.0
 
+        # Mouse
         self._prev_mouse_buttons = (False, False, False)
         self._prev_mouse_pos = pg.mouse.get_pos()
 
+        # CTRL + Z
         self.undo_stack = []
+        self.dirty = False
 
+        # Batches
         self._cached_map_batches = {}
-        
-
         self._selected_rect = None
     
-    
         self._load_current_map()
+
+
 
     def _create_labels(self):
         self.title_label = TextLabel(self.game, "ow-title", "OVERWORLD EDITOR", font_key="pixel", size_font=24)
@@ -92,8 +85,6 @@ class OverworldEditor(EmptyScene):
         self.map_label = TextLabel(self.game, "ow-map", "", size_font=20, font_key="pixel")
         self.map_label.position = (20, 56)
 
-        self.layer_label = TextLabel(self.game, "ow-layer", "", size_font=18, font_key="pixel")
-        self.layer_label.position = (380, 56)
 
         self.tile_label = TextLabel(self.game, "ow-tile", "", size_font=18, font_key="pixel")
         self.tile_label.position = (20, 72)
@@ -127,35 +118,27 @@ class OverworldEditor(EmptyScene):
                     w, h = tile.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))
 
 
-            self.assets.regCutOutImage(tile_key, "overworld", x=x, y=y, w=w, h=h)
-            self.assets_to_release.add(tile_key)
+                self.assets.regCutOutImage(tile_key, "overworld", x=x, y=y, w=w, h=h)
+                self.assets_to_release.add(tile_key)
 
 
 
     def _load_current_map(self):
-        if not self.map_files:
-            self.map_path = None
-            self.map_json = {}
-            self.layer_keys = []
-            self.layer_index = 0
-            return
-
         self.map_path = self.map_files[self.map_index]
         self.map_json = readData(self.map_path)
-        self.layer_keys = [k for k, v in self.map_json.items() if k.startswith("tile-map-") and isinstance(v, list)]
-        self.layer_index = 0
+        
+        
         self._normalize_active_layer()
         self.dirty = False
         self.status = f"Loaded: {self.map_path}"
     
 
     def _normalize_active_layer(self):
-        if not self.layer_keys:
+        
+        if not self.map_json.get("tile-map-world"):
             self.map_json["tile-map-world"] = []
-            self.layer_keys = ["tile-map-world"]
-            self.layer_index = 0
-        self.layer_index = max(0, min(self.layer_index, len(self.layer_keys) - 1))
-        layer = self._active_layer()
+            
+        layer = self.map_json["tile-map-world"]
         default_tile = "tile-1" if "tile-1" in self.notation else ""
         is_completely_empty = all((not cell) for row in layer for cell in row) if layer else True
 
@@ -169,11 +152,9 @@ class OverworldEditor(EmptyScene):
             while len(row) < width:
                 row.append(default_tile if is_completely_empty else "")
 
-    def _active_layer_key(self):
-        return self.layer_keys[self.layer_index]
 
     def _active_layer(self):
-        return self.map_json[self._active_layer_key()]
+        return self.map_json.get("tile-map-world", [])
 
 
     def _set_status(self, text: str):
@@ -186,13 +167,10 @@ class OverworldEditor(EmptyScene):
         self.map_index = (self.map_index + delta) % len(self.map_files)
         self._load_current_map()
 
-    def _switch_layer(self, delta: int):
-        if not self.layer_keys:
-            return
-        self.layer_index = (self.layer_index + delta) % len(self.layer_keys)
-        self._normalize_active_layer()
 
-        self._set_status(f"Layer: {self._active_layer_key()}")
+    def _switch_biome(self, biome: int):
+        pass
+
 
     def _select_tile_delta(self, delta: int):
         if not self.palette_keys:
@@ -200,6 +178,8 @@ class OverworldEditor(EmptyScene):
         idx = self.palette_keys.index(self.selected_tile)
         idx = (idx + delta) % len(self.palette_keys)
         self.selected_tile = self.palette_keys[idx]
+
+
 
     def _paint(self, mouse_pos, erase: bool):
         layer = self._active_layer()
@@ -216,13 +196,13 @@ class OverworldEditor(EmptyScene):
         if tx < 0 or ty < 0 or tx >= cols or ty >= rows:
             return False
 
-        layer = self._active_layer()
+        
         current = layer[ty][tx]
         new_value = "" if erase else self.selected_tile
         if current == new_value:
             return False
 
-        self.undo_stack.append((self._active_layer_key(), tx, ty, current))
+        self.undo_stack.append((tx, ty, current))
         layer[ty][tx] = new_value
         self.dirty = True
 
@@ -233,8 +213,8 @@ class OverworldEditor(EmptyScene):
             self._set_status("Nothing to undo")
             return
 
-        layer_key, tx, ty, prev_value = self.undo_stack.pop()
-        layer = self.map_json.get(layer_key)
+        tx, ty, prev_value = self.undo_stack.pop()
+        layer = self.map_json.get("tile-map-world", [])
         if not isinstance(layer, list) or ty < 0 or ty >= len(layer):
             self._set_status("Undo skipped")
             return
@@ -258,8 +238,8 @@ class OverworldEditor(EmptyScene):
             "save": (640, 16, 140, 34),
             "prev_map": (640, 56, 34, 28),
             "next_map": (746, 56, 34, 28),
-            "prev_layer": (640, 90, 34, 28),
-            "next_layer": (746, 90, 34, 28),
+            "prev_biome": (640, 90, 34, 28),
+            "next_biome": (746, 90, 34, 28),
         }
 
     def _palette_rects(self):
@@ -321,6 +301,7 @@ class OverworldEditor(EmptyScene):
         if self.map_path is None:
             self._set_status("No map file to save")
             return
+        
         saveData(self.map_path, self.map_json)
         self.dirty = False
         self._set_status(f"Saved: {self.map_path}")
@@ -332,14 +313,13 @@ class OverworldEditor(EmptyScene):
         if self.status_timer > 0:
             self.status_timer -= self.game.delta_time
         else:
-            self.status = ""
+            self.status = "LMB draw | RMB erase | MMB pan | Wheel zoom | Q/E tile | Ctrl+S save"
 
         self._handle_mouse_input()
 
         self.map_label.setText(f"Map: {"Some map" if self.map_path else 'none'} {'*' if self.dirty else ''}")
-        self.layer_label.setText(f"Layer: {self._active_layer_key() if self.layer_keys else 'none'}")
         self.tile_label.setText(f"Tile: {self.selected_tile if self.selected_tile else 'none'}")
-        self.status_label.setText(self.status if self.status else "LMB draw | RMB erase | MMB pan | Wheel zoom | [/] map | ;/' layer | Q/E tile | Ctrl+S save")
+        self.status_label.setText(self.status)
         
 
 
@@ -394,13 +374,13 @@ class OverworldEditor(EmptyScene):
                 self._prev_mouse_buttons = (left, middle, right)
                 self._prev_mouse_pos = mouse_pos
                 return
-            if over_ui and self._in_rect(mouse_pos, rects["prev_layer"]):
-                self._switch_layer(-1)
+            if over_ui and self._in_rect(mouse_pos, rects["prev_biome"]):
+                self._switch_biome(-1)
                 self._prev_mouse_buttons = (left, middle, right)
                 self._prev_mouse_pos = mouse_pos
                 return
-            if over_ui and self._in_rect(mouse_pos, rects["next_layer"]):
-                self._switch_layer(1)
+            if over_ui and self._in_rect(mouse_pos, rects["next_biome"]):
+                self._switch_biome(1)
                 self._prev_mouse_buttons = (left, middle, right)
                 self._prev_mouse_pos = mouse_pos
                 return
@@ -437,10 +417,6 @@ class OverworldEditor(EmptyScene):
                 self._switch_map(-1)
             elif event.key == pg.K_RIGHTBRACKET:
                 self._switch_map(1)
-            elif event.key == pg.K_SEMICOLON:
-                self._switch_layer(-1)
-            elif event.key == pg.K_QUOTE:
-                self._switch_layer(1)
             elif event.key == pg.K_q:
                 self._select_tile_delta(-1)
             elif event.key == pg.K_e:
@@ -509,7 +485,7 @@ class OverworldEditor(EmptyScene):
 
         if self._selected_rect:
             x, y, w, h = self._selected_rect
-            self.renderer.renderQuad(position=(x, y), size=(w, h), r=1.0, g=0.0, b=0.0, a=1.0, mode=RenderMode.LINE_LOOP)
+            self.renderer.renderQuad(position=(x, y), size=(w, h), r=1.0, g=0.0, b=0.0, a=0.5)
 
                
 
@@ -525,7 +501,7 @@ class OverworldEditor(EmptyScene):
         self.map_label.render()
         self.tile_label.render()
         self.status_label.render()
-        self.layer_label.render()
+        
 
         
        
@@ -539,15 +515,13 @@ class OverworldEditor(EmptyScene):
     def _build_map_batches(self):
         batches = {}
 
-        if not self.layer_keys:
-            return batches
-
         map_cell = max(1, int(self.cell_size * self.zoom))
         screen_w, screen_h = self.game.width, self.game.height
         gx, gy = self.grid_origin
         ox, oy = self.view_offset
 
         layer = self._active_layer()
+        
 
     
         inv_cell = 1.0 / map_cell
@@ -595,7 +569,6 @@ class OverworldEditor(EmptyScene):
         return batches
 
 
-   
 
     def onSave(self):
         for animation in self.animations.values():

@@ -8,7 +8,7 @@ from supermarioworld.rendering.users import TextLabel, FadeLabel
 from supermarioworld.rendering.shaders import CustomShader
 from supermarioworld.camera import Camera
 
-from supermarioworld.configuration import NOTATION_BIOME_OVERWORLD
+from supermarioworld.configuration import NOTATION_BIOME_OVERWORLD, WALK_SPEED, SMOOTH_CAMERA, PIXEL_SPEED
 
 
 
@@ -19,12 +19,12 @@ class OverWorld(EmptyScene):
 
         # Audio
         self.audio.load(music_name)
-        self.audio.play(loops=-1, fade_in=2000)
+        self.audio.play(loops=-1)
 
     
 
         # overworld player
-        self.player = OverWorldPlayer(game, map_ref=map_ref)
+        self.player = OverWorldPlayer(game, map_ref=map_ref, move_speed=WALK_SPEED)
 
         
 
@@ -32,19 +32,20 @@ class OverWorld(EmptyScene):
         self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{NOTATION_BIOME_OVERWORLD.get(biome)}.json")
         self.overworld_map.load(map_ref)
 
-        x, y = game.player.current_overworld_camera_pos
   
         # Camera
-        self.camera = Camera(game=game, screen_width=game.width, screen_height=game.height, smooth=0.7, x=x, y=y)
+        self.camera = Camera(game=game, screen_width=game.width, screen_height=game.height, smooth=SMOOTH_CAMERA)
         self.camera.setBounds(0, -80, 2500, 2500)
 
        
         # Ui
         self.assets.regImage("overworld-border", "overworld/overworld-border.png")
+        
+        self.assets.regCutOutImage("x-lives", atlas_key="fonts", x=313, y=113, w=7, h=7)
 
         self.text_titles = TextLabel(game, "titles", font_key="pixel", size_font=18)
         self.text_account = TextLabel(game, "text-account", f"#P-{self.game.player.getSlot()}", font_key="pixel", size_font=15)
-        self.text_points = TextLabel(game, "text-points", text="MOVING: 'WASD', SELECT: 'Q', EXIT TO MENU: 'E'", font_key="pixel", size_font=15)
+        self.text_points = TextLabel(game, "text-points", text="MOVING: 'WASD', SELECT: 'Q', EXIT TO MENU: 'E'", font_key="pixel", size_font=13)
         self.text_lives = TextLabel(game, "text-lies", text=f"{self.game.player.lives}", font_key="pixel", size_font=18)
 
         self.text_fps = TextLabel(game, "text-fps", text=f"FPS: {self.account.getFps()}/{self.account.getFps()}", font_key="pixel", size_font=15)
@@ -58,16 +59,14 @@ class OverWorld(EmptyScene):
         # Pixel mosaic
         self.pixel_size = 1
         self.target_pixel_size = 1
-        self.pixel_speed = 60
 
-        self.renderer.createFbo("tile-map", (game.width, game.height))
-
-
+       
         self.pixel_mosiac_shader = CustomShader(game, "testing/default.vert", "post-processing/post-processing-pxm.frag")
         self.pixel_mosiac_shader.defineUniform("pixel_size", "pixelSize")
         self.pixel_mosiac_shader.defineUniform("texture_size", "textureSize")
 
         self.renderer.regShader("pxm", self.pixel_mosiac_shader)
+        self.renderer.createFbo("tile-map", (game.width, game.height))
         
         
 
@@ -78,11 +77,15 @@ class OverWorld(EmptyScene):
         # Fade
         self.fade_label.update()
 
-        # Overworld spatial
-        self.overworld_map.update(self.player)
-        
         # Camera
         self.camera.follow(self.player.position[0], self.player.position[1])
+
+        # Overworld spatial
+        self.player.updatePlayer(self.game.delta_time)
+
+        self.overworld_map.update(self.player)
+        
+        
 
         # Pixel mosaic
         if self.player.redirecting and self.player.redirect_scene != "base:menu":
@@ -93,11 +96,11 @@ class OverWorld(EmptyScene):
         
 
         if self.pixel_size < self.target_pixel_size:
-            self.pixel_size += self.pixel_speed * self.game.delta_time
+            self.pixel_size += PIXEL_SPEED * self.game.delta_time
             self.pixel_size = min(self.pixel_size, self.target_pixel_size)
 
         elif self.pixel_size > self.target_pixel_size:
-            self.pixel_size -= self.pixel_speed * self.game.delta_time
+            self.pixel_size -= PIXEL_SPEED * self.game.delta_time
             self.pixel_size = max(self.pixel_size, self.target_pixel_size)
 
         # Fps
@@ -114,11 +117,12 @@ class OverWorld(EmptyScene):
             self.fade_label.fadeOut(speed=1.5)
             self.OUT_FADE = True
 
+
         # If we coming to new node
         if self.text_titles.text != self.player._getTitleNode():
             self.text_titles.setText(self.player._getTitleNode())
 
-        self.player.updatePlayer(self.camera, self.game.delta_time)
+        
     
 
     def onEvent(self, event):
@@ -153,14 +157,26 @@ class OverWorld(EmptyScene):
         
         # Render UI
         self.renderer.render("overworld-border", size=(self.game.width, self.game.height))
-        self.renderer.render(self.text_titles.texture_id, size=self.text_titles.size, position=(265, 70))
+        self.renderer.render("x-lives", size=(20, 20), position=(155, 70))
+
+        title_size = self.text_titles.size
+
+        max_width = 400
+
+        scale = 1.0
+        if title_size[0] > max_width:
+            scale = max_width / title_size[0]
+
+        render_size = (title_size[0] * scale, title_size[1] * scale)
+
+        self.renderer.render(self.text_titles.texture_id, size=render_size, position=(245, 70))
         self.renderer.render(self.text_lives.texture_id, size=self.text_lives.size, position=(185, 70))
 
         
 
         
         self.renderer.render(self.text_account.texture_id, size=self.text_account.size, position=(25, self.game.height - 25))
-        self.renderer.render(self.text_points.texture_id, size=self.text_points.size, position=(65, 495))
+        self.renderer.render(self.text_points.texture_id, size=self.text_points.size, position=(60, 495))
 
         if self.game.DEBUG:
             self.renderer.render(self.text_fps.texture_id, size=self.text_fps.size, position=(25, 25))

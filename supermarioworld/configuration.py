@@ -18,6 +18,13 @@ NOTATION_BIOME_LEVEL = {
     1: "tile-notation-underground"
 }
 
+# Overworld parametrs
+WALK_SPEED = 145
+PIXEL_SPEED = 75
+
+SMOOTH_CAMERA = 0.7
+
+
 
 # Level and Overworld editor parameters
 PIXEL_TILE_SIZE = 8

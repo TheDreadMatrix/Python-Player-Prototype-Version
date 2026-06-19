@@ -8,7 +8,7 @@ class Level(EmptyScene):
         super().__init__(game)
 
         self.audio.load(music_name)
-        self.audio.play(loops=-1, fade_in=3000)
+        self.audio.play(loops=-1)
 
     
 
@@ -33,18 +33,5 @@ class Level(EmptyScene):
 
 
 
-class Tutorial(EmptyScene):
-    def __init__(self, game):
-        super().__init__(game)
 
-    def onUpdate(self):
-        return super().onUpdate()
-
-
-    def onEvent(self, event):
-        return super().onEvent(event)
-
-
-    def onRender(self):
-        return super().onRender()
     

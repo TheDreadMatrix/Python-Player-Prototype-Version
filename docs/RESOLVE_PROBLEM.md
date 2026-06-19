@@ -6,12 +6,15 @@ Fix CustomShader:
 * Shader source for instance and quad shader
 
 
-Fix Overworld:
-* Level tile-map animation
-* Level level node in map layer 2
 
 
 Fix Menu:
 * UI
+
+
+Fix editor:
+* Swtich biome notation
+
+
 
 

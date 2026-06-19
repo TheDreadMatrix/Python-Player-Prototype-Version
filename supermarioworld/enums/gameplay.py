@@ -1,6 +1,5 @@
 from enum import IntEnum
 
-REDIRECT_TO_OVERWORLD = 0
 
 
 class CharacterState(IntEnum):

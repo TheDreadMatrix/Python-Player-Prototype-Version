@@ -96,31 +96,67 @@
         },
 
         "right": {
-            "target": "level-4",
+            "target": "level-5",
+            "path": [[1000, 425], [1128, 435], [1128, 730]],
+            "path-animation": ["right", "right", "down"]
+        },
 
-            "path-animation": ["right"]
+        "down": {
+            "target": "level-4",
+            "path": [[960, 590]],
+            "path-animation": ["down"]
         }
     },
 
     "level-4": {
-        "title": "Ampliy`s castle",
+        "title": "Valley of Ones 4",
         "redirect": "base:level-4",
-        "position": [1000, 1000],
+        "position": [960, 590],
 
-        "left": {
-            "target": "start",
-            "path": [[100, 100]],
+        "up": {
+            "target": "level-3",
+            "path": [[960, 425]],
             "path-animation": ["up"]
         }
     },
 
-    "level-secret": {
-        "title": "Valley of Ones secret",
-        "redirect": "base:overworld-2"
+    "level-5": {
+        "title": "Ampliy`s castle",
+        "redirect": "base:ampliy-castle",
+        "position": [1128, 730],
+
+
+        "up": {
+            "target": "level-3",
+            "path": [[1128, 730], [1128, 435], [960, 425]],
+            "path-animation": ["up", "up", "left"]
+        },
+
+        "down": {
+            "target": "level-end",
+            "path": [[1128, 730], [1128, 870], [1128, 890], [325, 890], [310, 855]],
+            "path-animation": ["down", "down", "left", "left", "up"]
+        }
     },
+
 
     "level-end": {
         "title": "Valley of Ones STAR-DOME",
-        "redirect": "base:oveworld-3"
+        "redirect": "base:overworld-2",
+        "position": [310, 855],
+
+        "right": {
+            "target": "level-5",
+            "path": [[325, 890], [1122, 890], [1128, 870], [1128, 730]],
+            "path-animation": ["down", "right", "up", "up"]
+        },
+
+        "down": {
+            "target": "level-5",
+            "path": [[325, 890], [1122, 890], [1128, 870], [1128, 730]],
+            "path-animation": ["down", "right", "up", "up"]
+        }
+
+
     }
 }
