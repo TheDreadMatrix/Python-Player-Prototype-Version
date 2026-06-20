@@ -11,14 +11,14 @@ class Johnson:
 
     def readData(self) -> dict[str]:
         try:
-            with open(self.path, "r") as f:
+            with open(self.path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except json.JSONDecodeError:
             data = {}
         return data
     
     def saveData(self, data: dict[str]):
-        with open(self.path, "w") as f:
+        with open(self.path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
 
 
@@ -26,7 +26,7 @@ class Johnson:
 
 def readData(path: str) -> dict:
     try: 
-        with open(path, "r") as f: 
+        with open(path, "r", encoding="utf-8") as f: 
             data = json.load(f)
     except json.JSONDecodeError:
         data = {}
@@ -34,5 +34,5 @@ def readData(path: str) -> dict:
 
 
 def saveData(path: str, data: dict) -> None: 
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)

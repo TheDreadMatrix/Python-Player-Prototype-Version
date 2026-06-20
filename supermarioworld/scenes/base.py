@@ -1,5 +1,6 @@
 from supermarioworld.package_typing import GameType, Evalent
 
+
 class EmptyScene:
     def __init__(self, game: "GameType"):
         self.game = game
@@ -8,6 +9,8 @@ class EmptyScene:
         self.assets = game.assets
         self.audio = game.audio
         self.account = game.account
+
+        self.locale = game.locale
         
         self.renderer = game.renderer
 

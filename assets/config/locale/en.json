@@ -1,0 +1,20 @@
+{
+    "menu-play": "Player mode",
+    "menu-options": "Options",
+    "menu-quit": "Quit",
+
+    "main-pointer-overworld": "MOVING: 'WASD', SELECT: 'Q', EXIT TO MENU: 'E",
+    "node-cant-be-found": "NODE CANT BE FOUND",
+    "unnamed-title-node": "UNNAMED TITLE NODE",
+
+    "valley-of-ones-daemon-house": "Daemon`s house",
+    "valley-of-ones-1": "Valley of Ones 1",
+    "valley-of-ones-2": "Valley of Ones 2",
+    "valley-of-ones-3": "Valley of Ones 3",
+    "valley-of-ones-4": "Valley of Ones 4",
+    "valley-of-ones-ampliy-castle": "Ampliy`s castle",
+    "valley-of-ones-star-dome": "Valley of Ones STAR-DOME",
+
+    "diamond-caves-star-dome": "Diamond Caves STAR DOME"
+
+}

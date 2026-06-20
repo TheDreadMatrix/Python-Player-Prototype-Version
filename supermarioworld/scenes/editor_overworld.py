@@ -32,9 +32,10 @@ class OverworldEditor(EmptyScene):
         self._drag_palette_off = (0, 0)
 
         # Read file and atlas
+        self.biome_index = biome
         notation = readData(game.paths.ConfigPath(f"overworld/notations/{NOTATION_BIOME_OVERWORLD.get(biome)}.json"))
 
-        self.notation = notation["tiles"]
+        self.notation = notation.get("tiles", {})
         self.assets.regAtlas("overworld", notation["img-ref"])
 
 
@@ -168,8 +169,47 @@ class OverworldEditor(EmptyScene):
         self._load_current_map()
 
 
-    def _switch_biome(self, biome: int):
-        pass
+    def _switch_biome(self, delta: int):
+        biome_count = len(NOTATION_BIOME_OVERWORLD)
+        self.biome_index = (self.biome_index + delta) % biome_count
+
+       
+        for anim in self.animations.values():
+            anim.delAnimation()
+
+        self.animations.clear()
+
+     
+        for key in self.assets_to_release:
+            self.assets.delImage(key)
+
+        self.assets_to_release.clear()
+
+       
+        notation = readData(
+            self.game.paths.ConfigPath(
+                f"overworld/notations/{NOTATION_BIOME_OVERWORLD[self.biome_index]}.json"
+            )
+        )
+
+        self.notation = notation.get("tiles", {})
+
+        
+        self.assets.regAtlas("overworld", notation["img-ref"])
+
+      
+        self.palette_keys = list(self.notation.keys())
+        self.selected_tile = self.palette_keys[0] if self.palette_keys else None
+
+      
+        self._register_palette_textures()
+
+     
+        self._normalize_active_layer()
+
+        self._set_status(
+            f"Biome: {NOTATION_BIOME_OVERWORLD[self.biome_index]}"
+        )
 
 
     def _select_tile_delta(self, delta: int):

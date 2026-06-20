@@ -5,8 +5,11 @@ from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
 from supermarioworld.entities.overworld_entities import OverWorldPlayer
 
 from supermarioworld.rendering.users import TextLabel, FadeLabel
+from supermarioworld.rendering.animation import AnimationCutOut
 from supermarioworld.rendering.shaders import CustomShader
-from supermarioworld.camera import Camera
+from supermarioworld.camera import OverworldCamera
+
+
 
 from supermarioworld.configuration import NOTATION_BIOME_OVERWORLD, WALK_SPEED, SMOOTH_CAMERA, PIXEL_SPEED
 
@@ -16,11 +19,6 @@ from supermarioworld.configuration import NOTATION_BIOME_OVERWORLD, WALK_SPEED, 
 class OverWorld(EmptyScene):
     def __init__(self, game: GameType, biome: int, music_name: str, map_ref: str):
         super().__init__(game)
-
-        # Audio
-        self.audio.load(music_name)
-        self.audio.play(loops=-1)
-
     
 
         # overworld player
@@ -34,7 +32,7 @@ class OverWorld(EmptyScene):
 
   
         # Camera
-        self.camera = Camera(game=game, screen_width=game.width, screen_height=game.height, smooth=SMOOTH_CAMERA)
+        self.camera = OverworldCamera(game=game, screen_width=game.width, screen_height=game.height, smooth=SMOOTH_CAMERA)
         self.camera.setBounds(0, -80, 2500, 2500)
 
        
@@ -45,7 +43,7 @@ class OverWorld(EmptyScene):
 
         self.text_titles = TextLabel(game, "titles", font_key="pixel", size_font=18)
         self.text_account = TextLabel(game, "text-account", f"#P-{self.game.player.getSlot()}", font_key="pixel", size_font=15)
-        self.text_points = TextLabel(game, "text-points", text="MOVING: 'WASD', SELECT: 'Q', EXIT TO MENU: 'E'", font_key="pixel", size_font=13)
+        self.text_points = TextLabel(game, "text-points", text=self.locale.gettext("main-pointer-overworld"), font_key="pixel", size_font=13)
         self.text_lives = TextLabel(game, "text-lies", text=f"{self.game.player.lives}", font_key="pixel", size_font=18)
 
         self.text_fps = TextLabel(game, "text-fps", text=f"FPS: {self.account.getFps()}/{self.account.getFps()}", font_key="pixel", size_font=15)
@@ -68,11 +66,19 @@ class OverWorld(EmptyScene):
         self.renderer.regShader("pxm", self.pixel_mosiac_shader)
         self.renderer.createFbo("tile-map", (game.width, game.height))
         
-        
+        # Audio
+        self.audio.load(music_name)
+        self.audio.play(loop=True)
+
+        # test
+        self.timer = 0
+        self.crt_shader = CustomShader(game, vertex_path="testing/default.vert", fragment_path="post-processing/post-processing-crt.frag")
+        self.renderer.regShader("crt", self.crt_shader)
+        self.renderer.createFbo("crt", (game.width, game.height))
 
 
     def onUpdate(self):
-        
+        self.timer += self.game.delta_time
 
         # Fade
         self.fade_label.update()
@@ -119,8 +125,9 @@ class OverWorld(EmptyScene):
 
 
         # If we coming to new node
-        if self.text_titles.text != self.player._getTitleNode():
-            self.text_titles.setText(self.player._getTitleNode())
+        title = self.locale.gettext(self.player._getTitleNode())
+        if self.text_titles.text != title:
+            self.text_titles.setText(title)
 
         
     
@@ -135,6 +142,8 @@ class OverWorld(EmptyScene):
     
 
     def onRender(self):
+
+        self.renderer.beginFbo("crt")
 
         # Render map
         if self.player.redirecting:
@@ -182,6 +191,12 @@ class OverWorld(EmptyScene):
             self.renderer.render(self.text_fps.texture_id, size=self.text_fps.size, position=(25, 25))
 
         self.fade_label.render()
+
+
+        self.renderer.endFbo()
+
+        self.crt_shader.setUniform("time", self.timer)
+        self.renderer.renderFbo("crt", size=(self.game.width, self.game.height), shader_key="crt")
 
 
     

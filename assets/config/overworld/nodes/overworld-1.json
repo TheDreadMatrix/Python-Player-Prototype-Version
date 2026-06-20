@@ -1,6 +1,6 @@
 {
     "start": {
-        "title": "Daemon`s house",
+        "title": "valley-of-ones-daemon-house",
         "redirect": "base:tutorial",
         "position": [165, 275],
         
@@ -19,7 +19,7 @@
     },
 
     "level-1": {
-        "title": "Valley of Ones 1",
+        "title": "valley-of-ones-1",
         "redirect": "base:level-1",
         "position": [575, 275],
 
@@ -47,7 +47,7 @@
     },
 
     "level-2": {
-        "title": "Valley of Ones 2",
+        "title": "valley-of-ones-2",
         "redirect": "base:level-2",
         "position": [720, 425],
 
@@ -81,7 +81,7 @@
     },
 
     "level-3": {
-        "title": "Valley of Ones 3",
+        "title": "valley-of-ones-3",
         "redirect": "base:level-3",
         "position": [960, 425],
 
@@ -109,7 +109,7 @@
     },
 
     "level-4": {
-        "title": "Valley of Ones 4",
+        "title": "valley-of-ones-4",
         "redirect": "base:level-4",
         "position": [960, 590],
 
@@ -121,7 +121,7 @@
     },
 
     "level-5": {
-        "title": "Ampliy`s castle",
+        "title": "valley-of-ones-ampliy-castle",
         "redirect": "base:ampliy-castle",
         "position": [1128, 730],
 
@@ -141,7 +141,7 @@
 
 
     "level-end": {
-        "title": "Valley of Ones STAR-DOME",
+        "title": "valley-of-ones-star-dome",
         "redirect": "base:overworld-2",
         "position": [310, 855],
 

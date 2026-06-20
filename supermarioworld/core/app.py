@@ -10,7 +10,7 @@ from supermarioworld.core.runtime.daemonapi import GameRequest
 from supermarioworld.core.accounts import PlayerAccountManager
 from supermarioworld.core.resources import AssetsResources
 
-from supermarioworld.core.audio import AudioStream
+from supermarioworld.core.audio.audio import AudioStream
 
 from supermarioworld.core.renderer import MainRenderer
 
@@ -18,7 +18,27 @@ import pygame as pg
 
 
 
+from supermarioworld.johnson import readData
 
+
+class Locale:
+    AVAILABLE_LANGUAGES = {
+        "ru",
+        "en"
+    }
+    def __init__(self, game: "SuperMariWorldApplication", language_key: str):
+        language_key = language_key.lower()
+
+        if language_key not in self.AVAILABLE_LANGUAGES:
+            print(f"[Locale] Unknown language '{language_key}', fallback to 'en'")
+            language_key = "en"
+
+
+        self.language_data = readData(game.paths.ConfigPath(f"locale/{language_key}.json"))
+
+
+    def gettext(self, word_key):
+        return self.language_data.get(word_key, "Undefined translation")
 
 
 
@@ -52,6 +72,7 @@ class SuperMariWorldApplication:
         
         # Configuration settings 
         self.account = PlayerAccountManager(self)
+        
 
         # Attributes
         self._clock = pg.time.Clock()
@@ -81,6 +102,10 @@ class SuperMariWorldApplication:
         self.router.onLoad(self)
         self.router.onInitScene(self)
         self.router._postInitScene()
+
+    @property
+    def locale(self):
+        return Locale(game=self, language_key=self.account.getLanguage())
        
     @property
     def player(self):
@@ -102,11 +127,10 @@ class SuperMariWorldApplication:
     
 
     def _update(self):
-        if self._focused:
-            pg.mixer.music.unpause()
+        if self._focused:        
             self.router.update()
-        else:
-            pg.mixer.music.pause()
+    
+            
 
 
         for event in pg.event.get():
@@ -116,9 +140,11 @@ class SuperMariWorldApplication:
                     self._DEBUG = not self._DEBUG
 
             elif event.type == pg.WINDOWFOCUSLOST:
+                self.audio.pause()
                 self._focused = False
 
             elif event.type == pg.WINDOWFOCUSGAINED:
+                self.audio.unpause()
                 self._focused = True
 
             if self._focused:

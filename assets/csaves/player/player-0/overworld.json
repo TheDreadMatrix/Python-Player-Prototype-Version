@@ -15,39 +15,23 @@
                 "level-5": true,
                 "level-end": true
             },
-            "current-node": "level-end"
+            "current-node": "level-3"
         },
         "overworld-2": {
             "current-node": "start",
-            "nodes": {},
-            "camera-pos": [
-                0,
-                0
-            ]
+            "nodes": {}
         },
         "overworld-3": {
             "current-node": "start",
-            "nodes": {},
-            "camera-pos": [
-                0,
-                0
-            ]
+            "nodes": {}
         },
         "overworld-4": {
             "current-node": "start",
-            "nodes": {},
-            "camera-pos": [
-                0,
-                0
-            ]
+            "nodes": {}
         },
         "overworld-star": {
             "current-node": "start",
-            "nodes": {},
-            "camera-pos": [
-                0,
-                0
-            ]
+            "nodes": {}
         }
     }
 }

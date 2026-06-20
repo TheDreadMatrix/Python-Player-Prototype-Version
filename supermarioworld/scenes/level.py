@@ -8,7 +8,7 @@ class Level(EmptyScene):
         super().__init__(game)
 
         self.audio.load(music_name)
-        self.audio.play(loops=-1)
+        self.audio.play()
 
     
 

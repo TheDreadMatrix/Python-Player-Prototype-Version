@@ -14,7 +14,7 @@ class OverWorldPlayer:
     def __init__(self, game: GameType, map_ref: str, move_speed: int=160):
         self.game = game
 
-        self.DEFAULT_NODE = {"title": "NODE CANT BE FOUND."}
+        self.DEFAULT_NODE = {"title": "node-cant-be-found"}
         self.MAP_REF = map_ref
 
         # Speed
@@ -25,6 +25,7 @@ class OverWorldPlayer:
 
         # Nodes
         game.player.current_overworld = map_ref
+        
 
         self.main_nodes = Johnson(game.paths.ConfigPath(f"overworld/nodes/{map_ref}.json")).readData()
 
@@ -80,7 +81,7 @@ class OverWorldPlayer:
         
 
     def _getTitleNode(self):
-        return self.current_node.get("title", "UNNAMED TITLE NODE")
+        return self.current_node.get("title", "unnamed-title-node")
     
     def startMove(self, node_data):
         if self.moving:

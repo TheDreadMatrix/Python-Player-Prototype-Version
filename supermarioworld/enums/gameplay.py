@@ -1,5 +1,9 @@
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 
+
+class LanguageKey(StrEnum):
+    RU = "ru"
+    EN = "en"
 
 
 class CharacterState(IntEnum):

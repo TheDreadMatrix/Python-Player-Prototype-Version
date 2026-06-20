@@ -1,0 +1,19 @@
+{
+    "menu-play": "Режим игры",
+    "menu-options": "Настройки",
+    "menu-quit": "Выход",
+
+    "main-pointer-overworld": "ДВИЖЕНИЕ: 'WASD', ВЫБОР: 'Q', ВЫХОД В МЕНЮ: 'E'",
+     "node-cant-be-found": "УЗЕЛ НЕ ОБНАРУЖЕН",
+    "unnamed-title-node": "БЕЗЫМЯННАЯ НАЗВАНИЕ УЗЛА",
+
+    "valley-of-ones-daemon-house": "Дом Деймона",
+    "valley-of-ones-1": "Долина Одиноких 1",
+    "valley-of-ones-2": "Долина Одиноких 2",
+    "valley-of-ones-3": "Долина Одиноких 3",
+    "valley-of-ones-4": "Долина Одиноких 4",
+    "valley-of-ones-ampliy-castle": "Замок Эмпли",
+    "valley-of-ones-star-dome": "Звёздный Купол Долины Одиноких",
+
+    "diamond-caves-star-dome": "Звёздный Купол Алмазных пещер"
+}

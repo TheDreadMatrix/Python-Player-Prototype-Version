@@ -93,7 +93,7 @@ class PlayerAccountManager:
 
     
     # Get
-    def getLanguage(self): return self.settings_data.get("language", "ENG")
+    def getLanguage(self): return self.settings_data.get("language", "en")
     def getFps(self): return self.settings_data.get("frametime", 60)
     def getSoundVolume(self): return self.settings_data.get("sound", 1.0)
     def getMusicVolume(self): return self.settings_data.get("music", 1.0)

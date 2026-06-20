@@ -25,7 +25,7 @@ class Menu(EmptyScene):
 
         #MUSIC
         self.audio.load("title")
-        self.audio.play(fade_in=3000, loops=-1)
+        self.audio.play(loop=True)
 
         
         self.sound_choose = game.audio.giveSound("choose")
