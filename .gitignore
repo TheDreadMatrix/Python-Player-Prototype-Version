@@ -2,6 +2,9 @@
 venv/
 .venv/
 
+**/DaemonOverworldEditor/
+**/WhatADaemonWorld/
+
 # Python cache
 __pycache__/
 *.pyc

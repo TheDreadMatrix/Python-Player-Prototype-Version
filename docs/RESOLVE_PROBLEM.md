@@ -12,8 +12,7 @@ Fix Menu:
 * UI
 
 
-Fix editor:
-* Swtich biome notation
+
 
 
 
