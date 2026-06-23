@@ -41,6 +41,7 @@ class OverWorldMap:
 
         self.tiles_build = []
         self.tiles = []
+        self.tile_entities = {}
         
         self.animations: dict[str, AnimationCutOut] = {}
 
@@ -187,9 +188,10 @@ class OverWorldMap:
                     flx = tile.get("flx", 0)
                     fly = tile.get("fly", 0)
 
-                entities.append(
-                        TileEntity(tile=normalized_key, x=col_i * DRAW_TILE_SIZE, y=row_i * DRAW_TILE_SIZE, s_w=DRAW_TILE_SIZE, s_h=DRAW_TILE_SIZE, flx=flx, fly=fly)
-                    )
+                tile_entity = TileEntity(tile=normalized_key, x=col_i * DRAW_TILE_SIZE, y=row_i * DRAW_TILE_SIZE, s_w=DRAW_TILE_SIZE, s_h=DRAW_TILE_SIZE, flx=flx, fly=fly)
+                entities.append(tile_entity)
+                
+                self.tile_entities[(row_i, col_i)] = tile_entity
                 
                 
         
@@ -208,6 +210,12 @@ class OverWorldMap:
         self._build_entities()
 
         
+    def set_tile(self, row: int, col: int, tile: str, sound=None):
+        entity = self.tile_entities[(row, col)]
+        entity.tile = self._normalize_tile_key(tile)
+        
+        if sound:
+            sound.play()
 
     
 

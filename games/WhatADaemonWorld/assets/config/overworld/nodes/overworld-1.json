@@ -1,14 +1,14 @@
 {
     "start": {
-        "title": "Daemon`s house",
+        "title": "valley-of-ones-daemon-house",
         "redirect": "base:tutorial",
-        "position": [100, 200],
+        "position": [165, 275],
         
         "right": {
             "target": "level-1",
 
             "path": [
-                [285, 200]
+                [575, 275]
             ],
 
             "path-animation": [
@@ -19,15 +19,15 @@
     },
 
     "level-1": {
-        "title": "Valley of Ones 1",
+        "title": "valley-of-ones-1",
         "redirect": "base:level-1",
-        "position": [285, 200],
+        "position": [575, 275],
 
         "left": {
             "target": "start",
 
             "path": [
-                [100, 200]
+                [165, 275]
             ],
 
             "path-animation": [
@@ -39,81 +39,124 @@
             "target": "level-2",
             
             "path": [
-                [440, 200]
+                [575, 275], [710, 285], [720, 300], [720, 425]
             ],
 
-            "path-animation": ["right"]
+            "path-animation": ["right", "right", "down", "down"]
         }
     },
 
     "level-2": {
-        "title": "Valley of Ones 2",
+        "title": "valley-of-ones-2",
         "redirect": "base:level-2",
-        "position": [440, 200],
+        "position": [720, 425],
 
-         "left": {
+        "left": {
             "target": "level-1",
 
             "path": [
-                [285, 200]
+                [720, 425], [720, 300], [710, 285], [575, 275]
             ],
-            "path-animation": ["left"]
+            "path-animation": ["up", "up", "left", "left"]
+        },
+
+         "up": {
+            "target": "level-1",
+
+            "path": [
+                [720, 425], [720, 300], [710, 285], [575, 275]
+            ],
+            "path-animation": ["up", "up", "left", "left"]
         },
 
         "right": {
             "target": "level-3",
 
             "path": [
-                [450, 200],
-                [500, 220],
-                [620, 220]
+                [960, 425]
             ],
-            "path-animation": ["right", "right", "right"]
+            "path-animation": ["right"]
         }
 
     },
 
     "level-3": {
-        "title": "Valley of Ones 3",
+        "title": "valley-of-ones-3",
         "redirect": "base:level-3",
-        "position": [620, 220],
+        "position": [960, 425],
 
         "left": {
             "target": "level-2",
 
             "path": [
-                [620, 220], [500, 220], [450, 200]
+                [720, 425]
             ],
 
-            "path-animation": ["left", "left", "left"]
+            "path-animation": ["left"]
         },
 
         "right": {
-            "target": "level-4",
+            "target": "level-5",
+            "path": [[1000, 425], [1128, 435], [1128, 730]],
+            "path-animation": ["right", "right", "down"]
+        },
 
-            "path-animation": ["right"]
+        "down": {
+            "target": "level-4",
+            "path": [[960, 590]],
+            "path-animation": ["down"]
         }
     },
 
     "level-4": {
-        "title": "Ampliy`s castle",
+        "title": "valley-of-ones-4",
         "redirect": "base:level-4",
-        "position": [1000, 1000],
+        "position": [960, 590],
 
-        "left": {
-            "target": "start",
-            "path": [[100, 100]],
+        "up": {
+            "target": "level-3",
+            "path": [[960, 425]],
             "path-animation": ["up"]
         }
     },
 
-    "level-secret": {
-        "title": "Valley of Ones secret",
-        "redirect": "base:overworld-2"
+    "level-5": {
+        "title": "valley-of-ones-ampliy-castle",
+        "redirect": "base:ampliy-castle",
+        "position": [1128, 730],
+
+
+        "up": {
+            "target": "level-3",
+            "path": [[1128, 730], [1128, 435], [960, 425]],
+            "path-animation": ["up", "up", "left"]
+        },
+
+        "down": {
+            "target": "level-end",
+            "path": [[1128, 730], [1128, 870], [1128, 890], [325, 890], [310, 855]],
+            "path-animation": ["down", "down", "left", "left", "up"]
+        }
     },
 
+
     "level-end": {
-        "title": "Valley of Ones STAR-DOME",
-        "redirect": "base:oveworld-3"
+        "title": "valley-of-ones-star-dome",
+        "redirect": "base:overworld-2",
+        "position": [310, 855],
+
+        "right": {
+            "target": "level-5",
+            "path": [[325, 890], [1122, 890], [1128, 870], [1128, 730]],
+            "path-animation": ["down", "right", "up", "up"]
+        },
+
+        "down": {
+            "target": "level-5",
+            "path": [[325, 890], [1122, 890], [1128, 870], [1128, 730]],
+            "path-animation": ["down", "right", "up", "up"]
+        }
+
+
     }
 }

@@ -1,4 +1,4 @@
-from supermarioworld.package_typing import GameType
+from supermarioworld.package_typing import GameType, _SoundType
 from supermarioworld.johnson import Johnson
 
 from supermarioworld.rendering.animation import AnimationCutOut
@@ -32,6 +32,8 @@ class OverWorldPlayer:
         self.current_node = self.main_nodes.get(game.player.current_overworld_level, self.DEFAULT_NODE)
 
         self.current_node_key = game.player.current_overworld_level
+
+
         
         self.position = self.current_node.get("position", (0, 0))
         self.moving = False
@@ -47,16 +49,10 @@ class OverWorldPlayer:
         self.target = None
         
 
-        # Sounds
-        self.sound_choose = game.audio.giveSound("choose")
-        self.sound_cancel = game.audio.giveSound("cancel")
-        self.sound_exit = game.audio.giveSound("pause")
-
         
         # Rendering
         self.renderer = game.renderer
         self.request = game.request
-        self.account = game.account
         
 
         game.assets.regAtlas("chr-spr", "overworld/overworld-sprites.png")
@@ -88,7 +84,6 @@ class OverWorldPlayer:
             return
         
         if not self.game.player.hasOverworldNodeOpened(node_data.get("target")):
-            self.sound_cancel.play()
             return 
 
         self.moving = True
@@ -106,7 +101,7 @@ class OverWorldPlayer:
         return self.animation_dict.get(animation_name, self.animation_down)
 
 
-    def updatePlayer(self, dt):
+    def updatePlayer(self, sound_if_passed: _SoundType):
         # Animations
         self.current_animation = self.getCurrentPathAnimation()
         self.current_animation.update()
@@ -115,7 +110,7 @@ class OverWorldPlayer:
         
 
         if self.redirecting:
-            self.redirect_timer += dt
+            self.redirect_timer += self.game.delta_time
             if self.redirect_timer > 2.5:
                 self.game.player.current_overworld = self.MAP_REF
                 self.game.player.current_overworld_level = self.current_node_key
@@ -132,7 +127,9 @@ class OverWorldPlayer:
             self.current_node_key = self.target
             self.current_node = self.main_nodes.get(self.target, self.DEFAULT_NODE)
             self.position = self.current_node.get("position", (0, 0))
-            self.sound_choose.play()
+
+            # Play sound when we passed the node
+            sound_if_passed.play()
 
             self.moving = False
             self.target = None
@@ -146,7 +143,7 @@ class OverWorldPlayer:
 
         distance = math.hypot(dx, dy)
 
-        step = self.move_speed * dt
+        step = self.move_speed * self.game.delta_time
 
         if distance <= step:
             self.position = (target_x, target_y)
@@ -213,7 +210,7 @@ class OverWorldPlayer:
                 if not self.moving:
                     self.redirecting = True 
                     self.redirect_scene = "base:menu"
-                    self.sound_exit.play()
+                    
                     
 
 

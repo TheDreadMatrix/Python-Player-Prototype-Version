@@ -5,13 +5,13 @@ from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
 from supermarioworld.entities.overworld_entities import OverWorldPlayer
 
 from supermarioworld.rendering.users import TextLabel, FadeLabel
-from supermarioworld.rendering.animation import AnimationCutOut
 from supermarioworld.rendering.shaders import CustomShader
 from supermarioworld.camera import OverworldCamera
 
 
 
 from supermarioworld.configuration import NOTATION_BIOME_OVERWORLD, WALK_SPEED, SMOOTH_CAMERA, PIXEL_SPEED
+import pygame as pg
 
 
 
@@ -19,7 +19,7 @@ from supermarioworld.configuration import NOTATION_BIOME_OVERWORLD, WALK_SPEED, 
 class OverWorld(EmptyScene):
     def __init__(self, game: GameType, biome: int, music_name: str, map_ref: str):
         super().__init__(game)
-    
+
 
         # overworld player
         self.player = OverWorldPlayer(game, map_ref=map_ref, move_speed=WALK_SPEED)
@@ -41,12 +41,12 @@ class OverWorld(EmptyScene):
         
         self.assets.regCutOutImage("x-lives", atlas_key="fonts", x=313, y=113, w=7, h=7)
 
-        self.text_titles = TextLabel(game, "titles", font_key="pixel", size_font=18)
-        self.text_account = TextLabel(game, "text-account", f"#P-{self.game.player.getSlot()}", font_key="pixel", size_font=15)
-        self.text_points = TextLabel(game, "text-points", text=self.locale.gettext("main-pointer-overworld"), font_key="pixel", size_font=13)
-        self.text_lives = TextLabel(game, "text-lies", text=f"{self.game.player.lives}", font_key="pixel", size_font=18)
+        self.text_titles = TextLabel(game,  font_key="pixel", size_font=18)
+        self.text_account = TextLabel(game,  text=f"#P-{self.game.player.getSlot()}", font_key="pixel", size_font=15)
+        self.text_points = TextLabel(game,  text=self.locale.gettext("main-pointer-overworld"), font_key="pixel", size_font=13)
+        self.text_lives = TextLabel(game,  text=f"{self.game.player.lives}", font_key="pixel", size_font=18)
 
-        self.text_fps = TextLabel(game, "text-fps", text=f"FPS: {self.account.getFps()}/{self.account.getFps()}", font_key="pixel", size_font=15)
+        self.text_fps = TextLabel(game, text=f"FPS: {self.account.getFps()}/{self.account.getFps()}", font_key="pixel", size_font=15)
         self.fps_timer = 0
 
         # Fade
@@ -67,18 +67,23 @@ class OverWorld(EmptyScene):
         self.renderer.createFbo("tile-map", (game.width, game.height))
         
         # Audio
+        self.open_egg_sound = self.audio.giveSound("open-egg")
+        self.sound_choose = game.audio.giveSound("choose")
+        self.sound_exit = game.audio.giveSound("pause")
+
         self.audio.load(music_name)
         self.audio.play(loop=True)
 
         # test
+        """
         self.timer = 0
         self.crt_shader = CustomShader(game, vertex_path="testing/default.vert", fragment_path="post-processing/post-processing-crt.frag")
         self.renderer.regShader("crt", self.crt_shader)
-        self.renderer.createFbo("crt", (game.width, game.height))
+        self.renderer.createFbo("crt", (game.width, game.height))"""
 
 
     def onUpdate(self):
-        self.timer += self.game.delta_time
+        
 
         # Fade
         self.fade_label.update()
@@ -87,14 +92,14 @@ class OverWorld(EmptyScene):
         self.camera.follow(self.player.position[0], self.player.position[1])
 
         # Overworld spatial
-        self.player.updatePlayer(self.game.delta_time)
+        self.player.updatePlayer(sound_if_passed=self.sound_choose)
 
         self.overworld_map.update(self.player)
         
         
 
         # Pixel mosaic
-        if self.player.redirecting and self.player.redirect_scene != "base:menu":
+        if self.player.redirecting:
             self.target_pixel_size = 128
         else:
             self.target_pixel_size = 1
@@ -133,17 +138,22 @@ class OverWorld(EmptyScene):
     
 
     def onEvent(self, event):
-        if event.type == 768 and self.game.DEBUG:
-            if event.key == 108:
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_e:
+                self.sound_exit.play()
+
+        if event.type == pg.KEYDOWN and self.game.DEBUG:
+            if event.key == pg.K_l:
                 self.request.restartScene()
+            if event.key == pg.K_r:
+                self.overworld_map.set_tile(2, 2, "water-2", sound=self.open_egg_sound)
+
         self.player.handleEventNodes(event=event)
         
         
     
 
     def onRender(self):
-
-        self.renderer.beginFbo("crt")
 
         # Render map
         if self.player.redirecting:
@@ -165,7 +175,7 @@ class OverWorld(EmptyScene):
 
         
         # Render UI
-        self.renderer.render("overworld-border", size=(self.game.width, self.game.height))
+        #self.renderer.render("overworld-border", size=(self.game.width, self.game.height))
         self.renderer.render("x-lives", size=(20, 20), position=(155, 70))
 
         title_size = self.text_titles.size
@@ -193,10 +203,7 @@ class OverWorld(EmptyScene):
         self.fade_label.render()
 
 
-        self.renderer.endFbo()
 
-        self.crt_shader.setUniform("time", self.timer)
-        self.renderer.renderFbo("crt", size=(self.game.width, self.game.height), shader_key="crt")
 
 
     

@@ -45,6 +45,7 @@ class Bootloader(SceneManager):
         game.assets.regSound("pause", "wav/pause.wav")
         game.assets.regSound("scroll", "wav/scroll.wav")
         game.assets.regSound("thunder", "wav/smw_thunder.wav")
+        game.assets.regSound("open-egg", "wav/open.wav")
 
         game.assets.regSound("pointer", "mp3/pointer.mp3")
         game.assets.regSound("losing", "mp3/lost.mp3")

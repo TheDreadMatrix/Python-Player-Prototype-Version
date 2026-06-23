@@ -22,10 +22,10 @@
     "moun-16": [45, 117],
 
 
-    "tree-1": [45, 45],
-    "tree-2": [54, 45],
-    "tree-3": [45, 54],
-    "tree-4": [54, 54],
+    "tree-1": {"xy": [45, 45]},
+    "tree-2": {"xy": [45, 45], "flx": true},
+    "tree-3": {"xy": [45, 54]},
+    "tree-4": {"xy": [45, 54], "flx": true},
 
     "ice-1": [63, 45],
     "ice-2": [72, 45],
@@ -60,6 +60,84 @@
     "rock-3": [90, 90],
     "rock-4": [99, 90],
 
+    "rock-5": {"xy": [90, 81], "flx": true},
+    "rock-6": {"xy": [99, 81], "flx": true},
+    "rock-7": {"xy": [90, 90], "flx": true},
+    "rock-8": {"xy": [99, 90], "flx": true},
+
+    "level-node-1": {"xy": [162, 126]},
+    "level-node-2": {"xy": [162, 126], "flx": true},
+    "level-node-3": {"xy": [162, 126], "fly": true},
+    "level-node-4": {"xy": [162, 126], "flx": true, "fly": true}, 
+
+    "level-node-5": {"xy": [171, 108]},
+    "level-node-6": {"xy": [171, 108], "fly": true},
+    "level-node-7": {"xy": [144, 135]},
+    "level-node-8": {"xy": [144, 135], "flx": true},
+
+    "level-node-9": {"xy": [180, 108]},
+    "level-node-10": {"xy": [180, 108], "flx": true},
+    "level-node-11": {"xy": [180, 108], "fly": true},
+    "level-node-12": {"xy": [180, 108], "flx": true, "fly": true},
+
+    "level-node-13": {"xy": [180, 117]},
+    "level-node-14": {"xy": [180, 117], "flx": true},
+    "level-node-15": {"xy": [180, 117], "fly": true},
+    "level-node-16": {"xy": [180, 117], "flx": true, "fly": true},
+
+    "level-node-17": {"xy": [189, 126]},
+    "level-node-18": {"xy": [189, 126], "flx": true},
+    "level-node-19": {"xy": [189, 126], "fly": true},
+    "level-node-20": {"xy": [189, 126], "flx": true, "fly": true},
+
+    "level-node-21": {"xy": [198, 126]},
+    "level-node-22": {"xy": [198, 126], "flx": true},
+    "level-node-23": {"xy": [198, 126], "fly": true},
+    "level-node-24": {"xy": [198, 126], "flx": true, "fly": true},
+
+    "level-node-25": {"xy": [189, 117]},
+    "level-node-26": {"xy": [189, 117], "flx": true},
+    "level-node-27": {"xy": [189, 117], "fly": true},
+    "level-node-28": {"xy": [189, 117], "flx": true, "fly": true},
+
+    "level-node-open-1": {"xy": [198, 81]},
+    "level-node-open-2": {"xy": [198, 81], "flx": true},
+    "level-node-open-3": {"xy": [198, 81], "fly": true},
+    "level-node-open-4": {"xy": [198, 81], "flx": true, "fly": true},
+
+    "level-node-open-5": {"xy": [207, 63]},
+    "level-node-open-6": {"xy": [207, 63], "fly": true},
+    "level-node-open-7": {"xy": [180, 90]},
+    "level-node-open-8": {"xy": [180, 90], "flx": true},
+
+    "level-node-open-9": {"xy": [216, 63]},
+    "level-node-open-10": {"xy": [216, 63], "flx": true},
+    "level-node-open-11": {"xy": [216, 63], "fly": true},
+    "level-node-open-12": {"xy": [216, 63], "flx": true, "fly": true},
+
+    "level-node-open-13": {"xy": [216, 72]},
+    "level-node-open-14": {"xy": [216, 72], "flx": true},
+    "level-node-open-15": {"xy": [216, 72], "fly": true},
+    "level-node-open-16": {"xy": [216, 72], "flx": true, "fly": true},
+
+    "level-node-open-17": {"xy": [225, 81]},
+    "level-node-open-18": {"xy": [225, 81], "flx": true},
+    "level-node-open-19": {"xy": [225, 81], "fly": true},
+    "level-node-open-20": {"xy": [225, 81], "flx": true, "fly": true},
+
+    "level-node-open-21": {"xy": [234, 81]},
+    "level-node-open-22": {"xy": [234, 81], "flx": true},
+    "level-node-open-23": {"xy": [234, 81], "fly": true},
+    "level-node-open-24": {"xy": [234, 81], "flx": true, "fly": true},
+
+    "level-node-open-25": {"xy": [225, 72]},
+    "level-node-open-26": {"xy": [225, 72], "flx": true},
+    "level-node-open-27": {"xy": [225, 72], "fly": true},
+    "level-node-open-28": {"xy": [225, 72], "flx": true, "fly": true},
+    
+    
+
+
     "asset-1": [81, 72],
     "asset-2": [81, 81],
     "asset-3": [90, 72],
@@ -72,8 +150,11 @@
     "asset-10": [108, 81],
     "asset-11": [99, 63],
 
-    "water-1": [54, 99],
-    "water-2": [54, 108],
+    "water-1": {"frames": [{"xy": [0, 0]}, {"xy": [0, 9]}, {"xy": [0, 18]}, {"xy": [0, 27]}, {"xy": [0, 36]}, {"xy": [0, 45]}, {"xy": [0, 54]}, {"xy": [0, 63]}]},
+    "water-2": {"frames": [{"xy": [0, 72]}, {"xy": [0, 81]}, {"xy": [0, 90]}, {"xy": [0, 99]}, {"xy": [0, 108]}, {"xy": [0, 117]}, {"xy": [0, 126]}, {"xy": [0, 135]}]},
+    "water-3": {"frames": [{"xy": [9, 0]}, {"xy": [9, 9]}, {"xy": [9, 18]}, {"xy": [9, 27]}, {"xy": [9, 36]}, {"xy": [9, 45]}, {"xy": [9, 54]}, {"xy": [9, 63]}]},
+    "water-4": {"xy": [54, 99]},
+    
 
 
     "tile-1": [90, 63],
@@ -86,7 +167,8 @@
     "tile-7": [72, 72],
     "tile-8": [72, 81],
     "tile-9": [72, 90],
-    "tile-10": [72, 99],
+    "tile-10": {"xy": [63, 108], "flx": true},
+    
 
     "tile-11": [72, 108],
     "tile-12": [72, 117],
@@ -96,7 +178,6 @@
 
     "tile-16": [81, 90],
     "tile-17": [81, 99],
-    "tile-18": [81, 108],
     "tile-19": [81, 117],
     "tile-20": [81, 126],
 

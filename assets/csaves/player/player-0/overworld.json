@@ -2,10 +2,6 @@
     "active": "overworld-1",
     "worlds": {
         "overworld-1": {
-            "camera-pos": [
-                0,
-                0
-            ],
             "nodes": {
                 "start": true,
                 "level-1": true,
@@ -15,11 +11,15 @@
                 "level-5": true,
                 "level-end": true
             },
-            "current-node": "level-3"
+            "current-node": "level-5"
         },
         "overworld-2": {
-            "current-node": "start",
-            "nodes": {}
+            "current-node": "level-5",
+            "nodes": {
+                "start": true,
+                "level-5": true,
+                "level-6": true
+            }
         },
         "overworld-3": {
             "current-node": "start",

@@ -2,5 +2,6 @@ moderngl
 pygame_ce
 pyglm
 numpy
+easygui
 pyinstaller
 nuitka

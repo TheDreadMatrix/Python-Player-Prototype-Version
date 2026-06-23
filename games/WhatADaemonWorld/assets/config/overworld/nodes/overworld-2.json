@@ -1,6 +1,6 @@
 {
     "start": {
-        "title": "Diamond Caves START-DOME",
+        "title": "diamond-caves-star-dome",
         "redirect": "base:overworld-1",
         "position": [300, 400],
 
@@ -20,6 +20,8 @@
         "title": "Diamond Caves 1",
         "redirect": "base:level-5",
         "position": [300, 720],
+
+        "up": {"target": "level-6"},
         "down": {
             "target": "start",
 

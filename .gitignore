@@ -26,6 +26,9 @@ Thumbs.db
 
 test/
 
+#DLL
+*.dll
+*.ndll
 
 #EXE
 *.exe

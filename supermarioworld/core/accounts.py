@@ -17,12 +17,18 @@ DEFAULT_OVERWORLD = {
     "worlds": {
         "overworld-1": {
             "current-node": "start",
-            "nodes": {}
+            "nodes": {
+                
+            }
         },
         
         "overworld-2": {
             "current-node": "start",
-            "nodes": {}
+            "nodes": {
+                "start": True,
+                "level-5": True,
+                "level-6": True
+            }
         },
 
         "overworld-3": {

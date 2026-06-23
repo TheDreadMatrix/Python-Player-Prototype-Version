@@ -18,6 +18,13 @@ NOTATION_BIOME_LEVEL = {
     1: "tile-notation-underground"
 }
 
+
+# Audio
+
+LOWPASS_PARAMETR = 20000
+
+
+
 # Overworld parametrs
 WALK_SPEED = 145
 PIXEL_SPEED = 75

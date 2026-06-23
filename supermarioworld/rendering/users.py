@@ -62,17 +62,20 @@ class FadeLabel:
 
 
 class TextLabel:
-    def __init__(self, game: GameType, text_id: str, text: str="SOME-TEXT", font_key: str=None, size_font: int=20):
+    _id_count = 0
+    def __init__(self, game: GameType, text: str="SOME-TEXT", font_key: str=None, size_font: int=20):
         self._ctx = game.renderer._ctx
         self.resources = game.assets
         self.renderer = game.renderer
 
         self.text = text
 
-        self.texture_id = text_id
+        self.texture_id = f"text_label_{TextLabel._id_count}"
+        TextLabel._id_count += 1
 
         self.position = (0, 0)
         self.size = (0, 0)
+        self.width, self.height = self.size
       
         self.r = 1
         self.g = 1
@@ -93,7 +96,7 @@ class TextLabel:
 
         self.texture_note = None
 
-        self._rebuildText(color_text=(0, 0, 0), tex_filter=0, anisotropy=0)
+        self._rebuildText(color_text=(round(self.r * 255), round(self.g * 255), round(self.b * 255)), tex_filter=0, anisotropy=0)
     
     def _rebuildText(self, color_text, tex_filter, anisotropy):
         if self.texture_note is not None:
@@ -102,6 +105,7 @@ class TextLabel:
             self.texture_note = None
             
         self.texture_note, self.size = load_texture_text(self._ctx, self.font, self.text, color_text, tex_filter, anisotropy)
+        self.width, self.height = self.size
         self.resources._regRawImage(self.texture_id, self.texture_note)
 
 
@@ -120,3 +124,7 @@ class TextLabel:
             self.resources.delImage(self.texture_id)
             self.texture_note.release()
             self.texture_note = None
+
+
+    def __repr__(self):
+        return f"<TextLabel - {self.text}>"

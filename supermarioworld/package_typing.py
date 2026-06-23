@@ -99,6 +99,8 @@ class _SoundType:
     def setVolume(self, volume: float) -> None: ...
 
 class _StreamType:
+    def setFilterLowPass(self, parametr: int) -> None: ...
+
     def pause(self) -> None: ...
     def unpause(self) -> None: ...
 
@@ -143,6 +145,7 @@ class Evalent(typing.Protocol):
 class GameType(typing.Protocol):
     delta_time: float
     tick_time: float
+    SCENE_DATA: dict[str, typing.Any]
     DEBUG: bool
     
     width: int

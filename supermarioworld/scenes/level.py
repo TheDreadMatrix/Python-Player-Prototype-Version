@@ -20,11 +20,8 @@ class Level(EmptyScene):
         return super().onEvent(event)
 
 
-    
-    
-
     def onRender(self):
-        pass
+        self.renderer.renderQuad()
     
 
     def onSave(self):

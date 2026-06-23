@@ -89,15 +89,15 @@ class Menu(EmptyScene):
 
         
 
-        self.text_play = TextLabel(game, "text-1", "Play", size_font=32, font_key="pixel")
+        self.text_play = TextLabel(game,  text=self.locale.gettext("menu-play"), size_font=32, font_key="pixel")
         self.text_play.position = (game.width // 2 - self.text_play.size[0] // 2 - 10, 250)
         
 
-        self.text_options = TextLabel(game, "text-2", "Options", size_font=32, font_key="pixel")
+        self.text_options = TextLabel(game,  text=self.locale.gettext("menu-options"), size_font=32, font_key="pixel")
         self.text_options.position = (game.width // 2 - self.text_options.size[0] // 2 - 10, 350)
        
 
-        self.text_quit = TextLabel(game, "text-3", "Quit", size_font=32, font_key="pixel")
+        self.text_quit = TextLabel(game,  self.locale.gettext("menu-quit"), size_font=32, font_key="pixel")
         self.text_quit.position = (game.width // 2 - self.text_quit.size[0] // 2 - 10, 450)
         
         

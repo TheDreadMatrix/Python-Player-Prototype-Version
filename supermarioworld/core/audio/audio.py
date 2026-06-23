@@ -1,5 +1,5 @@
 from supermarioworld.core.audio.soloud import Wav, WavStream, Soloud, BiquadResonantFilter
-
+from supermarioworld.configuration import LOWPASS_PARAMETR
 
 
 class AudioStream:
@@ -10,10 +10,10 @@ class AudioStream:
         self.engine = Soloud()
         self.engine.init()
 
-        low_pass_filter = BiquadResonantFilter()
-        low_pass_filter.set_params(0, 0, 1500)
+        self.low_pass_filter = BiquadResonantFilter()
+        self.low_pass_filter.set_params(BiquadResonantFilter.LOWPASS, LOWPASS_PARAMETR, 1)
 
-        self.engine.set_global_filter(0, low_pass_filter)
+        self.engine.set_global_filter(0, self.low_pass_filter)
 
 
 
@@ -21,8 +21,15 @@ class AudioStream:
         self.music = None
 
 
+    def setFilterLowPass(self, parametr):
+        self.low_pass_filter.set_params(BiquadResonantFilter.LOWPASS, parametr, 1)
+        self.engine.set_global_filter(0, self.low_pass_filter)
+
+
 
     def load(self, music_key):
+        if self.music_handle is not None:
+            self.engine.stop_all()
         path = self.game.assets.musics.get(music_key, "stupid-player-you-put-undefined-key.mp3")
 
         wav = WavStream()
@@ -30,14 +37,15 @@ class AudioStream:
 
         self.music_handle = None
         self.music = wav
+    
         
 
     def play(self, loop=True):
         wav = self.music
 
-        self.music_handle = self.engine.play(wav, aVolume=1.0)
+        self.music_handle = self.engine.play(wav, aVolume=self.game.account.getMusicVolume())
 
-        self.engine.set_volume(self.music_handle, self.game.account.getMusicVolume())
+       
         wav.set_looping(loop)
         
         self.passed = False
