@@ -63,7 +63,7 @@ class FadeLabel:
 
 class TextLabel:
     _id_count = 0
-    def __init__(self, game: GameType, text: str="SOME-TEXT", font_key: str=None, size_font: int=20):
+    def __init__(self, game: GameType, text: str="SOME-TEXT", font_key: str=None, size_font: int=20, r=1, g=1, b=1, a=1):
         self._ctx = game.renderer._ctx
         self.resources = game.assets
         self.renderer = game.renderer
@@ -77,10 +77,10 @@ class TextLabel:
         self.size = (0, 0)
         self.width, self.height = self.size
       
-        self.r = 1
-        self.g = 1
-        self.b = 1
-        self.a = 1
+        self.r = r
+        self.g = g
+        self.b = b
+        self.a = a
 
         self.flipx = False
         self.flipy = False

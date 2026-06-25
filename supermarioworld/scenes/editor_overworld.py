@@ -1,6 +1,7 @@
 import pygame as pg
+import easygui
 
-from supermarioworld.johnson import readData, saveData
+from supermarioworld.johnson import readData, saveData, Johnson
 from supermarioworld.package_typing import GameType
 from supermarioworld.scenes.base import EmptyScene
 
@@ -9,20 +10,22 @@ from supermarioworld.rendering.users import TextLabel
 
 
 
-from supermarioworld.configuration import (NOTATION_BIOME_OVERWORLD, PIXEL_TILE_SIZE,
+from supermarioworld.configuration import (PIXEL_TILE_SIZE, ITEM_HEIGHT, 
                                            PALETTE_PER_ROW, OVERWORLD_EDITOR_COLS, OVERWORLD_EDITOR_ROWS, MIN_ZOOM_EDITOR, MAX_ZOOM_EDITOR)
 
 
 
-# TODO: Make hitbox better, Make overui rects, Make load and save system, Make notation load and save system, Content
+# TODO: Make load and save system, Make notation load and save system, Content
 
 class OverworldEditor(EmptyScene):
-    def __init__(self, game: GameType, biome: int=0, index_map: int=0):
+    def __init__(self, game: GameType):
         super().__init__(game)
+        # Editor flag
+        self.editor_loaded = False
 
-        self.audio.load("B-underground")
-        self.audio.setFilterLowPass(8000)
-        self.audio.play()
+        # Player data
+        self.player_data = Johnson(game.paths.CsavesPath("overworld_editor.json"))
+        self.player_data_dict = self.player_data.readData()
 
 
         self.cell_size = 32
@@ -38,17 +41,8 @@ class OverworldEditor(EmptyScene):
         self._drag_palette = False
         self._drag_palette_off = (0, 0)
 
-        # Read file and atlas
-        self.biome_index = biome
-        notation = readData(game.paths.ConfigPath(f"overworld/notations/{NOTATION_BIOME_OVERWORLD.get(biome)}.json"))
-
-        self.notation = notation.get("tiles", {})
-        self.assets.regAtlas("overworld", notation["img-ref"])
-
-
-        self.palette_keys = [k for k, _ in self.notation.items()]
-        self.selected_tile = self.palette_keys[0] if self.palette_keys else None
-
+        
+        # tiles
         self.assets_to_release = set()
         self.animations: dict[str, AnimationCutOut] = {}
 
@@ -56,10 +50,10 @@ class OverworldEditor(EmptyScene):
         # Menus
         self.menus = {
             "File": [
-                ("Open", lambda: self._set_status("Soon")),
-                ("Open notation", lambda: self._set_status("Soon")),
+                ("Open", self._open_dialog_file_map),
+                ("Open notation", self._open_dialog_file_notation),
                 ("Save", lambda: self._save_current_map(self.map_path)),
-                ("Exit", self.request.closeGame),
+                ("Exit", self._save_and_exit),
             ],
 
             "Edit": [
@@ -67,8 +61,6 @@ class OverworldEditor(EmptyScene):
             ],
 
             "View": [
-                ("Switch biome-", lambda: self._switch_biome(-1)),
-                ("Switch biome+", lambda: self._switch_biome(1)),
                 ("Zoom In", lambda: self._change_zoom(0.1)),
                 ("Zoom Out", lambda: self._change_zoom(-0.1)),
             ],
@@ -81,20 +73,47 @@ class OverworldEditor(EmptyScene):
         }
 
         self.opened_menu = None
-
-        # Create texture and text
-        self._register_palette_textures()
         self._create_labels()
-        
 
-        # Connect other files
-        maps_dir = game.paths.ConfigFolder("overworld/maps")
-        self.map_files = game.paths.findGlobal(maps_dir, file_category="*.json")
-        self.map_index = index_map
 
-        
-        self.map_path = f"{maps_dir}/overworld-1.json"
-        self.map_json = {}
+        # loading 
+        notation_file = self.player_data_dict.get("current-notation-file")
+        map_file = self.player_data_dict.get("current-file")
+
+        if not notation_file or not map_file:
+            self.editor_loaded = False
+        else:
+            self.editor_loaded = True
+
+
+        if self.editor_loaded:
+
+            notation = readData(self.player_data_dict["current-notation-file"])
+            
+
+            self.notation = notation.get("tiles", {})
+            self.assets.regAtlas("overworld", notation.get("img-ref", ""))
+
+
+            self.palette_keys = [k for k, _ in self.notation.items()]
+            self.selected_tile = self.palette_keys[0] if self.palette_keys else None
+
+            self._register_palette_textures()
+            
+            
+
+            # Connect other files
+            self.map_path = self.player_data_dict["current-file"]
+            self.map_json = {}
+
+            self._load_current_map(self.map_path)
+
+        else:
+            self.notation = {}
+            self.map_path = None
+            self.map_json = {}
+            self.palette_keys = []
+            self.selected_tile = None
 
         # Status
         self.status = "Ready"
@@ -112,13 +131,17 @@ class OverworldEditor(EmptyScene):
         self._cached_map_batches = {}
         self._last_title = ""
     
-        self._load_current_map(self.map_path)
+        # Audio is finally
+        self.audio.load("B-underground")
+        self.audio.setFilterLowPass(8000)
+        self.audio.play()
 
 
 
     def _create_labels(self):
         self.menu_labels = []
         self.menu_rects = {}
+        self.line_rect = (0, 0, self.game.width, 75)
 
         self.dropdown_labels = {}
         self.dropdown_rects = {}
@@ -157,9 +180,9 @@ class OverworldEditor(EmptyScene):
             width = max_width + 20
 
             for i, item in enumerate(self.dropdown_labels[menu_name]):
-                rect = (menu_x, menu_y + i * 24, width, 50)
+                rect = (menu_x, menu_y + i * ITEM_HEIGHT, width, ITEM_HEIGHT)
 
-                item["label"].position = (menu_x + 5, menu_y + i * 24 + 20)
+                item["label"].position = (menu_x + 5, menu_y + i * ITEM_HEIGHT + 6)
 
                 self.dropdown_rects[menu_name].append(rect)
 
@@ -169,6 +192,42 @@ class OverworldEditor(EmptyScene):
         self.status_label = TextLabel(self.game, size_font=15, font_key="pixel")
         self.status_label.position = (self.game.width * 0.37, 15)
 
+        self.load_label = TextLabel(self.game, text="Open a map and notation file", size_font=24, font_key="pixel")
+        self.load_label.position = (self.game.width * 0.2, self.game.height * 0.5)
+
+
+        
+
+    def _open_dialog_file_map(self):
+        path = easygui.fileopenbox(msg="choose a file...", title="Open map", default="*.json")
+        if not path:
+            return 
+
+        self.player_data_dict["current-file"] = path
+        self.map_path = path
+
+        self._load_current_map(path)
+        self.editor_loaded = (self.map_path is not None and len(self.notation) > 0)
+
+
+    def _open_dialog_file_notation(self):
+        path = easygui.fileopenbox(msg="choose a file...", title="Open notation", default="*.json")
+        if not path:
+            return
+
+        self.player_data_dict["current-notation-file"] = path
+        notation = readData(self.player_data_dict["current-notation-file"])
+            
+        self.notation = notation.get("tiles", {})
+        self.assets.regAtlas("overworld", notation.get("img-ref", ""))
+
+        self.palette_keys = [k for k, _ in self.notation.items()]
+        self.selected_tile = self.palette_keys[0] if self.palette_keys else None
+
+        self._register_palette_textures()
+        self.editor_loaded = (self.map_path is not None and len(self.notation) > 0)
+        
+        
 
 
     def _register_palette_textures(self):
@@ -181,9 +240,7 @@ class OverworldEditor(EmptyScene):
 
                 anim = AnimationCutOut(game=self.game, key_atlas="overworld",
                     frames=[(*f.get("xy", (0, 0)), *f.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))) for f in tile["frames"]],
-                    durations=tile.get("durations", [0.1] * len(tile["frames"])),
-                    key_images=key_images,
-                )
+                    durations=tile.get("durations", [0.1] * len(tile["frames"])), key_images=key_images)
 
                 self.animations[tile_key] = anim
             else:
@@ -207,6 +264,18 @@ class OverworldEditor(EmptyScene):
         self._normalize_active_layer()
         self.dirty = False
         self.status = f"Loaded: {path}"
+
+    def _save_current_map(self, path):
+        if not self.map_path:
+            return
+        saveData(path, self.map_json)
+        self.dirty = False
+        self._set_status("Saved")
+
+
+    def _save_and_exit(self):
+        self.player_data.saveData(self.player_data_dict)
+        self.request.closeGame()
     
 
     def _normalize_active_layer(self):
@@ -232,52 +301,10 @@ class OverworldEditor(EmptyScene):
         return self.map_json.get("tile-map-world", [])
 
 
-    def _set_status(self, text: str):
+
+    def _set_status(self, text: str, timer: float=3.0):
         self.status = text
-        self.status_timer = 9.0
-
-    def _switch_map(self, delta: int):
-        if not self.map_files:
-            return
-        self.map_index = (self.map_index + delta) % len(self.map_files)
-        self._load_current_map()
-
-
-    def _switch_biome(self, delta: int):
-        biome_count = len(NOTATION_BIOME_OVERWORLD)
-        self.biome_index = (self.biome_index + delta) % biome_count
-
-       
-        for anim in self.animations.values():
-            anim.delAnimation()
-
-        self.animations.clear()
-
-     
-        for key in self.assets_to_release:
-            self.assets.delImage(key)
-
-        self.assets_to_release.clear()
-
-       
-        notation = readData(self.game.paths.ConfigPath(f"overworld/notations/{NOTATION_BIOME_OVERWORLD[self.biome_index]}.json"))
-
-        self.notation = notation.get("tiles", {})
-
-        
-        self.assets.regAtlas("overworld", notation.get("img-ref", ""))
-
-      
-        self.palette_keys = list(self.notation.keys())
-        self.selected_tile = self.palette_keys[0] if self.palette_keys else None
-
-      
-        self._register_palette_textures()
-
-        self._normalize_active_layer()
-
-        self._set_status(f"Biome: {NOTATION_BIOME_OVERWORLD[self.biome_index]}")
-
+        self.status_timer = timer
 
 
     def _paint(self, mouse_pos, erase: bool):
@@ -309,6 +336,7 @@ class OverworldEditor(EmptyScene):
 
     def _undo_last(self):
         if not self.undo_stack:
+            self.dirty = False
             self._set_status("Nothing to undo")
             return
 
@@ -375,9 +403,12 @@ class OverworldEditor(EmptyScene):
         self.palette_scroll_rows = max(0, min(max_rows, self.palette_scroll_rows + delta_rows))
 
     def _over_ui(self, pos):
-        for rect in self.menu_rects.values():
-            if self._in_rect(pos, rect):
-                return True
+        if self._in_rect(pos, self.line_rect):
+            return True
+        if self.opened_menu:
+            for rect in self.dropdown_rects[self.opened_menu]:
+                if self._in_rect(pos, rect):
+                    return True
         return False
 
     def _over_palette(self, pos):
@@ -388,10 +419,7 @@ class OverworldEditor(EmptyScene):
                 return True
         return False
 
-    def _save_current_map(self, path):
-        saveData(path, self.map_json)
-        self.dirty = False
-        self._set_status("Saved")
+    
 
     def onUpdate(self):
         for animation in self.animations.values():
@@ -414,8 +442,23 @@ class OverworldEditor(EmptyScene):
         self.status_label.setText(self.status, r_text=1, g_text=1, b_text=1)
         
 
+    def _pick_tile_from_palette(self, pos):
+        if not self._in_rect(pos, self._palette_view_rect()):
+            return False
+        for tile_key, rect in self._palette_rects():
+            if self._in_rect(pos, rect):
+                self.selected_tile = tile_key
+                self._set_status(f"Tile: {self.selected_tile}", timer=9)
+                return True
+        return False
+
 
     def _handle_mouse_input(self):
+        if self.opened_menu:
+            self._prev_mouse_buttons = pg.mouse.get_pressed(3)
+            self._prev_mouse_pos = pg.mouse.get_pos()
+            return
+        
         mouse_pos = pg.mouse.get_pos()
         left, middle, right = pg.mouse.get_pressed(3)
         prev_left, prev_middle, prev_right = self._prev_mouse_buttons
@@ -464,6 +507,13 @@ class OverworldEditor(EmptyScene):
 
 
     def onEvent(self, event):
+        if event.type == pg.QUIT:
+            self.player_data.saveData(self.player_data_dict)
+
+        if event.type == pg.VIDEORESIZE:
+            self.line_rect = (0, 0, self.game.width, 75)
+            return
+
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1:  
                 mouse_pos = event.pos
@@ -480,15 +530,14 @@ class OverworldEditor(EmptyScene):
                     for item, rect in zip(self.dropdown_labels[self.opened_menu], self.dropdown_rects[self.opened_menu]):
                         if self._in_rect(mouse_pos, rect):
                             item["callback"]()
-                            self.opened_menu = None
                             return
 
-            self.opened_menu = None
+                    self.opened_menu = None
                         
             
         
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_s and (event.mod & pg.KMOD_CTRL):
+            if event.key == pg.K_s and (event.mod & pg.KMOD_CTRL) and self.map_path:
                 self._save_current_map(self.map_path)
             elif event.key == pg.K_z and (event.mod & pg.KMOD_CTRL):
                 self._undo_last()
@@ -511,15 +560,7 @@ class OverworldEditor(EmptyScene):
         self.zoom = max(MIN_ZOOM_EDITOR, min(MAX_ZOOM_EDITOR, self.zoom + delta))
         
 
-    def _pick_tile_from_palette(self, pos):
-        if not self._in_rect(pos, self._palette_view_rect()):
-            return False
-        for tile_key, rect in self._palette_rects():
-            if self._in_rect(pos, rect):
-                self.selected_tile = tile_key
-                self._set_status(f"Tile: {self.selected_tile}")
-                return True
-        return False
+    
 
     def onRender(self):
         self._cached_map_batches = self._build_map_batches()
@@ -557,11 +598,9 @@ class OverworldEditor(EmptyScene):
             
 
         
-
-
-
-        
         self.renderer.renderQuad(size=(self.game.width, 55), r=0.1, g=0.1, b=0.1, a=0.75)
+
+
         for label in self.menu_labels:
             label["label"].render()
 
@@ -576,6 +615,8 @@ class OverworldEditor(EmptyScene):
         
       
         self.status_label.render()
+        if not self.editor_loaded:
+            self.load_label.render()
         
 
         

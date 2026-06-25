@@ -62,7 +62,7 @@ class Bootloader(SceneManager):
 
         # Developer
         self.registerScene("base:level-editor", lambda: LevelEditor(game=game))
-        self.registerScene("base:overworld-editor", lambda: OverworldEditor(game=game, biome=OverWorldBiome.VALLEY, index_map=1))
+        self.registerScene("base:overworld-editor", lambda: OverworldEditor(game=game))
 
         # First place scenes
         self.registerScene("base:menu", lambda: Menu(game=game))

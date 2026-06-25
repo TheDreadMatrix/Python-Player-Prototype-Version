@@ -42,9 +42,9 @@ class OverWorld(EmptyScene):
         self.assets.regCutOutImage("x-lives", atlas_key="fonts", x=313, y=113, w=7, h=7)
 
         self.text_titles = TextLabel(game,  font_key="pixel", size_font=18)
-        self.text_account = TextLabel(game,  text=f"#P-{self.game.player.getSlot()}", font_key="pixel", size_font=15)
-        self.text_points = TextLabel(game,  text=self.locale.gettext("main-pointer-overworld"), font_key="pixel", size_font=13)
-        self.text_lives = TextLabel(game,  text=f"{self.game.player.lives}", font_key="pixel", size_font=18)
+        self.text_account = TextLabel(game,  text=f"#P-{self.game.player.getSlot()}", font_key="pixel", size_font=15, r=0, g=0, b=0)
+        self.text_points = TextLabel(game,  text=self.locale.gettext("main-pointer-overworld"), font_key="pixel", size_font=13, r=0, g=0, b=0)
+        self.text_lives = TextLabel(game,  text=f"{self.game.player.lives}", font_key="pixel", size_font=18, r=0, g=0, b=0)
 
         self.text_fps = TextLabel(game, text=f"FPS: {self.account.getFps()}/{self.account.getFps()}", font_key="pixel", size_font=15)
         self.fps_timer = 0
