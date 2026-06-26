@@ -12,6 +12,8 @@ Fix Menu:
 * UI
 
 
+Change core pygame -> pysdl2
+
 
 
 

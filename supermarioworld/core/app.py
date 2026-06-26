@@ -15,10 +15,6 @@ from supermarioworld.core.audio.audio import AudioStream
 from supermarioworld.core.renderer import MainRenderer
 
 import pygame as pg
-import subprocess
-import numpy as np
-
-
 
 from supermarioworld.johnson import readData
 
@@ -29,6 +25,8 @@ class Locale:
         "en"
     }
     def __init__(self, game: "SuperMariWorldApplication", language_key: str):
+        self.game = game
+
         language_key = language_key.lower()
 
         if language_key not in self.AVAILABLE_LANGUAGES:
@@ -39,83 +37,22 @@ class Locale:
         self.language_data = readData(game.paths.ConfigPath(f"locale/{language_key}.json"))
 
 
+    def switchLanguage(self, language_key: str):
+        language_key = language_key.lower()
+
+        if language_key not in self.AVAILABLE_LANGUAGES:
+            print(f"[Locale] Unknown language '{language_key}', fallback to 'en'")
+            language_key = "en"
+
+        self.language_data = readData(self.game.paths.ConfigPath(f"locale/{language_key}.json"))
+
+
     def gettext(self, word_key):
         return self.language_data.get(word_key, word_key)
 
 
 
 
-
-
-class ModernGLRecorder:
-    def __init__(self, fbo, width, height, fps=60):
-        self.fbo = fbo
-        self.w = width
-        self.h = height
-        self.fps = fps
-        self.proc = None
-        self.recording = False
-
-    def start(self, filename="record.mp4"):
-        self.proc = subprocess.Popen([
-            "ffmpeg",
-
-
-            "-y",
-            "-f", "rawvideo",
-            "-pix_fmt", "rgb24",
-            "-s", f"{self.w}x{self.h}",
-            "-i", "-",
-
-
-            "-fflags", "nobuffer",
-            "-flush_packets", "1",
-
-             "-c:v", "libx264",
-            "-pix_fmt", "yuv420p",
-            "-preset", "ultrafast",
-
-
-            filename
-        ], stdin=subprocess.PIPE)
-
-        self.recording = True
-
-    def capture(self):
-        if not self.recording:
-            return
-
-        
-        data = self.fbo.read(components=3, alignment=1)
-
-        frame = np.frombuffer(data, dtype=np.uint8)
-        frame = frame.reshape(self.h, self.w, 3)
-
-      
-        frame = np.flip(frame, axis=0)
-
-        self.proc.stdin.write(frame.tobytes())
-
-    def stop(self):
-        if not self.recording:
-            return
-
-        self.recording = False
-
-        try:
-            
-            self.proc.stdin.close()
-
-            
-            self.proc.wait(timeout=5)
-
-        except Exception:
-            self.proc.kill()
-        self.proc.stdin.flush()
-        self.proc.stdin.close()
-        self.proc.wait()
-
-        self.proc = None
 
 
 
@@ -151,6 +88,8 @@ class SuperMariWorldApplication:
         
         # Configuration settings 
         self.account = PlayerAccountManager(self)
+        self._locale = Locale(game=self, language_key=self.account.getLanguage())
+        self._locale_key = self.account.getLanguage()
         
 
         # Attributes
@@ -188,7 +127,13 @@ class SuperMariWorldApplication:
 
     @property
     def locale(self):
-        return Locale(game=self, language_key=self.account.getLanguage())
+        lang = self.account.getLanguage()
+
+        if self._locale_key != lang:
+            self._locale_key = lang
+            self._locale.switchLanguage(lang)
+
+        return self._locale
        
     @property
     def player(self):

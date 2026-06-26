@@ -1,23 +1,23 @@
-from supermarioworld.package_typing import GameType
+
 
 
 
 class SceneManager:
-    def onLoad(self, game: GameType):
+    def onLoad(self, game):
         pass
 
-    def onInitScene(self, game: GameType):
+    def onInitScene(self, game):
         pass
 
     def _postInitScene(self):
-        self.game._scene_name = self.START_SCENE
-        self._manager_state = self.START_SCENE
-        self._current_scene = self.scene_dict.get(self.START_SCENE 
-                                                  if self.game._run_scene is None 
-                                                  else self.game._run_scene)()
+        start_scene = self.game._run_scene or self.START_SCENE
+
+        self.game._scene_name = start_scene
+        self._manager_state = start_scene
+        self._current_scene = self.scene_dict.get(start_scene)()
 
 
-    def __init__(self, game: GameType):
+    def __init__(self, game):
         self.game = game
 
         self.START_SCENE = self.game._scene_name
@@ -45,6 +45,7 @@ class SceneManager:
 
     def update(self):
         state_scene = self.game.getScene()
+        
         
             
         if state_scene != self._manager_state:

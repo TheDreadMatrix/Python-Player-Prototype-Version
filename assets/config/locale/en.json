@@ -1,7 +1,42 @@
 {
+    "soon": "Soon...",
+    "set-map-n-notations": "Open a map and notation file",
+
     "menu-play": "Player mode",
     "menu-options": "Options",
     "menu-quit": "Quit",
+
+
+    "file": "File",
+    "open": "Open",
+    "open-notation": "Open notation",
+    "save-file": "Save",
+    "exit-file": "Exit",
+
+    "edit": "Edit",
+    "undo": "Undo",
+
+    "view": "View",
+    "zoom-in": "Zoom in",
+    "zoom-out": "Zoom out",
+
+    "modes": "Modes",
+    "set-node-mode": "Set node mode",
+    "set-mapso-mode": "Set mapso mode",
+    "set-tile-mode": "Set tilemap mode",
+
+    "loaded": "Loaded",
+    "saved": "Saved",
+    "nothing-to-undo": "Nothing to undo",
+    "undo-skipped": "Undo skipped",
+    "undo-undo": "Undo",
+    
+    "selected": "Selected:",
+    "draw": "Drawing",
+    "erase": "Erasing",
+
+    "lmb-rmb-ctrl-s": "LMB draw | RMB erase | Ctrl+S save",
+
 
     "main-pointer-overworld": "MOVING: 'WASD', SELECT: 'Q', EXIT TO MENU: 'E",
     "node-cant-be-found": "NODE CANT BE FOUND",

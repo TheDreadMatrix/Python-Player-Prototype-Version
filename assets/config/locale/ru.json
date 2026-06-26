@@ -1,7 +1,41 @@
 {
+    "soon": "Скоро",
+    "set-map-n-notations": "Стоит ли тебе открыть папки?",
+
     "menu-play": "Режим игры",
     "menu-options": "Настройки",
     "menu-quit": "Выход",
+
+    "file": "Файлы",
+    "open": "Открыть",
+    "open-notation": "Открыть нотацию",
+    "save-file": "Сохранить",
+    "exit-file": "Выйти",
+
+    "edit": "Правка",
+    "undo": "Исправить",
+
+    "view": "Вид",
+    "zoom-in": "Увеличить",
+    "zoom-out": "Отдалится",
+
+    "modes": "Режимы",
+    "set-node-mode": "Режим узла",
+    "set-mapso-mode": "Режим карты обьектов",
+    "set-tile-mode": "Режим тайлов",
+
+    "loaded": "Загружен",
+    "saved": "Сохранен",
+    "nothing-to-undo": "Нечего исправлять...",
+    "undo-skipped": "Пропущенно",
+    "undo-undo": "Исправление",
+
+    "selected": "Выбран:",
+    "draw": "Рисуем",
+    "erase": "Удаляем",
+
+    "lmb-rmb-ctrl-s": "ЛКМ рисовать | ПКМ удалять | Ctrl+S сохранять",
+
 
     "main-pointer-overworld": "ДВИЖЕНИЕ: 'WASD', ВЫБОР: 'Q', ВЫХОД В МЕНЮ: 'E'",
      "node-cant-be-found": "УЗЕЛ НЕ ОБНАРУЖЕН",

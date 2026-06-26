@@ -10,12 +10,11 @@ from supermarioworld.rendering.users import TextLabel
 
 
 
-from supermarioworld.configuration import (PIXEL_TILE_SIZE, ITEM_HEIGHT, 
+from supermarioworld.configuration import (PIXEL_TILE_SIZE, ITEM_HEIGHT, UNDO_DELAY,
                                            PALETTE_PER_ROW, OVERWORLD_EDITOR_COLS, OVERWORLD_EDITOR_ROWS, MIN_ZOOM_EDITOR, MAX_ZOOM_EDITOR)
 
 
 
-# TODO: Make load and save system, Make notation load and save system, Content
 
 class OverworldEditor(EmptyScene):
     def __init__(self, game: GameType):
@@ -49,26 +48,28 @@ class OverworldEditor(EmptyScene):
 
         # Menus
         self.menus = {
-            "File": [
-                ("Open", self._open_dialog_file_map),
-                ("Open notation", self._open_dialog_file_notation),
-                ("Save", lambda: self._save_current_map(self.map_path)),
-                ("Exit", self._save_and_exit),
+            self.locale.gettext("file"): [
+                (self.locale.gettext("open"), self._open_dialog_file_map),
+                (self.locale.gettext("open-notation"), self._open_dialog_file_notation),
+                (self.locale.gettext("save-file"), lambda: self._save_current_map(self.map_path)),
+                (self.locale.gettext("exit-file"), self._save_and_exit),
             ],
 
-            "Edit": [
-                ("Undo", self._undo_last),
+            self.locale.gettext("edit"): [
+                (self.locale.gettext("undo"), self._undo_last),
+                ("RU", lambda: self._set_lan_and_restart("RU")),
+                ("EN", lambda: self._set_lan_and_restart("EN"))
             ],
 
-            "View": [
-                ("Zoom In", lambda: self._change_zoom(0.1)),
-                ("Zoom Out", lambda: self._change_zoom(-0.1)),
+            self.locale.gettext("view"): [
+                (self.locale.gettext("zoom-in"), lambda: self._change_zoom(0.1)),
+                (self.locale.gettext("zoom-out"), lambda: self._change_zoom(-0.1)),
             ],
 
-            "Modes": [
-                ("Set Node mode", lambda: self._set_status("Soon")),
-                ("Set Mapso mode", lambda: self._set_status("Soon")),
-                ("Set Tile mode", lambda: self._set_status("Soon"))    
+            self.locale.gettext("modes"): [
+                (self.locale.gettext("set-node-mode"), lambda: self._set_status(self.locale.gettext("soon"))),
+                (self.locale.gettext("set-mapso-mode"), lambda: self._set_status(self.locale.gettext("soon"))),
+                (self.locale.gettext("set-tile-mode"), lambda: self._set_status(self.locale.gettext("soon")))    
             ]
         }
 
@@ -118,6 +119,7 @@ class OverworldEditor(EmptyScene):
         # Status
         self.status = "Ready"
         self.status_timer = 0.0
+        self.undo_timer = 0
 
         # Mouse
         self._prev_mouse_buttons = (False, False, False)
@@ -132,7 +134,7 @@ class OverworldEditor(EmptyScene):
         self._last_title = ""
     
         # Audio is finally
-        self.audio.load("B-underground")
+        self.audio.load("A")
         self.audio.setFilterLowPass(8000)
         self.audio.play()
 
@@ -190,9 +192,9 @@ class OverworldEditor(EmptyScene):
 
 
         self.status_label = TextLabel(self.game, size_font=15, font_key="pixel")
-        self.status_label.position = (self.game.width * 0.37, 15)
+        self.status_label.position = (self.game.width * 0.47, 15)
 
-        self.load_label = TextLabel(self.game, text="Open a map and notation file", size_font=24, font_key="pixel")
+        self.load_label = TextLabel(self.game, text=self.locale.gettext("set-map-n-notations"), size_font=24, font_key="pixel")
         self.load_label.position = (self.game.width * 0.2, self.game.height * 0.5)
 
 
@@ -211,6 +213,16 @@ class OverworldEditor(EmptyScene):
 
 
     def _open_dialog_file_notation(self):
+        for animation in self.animations.values():
+            animation.delAnimation()
+
+        self.animations.clear()
+
+        for keys in self.palette_keys:
+            self.assets.delImage(keys)
+
+        self.assets_to_release.clear()
+
         path = easygui.fileopenbox(msg="choose a file...", title="Open notation", default="*.json")
         if not path:
             return
@@ -263,19 +275,23 @@ class OverworldEditor(EmptyScene):
         
         self._normalize_active_layer()
         self.dirty = False
-        self.status = f"Loaded: {path}"
+        self.status = self.locale.gettext("loaded")
 
     def _save_current_map(self, path):
         if not self.map_path:
             return
         saveData(path, self.map_json)
         self.dirty = False
-        self._set_status("Saved")
+        self._set_status(self.locale.gettext("saved"))
 
 
     def _save_and_exit(self):
         self.player_data.saveData(self.player_data_dict)
         self.request.closeGame()
+
+    def _set_lan_and_restart(self, language: str):
+        self.account.setLanguage(language=language)
+        self.request.restartScene()
     
 
     def _normalize_active_layer(self):
@@ -337,22 +353,22 @@ class OverworldEditor(EmptyScene):
     def _undo_last(self):
         if not self.undo_stack:
             self.dirty = False
-            self._set_status("Nothing to undo")
+            self._set_status(self.locale.gettext("nothing-to-undo"))
             return
 
         tx, ty, prev_value = self.undo_stack.pop()
         layer = self.map_json.get("tile-map-world", [])
         if not isinstance(layer, list) or ty < 0 or ty >= len(layer):
-            self._set_status("Undo skipped")
+            self._set_status(self.locale.gettext("undo-skipped"))
             return
         row = layer[ty]
         if not isinstance(row, list) or tx < 0 or tx >= len(row):
-            self._set_status("Undo skipped")
+            self._set_status(self.locale.gettext("undo-skipped"))
             return
 
         row[tx] = prev_value
         self.dirty = True
-        self._set_status("Undo")
+        self._set_status(self.locale.gettext("undo-undo"))
 
     @staticmethod
     def _in_rect(pos, rect):
@@ -422,13 +438,23 @@ class OverworldEditor(EmptyScene):
     
 
     def onUpdate(self):
+        keys = pg.key.get_pressed()
+
+        if self.undo_timer > 0:
+            self.undo_timer -= self.game.delta_time
+
+        if (keys[pg.K_LCTRL] or keys[pg.K_RCTRL]) and keys[pg.K_z]:
+            if self.undo_timer <= 0:
+                self._undo_last()
+                self.undo_timer = UNDO_DELAY
+
         for animation in self.animations.values():
             animation.update()
 
         if self.status_timer > 0:
             self.status_timer -= self.game.delta_time
         else:
-            self.status = "LMB draw | RMB erase | Ctrl+S save"
+            self.status = self.locale.gettext("lmb-rmb-ctrl-s")
 
         self._handle_mouse_input()
 
@@ -448,7 +474,7 @@ class OverworldEditor(EmptyScene):
         for tile_key, rect in self._palette_rects():
             if self._in_rect(pos, rect):
                 self.selected_tile = tile_key
-                self._set_status(f"Tile: {self.selected_tile}", timer=9)
+                self._set_status(f"{self.locale.gettext("selected")} {self.selected_tile}", timer=9)
                 return True
         return False
 
@@ -497,10 +523,10 @@ class OverworldEditor(EmptyScene):
        
         if left and not middle and not over_ui and not over_palette:
             if self._paint(mouse_pos, erase=False):
-                self._set_status("Draw")
+                self._set_status(self.locale.gettext("draw"))
 
         if right and not middle and not over_ui and not over_palette and self._paint(mouse_pos, erase=True):
-            self._set_status("Erase")
+            self._set_status(self.locale.gettext("erase"))
 
         self._prev_mouse_buttons = (left, middle, right)
         self._prev_mouse_pos = mouse_pos
@@ -539,8 +565,6 @@ class OverworldEditor(EmptyScene):
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_s and (event.mod & pg.KMOD_CTRL) and self.map_path:
                 self._save_current_map(self.map_path)
-            elif event.key == pg.K_z and (event.mod & pg.KMOD_CTRL):
-                self._undo_last()
             elif event.key in (pg.K_EQUALS, pg.K_PLUS, pg.K_KP_PLUS):
                 self._change_zoom(0.1)
             elif event.key in (pg.K_MINUS, pg.K_KP_MINUS):

@@ -35,6 +35,7 @@ SMOOTH_CAMERA = 0.7
 
 # Level and Overworld editor parameters
 ITEM_HEIGHT = 28
+UNDO_DELAY = 0.05
 
 PIXEL_TILE_SIZE = 8
 DRAW_TILE_SIZE = 24
