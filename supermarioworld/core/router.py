@@ -1,7 +1,6 @@
 
 
 
-
 class SceneManager:
     def onLoad(self, game):
         pass

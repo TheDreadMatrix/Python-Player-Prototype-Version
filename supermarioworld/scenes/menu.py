@@ -1,6 +1,5 @@
 from supermarioworld.scenes.base import EmptyScene
 
-
 from supermarioworld.rendering.users import TextLabel, FadeLabel
 from supermarioworld.rendering.shaders import CustomShader
 
@@ -19,9 +18,8 @@ import math
 
 
 class Menu(EmptyScene):
-    def __init__(self, game):
-        super().__init__(game)
-   
+    NAME="Menu"
+    def onInitialization(self, game, **kwargs):
 
         #MUSIC
         self.audio.load("title")
@@ -82,9 +80,6 @@ class Menu(EmptyScene):
 
 
         self.pixel_mosiac_shader = CustomShader(game, "testing/default.vert", "post-processing/post-processing-pxm.frag")
-        self.pixel_mosiac_shader.defineUniform("pixel_size", "pixelSize")
-        self.pixel_mosiac_shader.defineUniform("texture_size", "textureSize")
-
         self.renderer.regShader("pxm", self.pixel_mosiac_shader)
 
         
@@ -257,8 +252,8 @@ class Menu(EmptyScene):
 
         self.renderer.endFbo()
 
-        self.pixel_mosiac_shader.setUniformByOneTime("pixel_size", self.pixel_size)
-        self.pixel_mosiac_shader.setUniformByOneTime("texture_size", (self.game.width, self.game.height))
+        self.pixel_mosiac_shader.setUniform("pixelSize", self.pixel_size)
+        self.pixel_mosiac_shader.setUniform("textureSize", (self.game.width, self.game.height))
 
         self.renderer.renderFbo("background", size=(self.game.width, self.game.height), shader_key="pxm")
 

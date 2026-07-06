@@ -5,6 +5,7 @@ void main(){
 
     gl_Position = getPosition();
 
-    giveFragmentUvCoordinate();
+
+    gotoFragment();
 
 }

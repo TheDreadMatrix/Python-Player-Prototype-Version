@@ -1,4 +1,4 @@
-#include custom_fragment_texture
+#include custom_fragment
 
 
 uniform float time;

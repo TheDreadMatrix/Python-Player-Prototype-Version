@@ -1,9 +1,8 @@
 
 
 Fix CustomShader:
-* Preprocessor Parser with comment
 * Uniforms and vao for each shader
-* Shader source for instance and quad shader
+* Shader source for instance shader
 
 
 
@@ -11,6 +10,8 @@ Fix CustomShader:
 Fix Menu:
 * UI
 
+
+Change scene destroy res
 
 Change core pygame -> pysdl2
 

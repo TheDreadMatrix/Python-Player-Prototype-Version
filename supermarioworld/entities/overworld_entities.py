@@ -1,4 +1,5 @@
-from supermarioworld.package_typing import GameType, _SoundType
+from supermarioworld.typing.gametype import GameType
+from supermarioworld.typing.audio_type import BasicSound
 from supermarioworld.johnson import Johnson
 
 from supermarioworld.rendering.animation import AnimationCutOut
@@ -101,7 +102,7 @@ class OverWorldPlayer:
         return self.animation_dict.get(animation_name, self.animation_down)
 
 
-    def updatePlayer(self, sound_if_passed: _SoundType):
+    def updatePlayer(self, sound_if_passed: BasicSound):
         # Animations
         self.current_animation = self.getCurrentPathAnimation()
         self.current_animation.update()
@@ -230,11 +231,3 @@ class OverWorldPlayer:
         self.renderer.render(animation.getTextureKey(), size=(48, 48), position=(x, y), r=r, g=g, b=b)
         
         
-
-
-    def deletePlayerRes(self):
-        self.animation_choose.delAnimation()
-        self.animation_left.delAnimation()
-        self.animation_right.delAnimation()
-        self.animation_down.delAnimation()
-        self.animation_up.delAnimation()

@@ -1,5 +1,5 @@
 from supermarioworld.scenes.base import EmptyScene
-from supermarioworld.package_typing import GameType
+from supermarioworld.typing.gametype import GameType
 
 from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
 from supermarioworld.entities.overworld_entities import OverWorldPlayer
@@ -16,9 +16,9 @@ import pygame as pg
 
 
 
-class OverWorld(EmptyScene):
-    def __init__(self, game: GameType, biome: int, music_name: str, map_ref: str):
-        super().__init__(game)
+class Overworld(EmptyScene):    
+    NAME = "Overworld"    
+    def onInitialization(self, game, map_ref: str, biome: int, music_name: str):
 
 
         # overworld player
@@ -37,9 +37,9 @@ class OverWorld(EmptyScene):
 
        
         # Ui
-        self.assets.regImage("overworld-border", "overworld/overworld-border.png")
-        
-        self.assets.regCutOutImage("x-lives", atlas_key="fonts", x=313, y=113, w=7, h=7)
+        self.assets.regImage(self.NAME, "overworld-border", "overworld/overworld-border.png")
+        self.assets.regCutOutImage(self.NAME, "x-lives", atlas_key="fonts", x=313, y=113, w=7, h=7)
+
 
         self.text_titles = TextLabel(game,  font_key="pixel", size_font=18)
         self.text_account = TextLabel(game,  text=f"#P-{self.game.player.getSlot()}", font_key="pixel", size_font=15, r=0, g=0, b=0)
@@ -59,9 +59,7 @@ class OverWorld(EmptyScene):
         self.target_pixel_size = 1
 
        
-        self.pixel_mosiac_shader = CustomShader(game, "testing/default.vert", "post-processing/post-processing-pxm.frag")
-        self.pixel_mosiac_shader.defineUniform("pixel_size", "pixelSize")
-        self.pixel_mosiac_shader.defineUniform("texture_size", "textureSize")
+        self.pixel_mosiac_shader = CustomShader(game, "vertex/vertex_1.vert", "post-processing/post-processing-pxm.frag")
 
         self.renderer.regShader("pxm", self.pixel_mosiac_shader)
         self.renderer.createFbo("tile-map", (game.width, game.height))
@@ -74,12 +72,6 @@ class OverWorld(EmptyScene):
         self.audio.load(music_name)
         self.audio.play(loop=True)
 
-        # test
-        """
-        self.timer = 0
-        self.crt_shader = CustomShader(game, vertex_path="testing/default.vert", fragment_path="post-processing/post-processing-crt.frag")
-        self.renderer.regShader("crt", self.crt_shader)
-        self.renderer.createFbo("crt", (game.width, game.height))"""
 
 
     def onUpdate(self):
@@ -156,18 +148,17 @@ class OverWorld(EmptyScene):
     def onRender(self):
 
         # Render map
-        if self.player.redirecting:
-            self.renderer.beginFbo("tile-map")
+        self.renderer.beginFbo("tile-map")
 
         self.overworld_map.renderMap(self.camera)
 
-        if self.player.redirecting:
-            self.renderer.endFbo()
+  
+        self.renderer.endFbo()
 
-            self.pixel_mosiac_shader.setUniformByOneTime("pixel_size", self.pixel_size)
-            self.pixel_mosiac_shader.setUniformByOneTime("texture_size", (self.game.width, self.game.height))
+        self.pixel_mosiac_shader.setUniform("pixelSize", self.pixel_size)
+        self.pixel_mosiac_shader.setUniform("textureSize", (self.game.width, self.game.height))
 
-            self.renderer.renderFbo("tile-map", size=(self.game.width, self.game.height), shader_key="pxm")
+        self.renderer.renderFbo("tile-map", size=(self.game.width, self.game.height), shader_key="pxm")
 
 
         # Render player
@@ -175,7 +166,7 @@ class OverWorld(EmptyScene):
 
         
         # Render UI
-        #self.renderer.render("overworld-border", size=(self.game.width, self.game.height))
+        self.renderer.render("overworld-border", size=(self.game.width, self.game.height))
         self.renderer.render("x-lives", size=(20, 20), position=(155, 70))
 
         title_size = self.text_titles.size
@@ -210,10 +201,8 @@ class OverWorld(EmptyScene):
 
     def onSave(self):
         self.renderer.deleteFbo("tile-map")
-
         self.renderer.delShader("pxm")
         
-        self.overworld_map.delRes()
 
         self.text_account.delRes()
         self.text_fps.delRes()
@@ -221,7 +210,5 @@ class OverWorld(EmptyScene):
         self.text_points.delRes()
         self.text_titles.delRes()
 
-        self.assets.delImage("overworld-border")
-        
-        self.player.deletePlayerRes()
+
     

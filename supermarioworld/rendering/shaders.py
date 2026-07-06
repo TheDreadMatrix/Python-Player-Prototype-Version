@@ -1,40 +1,32 @@
-from supermarioworld.package_typing import GameType
-
-"""
-Gluminary Contract GLSL extension building with Daemon Engine
-
-#include custom_default
-#include custom_instance
-#include custom_quad
-
-* If we including second or more time. Raise SyntaxError. Use only one include custom for vertex and fragment shader
-* You set custom uniform by setUniform. But you can define uniforms one time in __init__ and use setUniformByOneTime
-* Also after including and create CustomShader there generate glsl source with mergining
-
-Also VAO must create attribute for each shader
-
-Default -> [gluminary_input_Position, gluminary_input_Coordinate]
-Quad -> [gluminary_input_Position]
-Instance -> [gluminary_input_Position, gluminary_input_Coordinate, gluminary_instance_Position, gluminary_instance_Size, gluminary_instance_Flx, gluminary_instance_Fly]
-
-For uniforms shader builds building uniform attribute for each shader
-
-Default -> [uniform vec2 gluminary_Position; uniform vec2 gluminary_Size; uniform bool gluminary_Flx; uniform bool gluminary_Fly;]
-Quad -> [uniform vec2 gluminary_Position; uniform vec2 gluminary_Size]
-Instance -> [uniform vec2 gluminary_Position;]
-
-Also for fragment uniforms:
-
-[gluminary_r, gluminary_g, gluminary_b, gluminary_a] for all shader type
-
-[gluminary_Texture] for Default and Instance shaders
+from supermarioworld.typing.gametype import GameType
+import re
 
 
-"""
+class DefaultUniform:
+    def __init__(self, value):
+        self.value = value
 
 
-#commentary include is not working
-#fix for instance and quad shader
+def _uniform(program, name, default):
+    try:
+        return program[name]
+    except KeyError:
+        return DefaultUniform(default)
+
+
+def _strip_comments(source: str) -> str:
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.S)
+
+    source = re.sub(r"//.*?$", "", source, flags=re.M)
+
+    return source
+
+
+
+
+# fix problem with shader input system or syntex error
+# add own input attr
+# fix for instance shader
 class _IncludeProcessor:
     def __init__(self):
         self.includes = {}
@@ -74,6 +66,7 @@ class _IncludeProcessor:
         uniform bool gluminary_Fly;
 
         out vec2 gluminary_Coordinate;
+        
 
 
         vec4 getPosition(){
@@ -83,7 +76,7 @@ class _IncludeProcessor:
             return final_position;
         }
 
-        void giveFragmentUvCoordinate(){
+        void gotoFragment(){
             vec2 finalCoord = gluminary_input_Coordinate;
 
             if (gluminary_Flx) {
@@ -100,11 +93,12 @@ class _IncludeProcessor:
 
         """
 
+        self.register("custom_instance_vertex", "hello")
         self.register("custom_default_vertex", DEFAULT_VERTEX_REPLACER)
-        self.register("custom_fragment_texture", DEFAULT_FRAGMENT_REPLACER)
 
-        self.register("custom_quad", "Hello")
-        self.register("custom_instance", "hello")
+        self.register("custom_fragment", DEFAULT_FRAGMENT_REPLACER)
+
+       
 
     def register(self, name: str, code: str):
         self.includes[name] = code
@@ -113,51 +107,52 @@ class _IncludeProcessor:
 
     def process(self, source: str):
         self.include_count_for_source = 0
-        
 
-        while "#include" in source:
-            lines = source.split("\n")
-            out = []
-           
+        clean_source = _strip_comments(source)
 
-            for line in lines:
-                line_stripped = line.strip()
+        clean_lines = clean_source.splitlines()
+        real_lines = source.splitlines()
 
-                if line_stripped.startswith("#include"):
-                    self.include_count_for_source += 1
+        out = []
 
-                    if self.include_count_for_source >= 2:
-                        raise SyntaxError("GLuminary supports only one #include directive per shader.")
+        for real_line, clean_line in zip(real_lines, clean_lines):
+            stripped = clean_line.strip()
 
-                    parts = line_stripped.split()
-                    if len(parts) != 2:
-                        raise SyntaxError(f"Include name is not defined: {line}")
+            if stripped.startswith("#include"):
+                self.include_count_for_source += 1
 
-                    name = parts[1]
+                if self.include_count_for_source > 1:
+                    raise SyntaxError(
+                        "Only one #include is allowed per shader."
+                    )
+
+                parts = stripped.split()
+
+                if len(parts) != 2:
+                    raise SyntaxError(f"Invalid include: {real_line}")
+
+                include = parts[1]
+
+                if include not in self.includes:
+                    raise SyntaxError(
+                        f"Unknown include '{include}'"
+                    )
+
+                out.append(self.includes[include])
+
+            else:
+                out.append(real_line)
+
+        return "\n".join(out)
 
 
-                    if name not in self.includes:
-                        raise SyntaxError(f"Unknown include: '{name}'. GLuminary has {list(self.includes.keys())} include imports")
-
-                
-                    out.append(self.includes[name])
-
-                else:
-                    out.append(line)
-
-            
-            
-            source = "\n".join(out)
-        
-        return source
-
-
+_processor = _IncludeProcessor()
 
 
 
 class CustomShader:
     def __init__(self, game: GameType, vertex_path: str, fragment_path: str):
-        self.processor = _IncludeProcessor()
+        
 
 
         # load sources
@@ -165,47 +160,40 @@ class CustomShader:
         fragment_source = game.paths.ShaderText(fragment_path)
 
         # preprocess includes (BOTH)
-        vertex_source = self.processor.process(vertex_source)
-        fragment_source = self.processor.process(fragment_source)
+        vertex_source = _processor.process(vertex_source)
+        fragment_source = _processor.process(fragment_source)
 
         
 
         # compile program
-        self._program = game.renderer._ctx.program(
-            vertex_shader=vertex_source,
-            fragment_shader=fragment_source
-        )
+        self._program = game.renderer._ctx.program(vertex_shader=vertex_source, fragment_shader=fragment_source)
+        
+      
+
 
         # uniform registry
         self._uniforms = {
-            "unPos": self._program["gluminary_Position"],
-            "unSize": self._program["gluminary_Size"],
-            "unFlx": self._program["gluminary_Flx"],
-            "unFly": self._program["gluminary_Fly"],
-            "r": self._program["gluminary_r"],
-            "g": self._program["gluminary_g"],
-            "b": self._program["gluminary_b"],
-            "a": self._program["gluminary_a"]
-            
+            "unPos": _uniform(self._program, "gluminary_Position", (1, 1)),
+            "unSize": _uniform(self._program, "gluminary_Size", (1, 1)),
+
+            "unFlx": _uniform(self._program, "gluminary_Flx", 0),
+            "unFly": _uniform(self._program, "gluminary_Fly", 0),
+
+            "r": _uniform(self._program, "gluminary_r", 1.0),
+            "g": _uniform(self._program, "gluminary_g", 1.0),
+            "b": _uniform(self._program, "gluminary_b", 1.0),
+            "a": _uniform(self._program, "gluminary_a", 1.0),
         }
 
-        self._vao = game.renderer._ctx.vertex_array(self._program, [(game.renderer.vbo, "2f 2f", "gluminary_input_Position", "gluminary_input_Coordinate")], index_buffer=game.renderer.ebo)
         
-
-
-
-
-
+        self._vao = game.renderer._ctx.vertex_array(self._program, 
+            [(game.renderer.vbo, "2f 2f", "gluminary_input_Position", "gluminary_input_Coordinate")], index_buffer=game.renderer.ebo)
+        
+        
 
     def setUniform(self, name: str, value):
         self._program[name] = value
 
-
-    def defineUniform(self, alias: str, uniform_name: str):
-        self._uniforms[alias] = self._program[uniform_name]
-
-    def setUniformByOneTime(self, key: str, value):
-        self._uniforms[key].value = value
 
     def getUniform(self, name):
         return self._program[name].value

@@ -1,8 +1,8 @@
 from supermarioworld.core.router import SceneManager
-
+from supermarioworld.typing.gametype import GameType
 
 from supermarioworld.scenes.level import Level
-from supermarioworld.scenes.overworld import OverWorld
+from supermarioworld.scenes.overworld import Overworld
 from supermarioworld.scenes.menu import Menu, QuitScene
 from supermarioworld.scenes.settings import Settings
 
@@ -14,50 +14,50 @@ from supermarioworld.enums.gameplay import OverWorldBiome, LevelBiome
 
 
 class Bootloader(SceneManager):
-    def onLoad(self, game):
+    def onLoad(self, game: GameType):
         # Fonts and atlas
         game.assets.regAtlas("fonts", "atlas/fonts.png")
         game.assets.regFont("pixel", "PixelFont.ttf")
 
         # Musics
-        game.assets.regMusic("title", "title-name.mp3")
+        game.assets.regMusic("global", "title", "title-name.mp3")
 
 
-        game.assets.regMusic("overworld-1", "overworld/valley-of-ones.ogg")
-        game.assets.regMusic("overworld-2", "overworld/underground.ogg")
-        game.assets.regMusic("overworld-3", "overworld/red-forest.ogg")
-        game.assets.regMusic("overworld-4", "overworld/danger-zone-lava-land.mp3")
-        game.assets.regMusic("overworld-star", "overworld/special-star.ogg")
+        game.assets.regMusic("global", "overworld-1", "overworld/valley-of-ones.ogg")
+        game.assets.regMusic("global", "overworld-2", "overworld/underground.ogg")
+        game.assets.regMusic("global", "overworld-3", "overworld/red-forest.ogg")
+        game.assets.regMusic("global", "overworld-4", "overworld/danger-zone-lava-land.mp3")
+        game.assets.regMusic("global", "overworld-star", "overworld/special-star.ogg")
 
-        game.assets.regMusic("A", "level/A.ogg")
-        game.assets.regMusic("B", "level/B.ogg")
+        game.assets.regMusic("global", "A", "level/A.ogg")
+        game.assets.regMusic("global", "B", "level/B.ogg")
 
-        game.assets.regMusic("A-underground", "level/A-underground.ogg")
-        game.assets.regMusic("B-underground", "level/B-underground.ogg")
+        game.assets.regMusic("global", "A-underground", "level/A-underground.ogg")
+        game.assets.regMusic("global", "B-underground", "level/B-underground.ogg")
 
-        game.assets.regMusic("CS-A", "level/CS-A.ogg")
-        game.assets.regMusic("CS-B", "level/CS-b.ogg")
+        game.assets.regMusic("global", "CS-A", "level/CS-A.ogg")
+        game.assets.regMusic("global", "CS-B", "level/CS-b.ogg")
 
 
         # Sounds
-        game.assets.regSound("cancel", "wav/cancel.wav")
-        game.assets.regSound("choose", "wav/map.wav")
-        game.assets.regSound("pause", "wav/pause.wav")
-        game.assets.regSound("scroll", "wav/scroll.wav")
-        game.assets.regSound("thunder", "wav/smw_thunder.wav")
-        game.assets.regSound("open-egg", "wav/open.wav")
+        game.assets.regSound("global", "cancel", "wav/cancel.wav")
+        game.assets.regSound("global", "choose", "wav/map.wav")
+        game.assets.regSound("global", "pause", "wav/pause.wav")
+        game.assets.regSound("global", "scroll", "wav/scroll.wav")
+        game.assets.regSound("global", "thunder", "wav/smw_thunder.wav")
+        game.assets.regSound("global", "open-egg", "wav/open.wav")
 
-        game.assets.regSound("pointer", "mp3/pointer.mp3")
-        game.assets.regSound("losing", "mp3/lost.mp3")
-        game.assets.regSound("success", "mp3/success.mp3")
+        game.assets.regSound("global", "pointer", "mp3/pointer.mp3")
+        game.assets.regSound("global", "losing", "mp3/lost.mp3")
+        game.assets.regSound("global", "success", "mp3/success.mp3")
 
-        game.assets.regSound("coin", "mp3/coins.mp3")
-        game.assets.regSound("jumping", "mp3/jump.mp3")
-        
+        game.assets.regSound("global", "coin", "mp3/coins.mp3")
+        game.assets.regSound("global", "jumping", "mp3/jump.mp3")
+                
       
         
 
-    def onInitScene(self, game):
+    def onInitScene(self, game: GameType):
         self.START_SCENE = "base:overworld-1"
 
         # Developer
@@ -79,11 +79,11 @@ class Bootloader(SceneManager):
         self.registerScene("base:bonus-game-2", lambda: Level(game=game, biome=LevelBiome.CASTLE, music_name="overworld-star"))
 
         # Overworld
-        self.registerScene("base:overworld-1", lambda: OverWorld(game=game, biome=OverWorldBiome.VALLEY, music_name="overworld-1", map_ref="overworld-1"))
-        self.registerScene("base:overworld-2", lambda: OverWorld(game=game, biome=OverWorldBiome.UNDERGROUND, music_name="B-underground", map_ref="overworld-2"))
-        self.registerScene("base:overworld-3", lambda: OverWorld(game=game, biome=OverWorldBiome.RED_FOREST, music_name="overworld-3", map_ref="overworld-3"))
-        self.registerScene("base:overworld-4", lambda: OverWorld(game=game, biome=OverWorldBiome.MAGMA, music_name="overworld-4", map_ref="overworld-4"))
-        self.registerScene("base:overworld-star", lambda: OverWorld(game=game, biome=OverWorldBiome.SPECIAL, music_name="overworld-star", map_ref="overworld-star"))
+        self.registerScene("base:overworld-1", lambda: Overworld(game=game, biome=OverWorldBiome.VALLEY, music_name="overworld-1", map_ref="overworld-1"))
+        self.registerScene("base:overworld-2", lambda: Overworld(game=game, biome=OverWorldBiome.UNDERGROUND, music_name="B-underground", map_ref="overworld-2"))
+        self.registerScene("base:overworld-3", lambda: Overworld(game=game, biome=OverWorldBiome.RED_FOREST, music_name="overworld-3", map_ref="overworld-3"))
+        self.registerScene("base:overworld-4", lambda: Overworld(game=game, biome=OverWorldBiome.MAGMA, music_name="overworld-4", map_ref="overworld-4"))
+        self.registerScene("base:overworld-star", lambda: Overworld(game=game, biome=OverWorldBiome.SPECIAL, music_name="overworld-star", map_ref="overworld-star"))
 
         # Valley of ones
         self.registerScene("base:level-1", lambda: Level(game=game, biome=LevelBiome.VALLEY, music_name="A"))

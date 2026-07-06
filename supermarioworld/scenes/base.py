@@ -1,9 +1,13 @@
-from supermarioworld.package_typing import GameType, Evalent
+from supermarioworld.typing.gametype import GameType, BasicEvent
 
 
 class EmptyScene:
-    def __init__(self, game: "GameType"):
+    NAME = "BASE-ABC"
+    def __init__(self, game: GameType, **kwargs):
         self.game = game
+
+        self._router = game.router
+
         self.request = game.request
         self.paths = game.paths
         self.assets = game.assets
@@ -14,7 +18,13 @@ class EmptyScene:
         
         self.renderer = game.renderer
 
+        self.onInitialization(game, **kwargs)
+
+    def onInitialization(self, game: GameType, **kwargs): pass
+
+    
+
     def onUpdate(self): pass
-    def onEvent(self, event: Evalent): pass
+    def onEvent(self, event: BasicEvent): pass
     def onRender(self): pass
     def onSave(self): pass

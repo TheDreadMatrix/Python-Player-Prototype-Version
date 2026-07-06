@@ -1,4 +1,4 @@
-from supermarioworld.package_typing import GameType
+from supermarioworld.typing.gametype import GameType
 from supermarioworld.scenes.base import EmptyScene
 
 

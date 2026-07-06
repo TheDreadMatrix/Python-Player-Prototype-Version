@@ -1,4 +1,4 @@
-from supermarioworld.package_typing import GameType
+from supermarioworld.typing.gametype import GameType
 from supermarioworld.johnson import readData
 
 from supermarioworld.rendering.animation import AnimationCutOut
@@ -153,7 +153,7 @@ class OverWorldMap:
                     y = int(tile[1])
                     w, h = (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE)
 
-                self.assets.regCutOutImage(texture_key=tile_key, atlas_key=atlas_key, x=x, y=y, w=w, h=h)
+                self.assets.regCutOutImage("global", texture_key=tile_key, atlas_key=atlas_key, x=x, y=y, w=w, h=h)
                 self._registered_keys.add(tile_key)
 
     def _build_entities(self):
@@ -254,19 +254,5 @@ class OverWorldMap:
             self.renderer.render(tex, size=(tile.s_w, tile.s_h), position=(tile.x + x, tile.y + y), flx=tile.flx, fly=tile.fly)
     
 
-
-    def delRes(self):
-        for tile_key in self._registered_keys:
-            self.assets.delImage(tile_key)
-
-        for animation in self.animations.values():
-            animation.delAnimation()
-
-        self.spatial_hash.grids.clear()
-        self.tiles_build.clear()
-        self.tiles.clear()
-        self._registered_keys.clear()
-        self.map_data.clear()
-        self.layers.clear()
 
    

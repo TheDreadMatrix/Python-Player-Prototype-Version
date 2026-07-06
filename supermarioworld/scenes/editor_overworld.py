@@ -2,7 +2,7 @@ import pygame as pg
 import easygui
 
 from supermarioworld.johnson import readData, saveData, Johnson
-from supermarioworld.package_typing import GameType
+from supermarioworld.typing.gametype import GameType
 from supermarioworld.scenes.base import EmptyScene
 
 from supermarioworld.rendering.animation import AnimationCutOut
@@ -134,8 +134,7 @@ class OverworldEditor(EmptyScene):
         self._last_title = ""
     
         # Audio is finally
-        self.audio.load("A")
-        self.audio.setFilterLowPass(8000)
+        self.audio.load("A-underground")
         self.audio.play()
 
 
@@ -213,6 +212,10 @@ class OverworldEditor(EmptyScene):
 
 
     def _open_dialog_file_notation(self):
+        path = easygui.fileopenbox(msg="choose a file...", title="Open notation", default="*.json")
+        if not path:
+            return
+
         for animation in self.animations.values():
             animation.delAnimation()
 
@@ -223,9 +226,7 @@ class OverworldEditor(EmptyScene):
 
         self.assets_to_release.clear()
 
-        path = easygui.fileopenbox(msg="choose a file...", title="Open notation", default="*.json")
-        if not path:
-            return
+        
 
         self.player_data_dict["current-notation-file"] = path
         notation = readData(self.player_data_dict["current-notation-file"])
@@ -264,7 +265,7 @@ class OverworldEditor(EmptyScene):
                     w, h = tile.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))
 
 
-                self.assets.regCutOutImage(tile_key, "overworld", x=x, y=y, w=w, h=h)
+                self.assets.regCutOutImage("base:overworld_editor", tile_key, "overworld", x=x, y=y, w=w, h=h)
                 self.assets_to_release.add(tile_key)
 
 
@@ -581,7 +582,22 @@ class OverworldEditor(EmptyScene):
                 
 
     def _change_zoom(self, delta: float):
-        self.zoom = max(MIN_ZOOM_EDITOR, min(MAX_ZOOM_EDITOR, self.zoom + delta))
+        old_zoom = self.zoom
+        new_zoom = max(MIN_ZOOM_EDITOR, min(MAX_ZOOM_EDITOR, old_zoom + delta))
+
+        if old_zoom == new_zoom:
+            return
+
+        cx = self.game.width / 2
+        cy = self.game.height / 2
+
+        world_x = (cx - self.grid_origin[0] - self.view_offset[0]) / old_zoom
+        world_y = (cy - self.grid_origin[1] - self.view_offset[1]) / old_zoom
+
+        self.zoom = new_zoom
+
+        self.view_offset[0] = cx - self.grid_origin[0] - world_x * new_zoom
+        self.view_offset[1] = cy - self.grid_origin[1] - world_y * new_zoom
         
 
     
@@ -709,10 +725,3 @@ class OverworldEditor(EmptyScene):
         return batches
 
 
-
-    def onSave(self):
-        for animation in self.animations.values():
-            animation.delAnimation()
-
-        for key in self.assets_to_release:
-            self.assets.delImage(key)

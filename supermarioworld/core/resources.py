@@ -9,15 +9,36 @@ class AssetsResources:
     def __init__(self, game):
         self.game = game
 
-
-
-        self.sounds = {}
+        self.sounds = {} 
         self.musics = {}
         self.textures = {}
 
         self.atlas_surfaces: dict[str, pg.Surface] = {}
         self.font_surfaces: dict[str, str] = {}
 
+        self.set_to_destroy = {}
+
+    def _set_to_stack(self, owner, resource_type, resource_key):
+        self.set_to_destroy.setdefault(owner, [])
+        self.set_to_destroy[owner].append((resource_type, resource_key))
+
+    def releaseScene(self, scene):
+        for typ, key in self.set_to_destroy.pop(scene, []):
+
+            if typ == "IMAGE":
+                self.delImage(key)
+
+            elif typ == "SOUND":
+                self.delSound(key)
+
+            elif typ == "MUSIC":
+                self.delMusic(key)
+
+
+
+    # Registering Atlas Font Textures and Sounds
+
+    # 1. Pygame object
     def regAtlas(self, atlas_key, atlas_path):
         self.atlas_surfaces.update({atlas_key: pg.image.load(self.game.paths.ImagesPath(atlas_path)).convert_alpha()})
 
@@ -26,11 +47,14 @@ class AssetsResources:
 
 
 
-    def regImage(self, texture_key, texture_path, texture_filter=0, texture_anisotropy=0):
+    # 2. Moderngl object
+    def regImage(self, owner, texture_key, texture_path, texture_filter=0, texture_anisotropy=0):
         self.textures.update({texture_key: load_texture(self.game.renderer._ctx, self.game.paths.ImagesPath(texture_path), texture_filter, texture_anisotropy)})
 
+        self._set_to_stack(owner, "IMAGE", texture_key)
+        
 
-    def regCutOutImage(self, texture_key, atlas_key, x, y, w, h, texture_filter=0, texture_anisotropy=0):
+    def regCutOutImage(self, owner, texture_key, atlas_key, x, y, w, h, texture_filter=0, texture_anisotropy=0):
         atlas = self.atlas_surfaces.get(atlas_key)
 
         if atlas is None:
@@ -38,20 +62,29 @@ class AssetsResources:
 
         self.textures.update({texture_key: load_texture_cutout(self.game.renderer._ctx, atlas, x, y, w, h, texture_filter, texture_anisotropy)})
 
+        self._set_to_stack(owner, "IMAGE", texture_key)
 
-    def _regRawImage(self, texture_key, texture):
+
+    def _regRawImage(self, owner, texture_key, texture):
         self.textures.update({texture_key: texture})
 
+        self._set_to_stack(owner, "IMAGE", texture_key)
 
 
-    def regSound(self, sound_key, sound_path):
+    # 3. Just string path
+    def regSound(self, owner, sound_key, sound_path):
         self.sounds.update({sound_key: self.game.paths.SoundPath(sound_path)})
 
+        self._set_to_stack(owner, "SOUND", sound_key)
 
-    def regMusic(self, music_key, music_path):
+
+    def regMusic(self, owner, music_key, music_path):
         self.musics.update({music_key: self.game.paths.MusicPath(music_path)})
 
+        self._set_to_stack(owner, "MUSIC", music_key)
 
+
+    # Clear
     def delSound(self, sound_key):
         self.sounds.pop(sound_key, None)
 
