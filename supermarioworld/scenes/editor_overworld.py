@@ -15,7 +15,8 @@ from supermarioworld.configuration import (PIXEL_TILE_SIZE, ITEM_HEIGHT, UNDO_DE
 
 
 
-
+# Type checker
+# New
 class OverworldEditor(EmptyScene):
     def __init__(self, game: GameType):
         super().__init__(game)
@@ -49,8 +50,8 @@ class OverworldEditor(EmptyScene):
         # Menus
         self.menus = {
             self.locale.gettext("file"): [
+                (self.locale.gettext("new"), lambda: print("Hello")),
                 (self.locale.gettext("open"), self._open_dialog_file_map),
-                (self.locale.gettext("open-notation"), self._open_dialog_file_notation),
                 (self.locale.gettext("save-file"), lambda: self._save_current_map(self.map_path)),
                 (self.locale.gettext("exit-file"), self._save_and_exit),
             ],
@@ -200,9 +201,10 @@ class OverworldEditor(EmptyScene):
         
 
     def _open_dialog_file_map(self):
-        path = easygui.fileopenbox(msg="choose a file...", title="Open map", default="*.json")
+        path = easygui.fileopenbox(msg="choose a file like [maps, mapso, nodes, notations]", title="Open map", default="*.json")
         if not path:
             return 
+        
 
         self.player_data_dict["current-file"] = path
         self.map_path = path
@@ -265,7 +267,7 @@ class OverworldEditor(EmptyScene):
                     w, h = tile.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))
 
 
-                self.assets.regCutOutImage("base:overworld_editor", tile_key, "overworld", x=x, y=y, w=w, h=h)
+                self.assets.regCutOutImage(tile_key, "overworld", x=x, y=y, w=w, h=h)
                 self.assets_to_release.add(tile_key)
 
 
@@ -334,8 +336,8 @@ class OverworldEditor(EmptyScene):
         mx, my = mouse_pos
         mx -= self.view_offset[0]
         my -= self.view_offset[1]
-        tx = (mx - gx) // map_cell
-        ty = (my - gy) // map_cell
+        tx = int((mx - gx) // map_cell)
+        ty = int((my - gy) // map_cell)
         if tx < 0 or ty < 0 or tx >= cols or ty >= rows:
             return False
 

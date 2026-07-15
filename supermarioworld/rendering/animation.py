@@ -9,7 +9,7 @@ class Animation:
 
 
         textures = [load_texture(game.renderer._ctx, game.paths.ImagesPath(path), tex_filter, anisotropy) for path in frame_paths]
-        [game.assets._regRawImage("global", key, textures[i]) for i, key in enumerate(key_images)]
+        [game.assets._regRawImage(key, textures[i]) for i, key in enumerate(key_images)]
 
         self.key_images = key_images
 
@@ -55,7 +55,7 @@ class AnimationCutOut(Animation):
             load_texture_cutout(game.renderer._ctx, game.assets.atlas_surfaces[key_atlas], frame[0], frame[1], frame[2], frame[3], tex_filter, anisotropy) for frame in frames
         ]
 
-        [game.assets._regRawImage("global", key, textures[i]) for i, key in enumerate(key_images)]
+        [game.assets._regRawImage(key, textures[i]) for i, key in enumerate(key_images)]
 
         self.key_images = key_images
 

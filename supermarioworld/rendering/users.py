@@ -106,7 +106,7 @@ class TextLabel:
             
         self.texture_note, self.size = load_texture_text(self._ctx, self.font, self.text, color_text, tex_filter, anisotropy)
         self.width, self.height = self.size
-        self.resources._regRawImage("global", self.texture_id, self.texture_note)
+        self.resources._regRawImage(self.texture_id, self.texture_note)
 
 
     def setText(self, text: str, r_text: float=0, g_text: float=0, b_text: float=0, tex_filter: int=0, anisotropy: int=0):

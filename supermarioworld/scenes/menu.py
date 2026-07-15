@@ -57,6 +57,8 @@ class Menu(EmptyScene):
 
 
         # SPRITES
+        self.assets.beginScene("menu")
+
         game.assets.regImage("title", "menu/title.png")
         game.assets.regImage("title-border", "menu/title-border.png")
         game.assets.regImage("background", "menu/background.png")
@@ -79,7 +81,7 @@ class Menu(EmptyScene):
         self.renderer.createFbo("background", (game.width, game.height))
 
 
-        self.pixel_mosiac_shader = CustomShader(game, "testing/default.vert", "post-processing/post-processing-pxm.frag")
+        self.pixel_mosiac_shader = CustomShader(game, "vertex/vertex_1.vert", "post-processing/post-processing-pxm.frag")
         self.renderer.regShader("pxm", self.pixel_mosiac_shader)
 
         
@@ -281,15 +283,7 @@ class Menu(EmptyScene):
         
         self.text_quit.delRes()
         self.text_options.delRes()
-        self.text_play.delRes()
-  
-
-        self.game.assets.delImage("title")
-        self.game.assets.delImage("title-border")
-        self.game.assets.delImage("background")
-        self.game.assets.delImage("b1")
-        self.game.assets.delImage("b4")
-        
+        self.text_play.delRes()        
 
         
        

@@ -15,7 +15,7 @@ class OverWorldMap:
         
 
         # Spatial
-        self.spatial_hash = ChunkHasher(cell_sizes=(500, 450))
+        self.spatial_hash = ChunkHasher(cell_sizes=(400, 400))
 
         # Some registration
         self.assets = game.assets
@@ -42,6 +42,8 @@ class OverWorldMap:
         self.tiles_build = []
         self.tiles = []
         self.tile_entities = {}
+
+        self.current_cells = None
         
         self.animations: dict[str, AnimationCutOut] = {}
 
@@ -153,7 +155,7 @@ class OverWorldMap:
                     y = int(tile[1])
                     w, h = (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE)
 
-                self.assets.regCutOutImage("global", texture_key=tile_key, atlas_key=atlas_key, x=x, y=y, w=w, h=h)
+                self.assets.regCutOutImage( texture_key=tile_key, atlas_key=atlas_key, x=x, y=y, w=w, h=h)
                 self._registered_keys.add(tile_key)
 
     def _build_entities(self):
@@ -219,12 +221,12 @@ class OverWorldMap:
 
     
 
-    def update(self, player):
-        cell = self.spatial_hash.getCellSizes(player.position[0], player.position[1])
+    def update(self, pos_x, pos_y):
+        cell = self.spatial_hash.getCellSizes(pos_x, pos_y)
 
-        if cell != player.current_cells:
-            self.tiles = self.spatial_hash.getEntities(player.position[0], player.position[1])
-            player.current_cells = cell
+        if cell != self.current_cells:
+            self.tiles = self.spatial_hash.getEntities(pos_x, pos_y)
+            self.current_cells = cell
 
 
         for animation in self.animations.values():

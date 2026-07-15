@@ -16,9 +16,8 @@ import pygame as pg
 
 
 
-class Overworld(EmptyScene):    
-    NAME = "Overworld"    
-    def onInitialization(self, game, map_ref: str, biome: int, music_name: str):
+class Overworld(EmptyScene):      
+    def onInitialization(self, game: GameType, map_ref: str, biome: int, music_name: str):
 
 
         # overworld player
@@ -27,6 +26,7 @@ class Overworld(EmptyScene):
         
 
         # Tile map
+        self.assets.beginScene(map_ref)
         self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{NOTATION_BIOME_OVERWORLD.get(biome)}.json")
         self.overworld_map.load(map_ref)
 
@@ -37,8 +37,8 @@ class Overworld(EmptyScene):
 
        
         # Ui
-        self.assets.regImage(self.NAME, "overworld-border", "overworld/overworld-border.png")
-        self.assets.regCutOutImage(self.NAME, "x-lives", atlas_key="fonts", x=313, y=113, w=7, h=7)
+        self.assets.regImage("overworld-border", "overworld/overworld-border.png")
+        self.assets.regCutOutImage("x-lives", atlas_key="fonts", x=313, y=113, w=7, h=7)
 
 
         self.text_titles = TextLabel(game,  font_key="pixel", size_font=18)
@@ -81,12 +81,12 @@ class Overworld(EmptyScene):
         self.fade_label.update()
 
         # Camera
-        self.camera.follow(self.player.position[0], self.player.position[1])
+        self.camera.follow(*self.player.position)
 
         # Overworld spatial
         self.player.updatePlayer(sound_if_passed=self.sound_choose)
 
-        self.overworld_map.update(self.player)
+        self.overworld_map.update(*self.player.position)
         
         
 
@@ -137,8 +137,6 @@ class Overworld(EmptyScene):
         if event.type == pg.KEYDOWN and self.game.DEBUG:
             if event.key == pg.K_l:
                 self.request.restartScene()
-            if event.key == pg.K_r:
-                self.overworld_map.set_tile(2, 2, "water-2", sound=self.open_egg_sound)
 
         self.player.handleEventNodes(event=event)
         

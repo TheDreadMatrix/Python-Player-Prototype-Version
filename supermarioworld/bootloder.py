@@ -20,39 +20,39 @@ class Bootloader(SceneManager):
         game.assets.regFont("pixel", "PixelFont.ttf")
 
         # Musics
-        game.assets.regMusic("global", "title", "title-name.mp3")
+        game.assets.regMusic("title", "title-name.mp3")
 
 
-        game.assets.regMusic("global", "overworld-1", "overworld/valley-of-ones.ogg")
-        game.assets.regMusic("global", "overworld-2", "overworld/underground.ogg")
-        game.assets.regMusic("global", "overworld-3", "overworld/red-forest.ogg")
-        game.assets.regMusic("global", "overworld-4", "overworld/danger-zone-lava-land.mp3")
-        game.assets.regMusic("global", "overworld-star", "overworld/special-star.ogg")
+        game.assets.regMusic("overworld-1", "overworld/valley-of-ones.ogg")
+        game.assets.regMusic("overworld-2", "overworld/underground.ogg")
+        game.assets.regMusic("overworld-3", "overworld/red-forest.ogg")
+        game.assets.regMusic("overworld-4", "overworld/danger-zone-lava-land.mp3")
+        game.assets.regMusic("overworld-star", "overworld/special-star.ogg")
 
-        game.assets.regMusic("global", "A", "level/A.ogg")
-        game.assets.regMusic("global", "B", "level/B.ogg")
+        game.assets.regMusic("A", "level/A.ogg")
+        game.assets.regMusic("B", "level/B.ogg")
 
-        game.assets.regMusic("global", "A-underground", "level/A-underground.ogg")
-        game.assets.regMusic("global", "B-underground", "level/B-underground.ogg")
+        game.assets.regMusic("A-underground", "level/A-underground.ogg")
+        game.assets.regMusic("B-underground", "level/B-underground.ogg")
 
-        game.assets.regMusic("global", "CS-A", "level/CS-A.ogg")
-        game.assets.regMusic("global", "CS-B", "level/CS-b.ogg")
+        game.assets.regMusic("CS-A", "level/CS-A.ogg")
+        game.assets.regMusic("CS-B", "level/CS-b.ogg")
 
 
         # Sounds
-        game.assets.regSound("global", "cancel", "wav/cancel.wav")
-        game.assets.regSound("global", "choose", "wav/map.wav")
-        game.assets.regSound("global", "pause", "wav/pause.wav")
-        game.assets.regSound("global", "scroll", "wav/scroll.wav")
-        game.assets.regSound("global", "thunder", "wav/smw_thunder.wav")
-        game.assets.regSound("global", "open-egg", "wav/open.wav")
+        game.assets.regSound("cancel", "wav/cancel.wav")
+        game.assets.regSound("choose", "wav/map.wav")
+        game.assets.regSound("pause", "wav/pause.wav")
+        game.assets.regSound("scroll", "wav/scroll.wav")
+        game.assets.regSound("thunder", "wav/smw_thunder.wav")
+        game.assets.regSound("open-egg", "wav/open.wav")
 
-        game.assets.regSound("global", "pointer", "mp3/pointer.mp3")
-        game.assets.regSound("global", "losing", "mp3/lost.mp3")
-        game.assets.regSound("global", "success", "mp3/success.mp3")
+        game.assets.regSound("pointer", "mp3/pointer.mp3")
+        game.assets.regSound("losing", "mp3/lost.mp3")
+        game.assets.regSound("success", "mp3/success.mp3")
 
-        game.assets.regSound("global", "coin", "mp3/coins.mp3")
-        game.assets.regSound("global", "jumping", "mp3/jump.mp3")
+        game.assets.regSound("coin", "mp3/coins.mp3")
+        game.assets.regSound("jumping", "mp3/jump.mp3")
                 
       
         

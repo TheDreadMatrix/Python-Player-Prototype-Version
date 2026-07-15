@@ -21,8 +21,6 @@ class OverWorldPlayer:
         # Speed
         self.move_speed = move_speed
 
-        # For spatial hashing
-        self.current_cells = None
 
         # Nodes
         game.player.current_overworld = map_ref

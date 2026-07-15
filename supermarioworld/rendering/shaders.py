@@ -90,10 +90,12 @@ class _IncludeProcessor:
             gluminary_Coordinate = finalCoord;
         }
 
-
         """
 
-        self.register("custom_instance_vertex", "hello")
+        INSTANCE_VERTEX_REPLACER = """"""
+
+
+        self.register("custom_instance_vertex", INSTANCE_VERTEX_REPLACER)
         self.register("custom_default_vertex", DEFAULT_VERTEX_REPLACER)
 
         self.register("custom_fragment", DEFAULT_FRAGMENT_REPLACER)
@@ -105,7 +107,7 @@ class _IncludeProcessor:
 
     
 
-    def process(self, source: str):
+    def process(self, source: str, its_vertex=False, its_fragment=False):
         self.include_count_for_source = 0
 
         clean_source = _strip_comments(source)
@@ -160,8 +162,8 @@ class CustomShader:
         fragment_source = game.paths.ShaderText(fragment_path)
 
         # preprocess includes (BOTH)
-        vertex_source = _processor.process(vertex_source)
-        fragment_source = _processor.process(fragment_source)
+        vertex_source = _processor.process(vertex_source, its_vertex=True)
+        fragment_source = _processor.process(fragment_source, its_fragment=True)
 
         
 

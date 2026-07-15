@@ -1,11 +1,11 @@
 
 
 class OverworldCamera:
-    def __init__(self, game, screen_width: int, screen_height: int, smooth: float = 0.1, x: float = 0.0, y: float = 0.0):
+    def __init__(self, game, screen_width: int, screen_height: int, smooth: float = 0.1,):
         self.game = game
 
-        self.x = x
-        self.y = y
+        self.x = 0
+        self.y = 0
 
         self.screen_width = screen_width
         self.screen_height = screen_height

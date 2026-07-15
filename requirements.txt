@@ -1,5 +1,8 @@
 moderngl
 pygame_ce
+
+pysdl2
+
 pyglm
 numpy
 easygui

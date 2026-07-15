@@ -49,6 +49,7 @@ class SceneManager:
             
         if state_scene != self._manager_state:
             self._current_scene.onSave()
+            self._current_scene.assets.releaseScene()
             self._current_scene = self.scene_dict.get(state_scene)()
             self._manager_state = state_scene
 
