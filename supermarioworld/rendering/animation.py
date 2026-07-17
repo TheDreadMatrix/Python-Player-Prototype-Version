@@ -38,10 +38,6 @@ class Animation:
     def getTextureKey(self):
         return self.key_images[self.index]
     
-
-    def delAnimation(self):
-        for key in self.key_images:
-            self.game.assets.delImage(key)
     
 
 

@@ -4,16 +4,13 @@ import pygame as pg
 class Keyboard:
     def __init__(self):
         self._keys = None
-        self.dict_nums = {
-
-        }
 
     def _update(self):
         self._keys = pg.key.get_pressed()
 
 
     def pressed(self, key):
-        pass
+        return self._keys[key]
 
     def pressedDown(self, key, event):
         pass

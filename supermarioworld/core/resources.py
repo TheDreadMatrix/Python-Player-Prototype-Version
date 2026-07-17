@@ -13,8 +13,8 @@ class AssetsResources:
         self.musics = {}
         self.textures = {}
 
-        self.atlas_surfaces: dict[str, pg.Surface] = {}
-        self.font_surfaces: dict[str, str] = {}
+        self.atlas_surfaces = {}
+        self.font_surfaces = {}
 
         self.set_to_destroy = {}
         self._owner = None

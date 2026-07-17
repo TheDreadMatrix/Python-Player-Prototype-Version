@@ -536,10 +536,10 @@ class OverworldEditor(EmptyScene):
 
 
     def onEvent(self, event):
-        if event.type == pg.QUIT:
+        if self.request.isQuiting(event):
             self.player_data.saveData(self.player_data_dict)
 
-        if event.type == pg.VIDEORESIZE:
+        if self.request.isResized(event):
             self.line_rect = (0, 0, self.game.width, 75)
             return
 

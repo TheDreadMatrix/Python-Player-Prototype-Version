@@ -9,8 +9,6 @@ from supermarioworld.rendering.shaders import CustomShader
 from supermarioworld.camera import OverworldCamera
 
 
-
-from supermarioworld.configuration import NOTATION_BIOME_OVERWORLD, WALK_SPEED, SMOOTH_CAMERA, PIXEL_SPEED
 import pygame as pg
 
 
@@ -21,18 +19,20 @@ class Overworld(EmptyScene):
 
 
         # overworld player
-        self.player = OverWorldPlayer(game, map_ref=map_ref, move_speed=WALK_SPEED)
+        self.player = OverWorldPlayer(game, map_ref=map_ref, move_speed=self.WALK_SPEED)
 
         
 
         # Tile map
         self.assets.beginScene(map_ref)
-        self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{NOTATION_BIOME_OVERWORLD.get(biome)}.json")
+
+        
+        self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{self.NOTATION_BIOME_OVERWORLD.get(biome)}.json")
         self.overworld_map.load(map_ref)
 
   
         # Camera
-        self.camera = OverworldCamera(game=game, screen_width=game.width, screen_height=game.height, smooth=SMOOTH_CAMERA)
+        self.camera = OverworldCamera(game=game, screen_width=game.width, screen_height=game.height, smooth=self.SMOOTH_CAMERA)
         self.camera.setBounds(0, -80, 2500, 2500)
 
        
@@ -99,11 +99,11 @@ class Overworld(EmptyScene):
         
 
         if self.pixel_size < self.target_pixel_size:
-            self.pixel_size += PIXEL_SPEED * self.game.delta_time
+            self.pixel_size += self.PIXEL_SPEED * self.game.delta_time
             self.pixel_size = min(self.pixel_size, self.target_pixel_size)
 
         elif self.pixel_size > self.target_pixel_size:
-            self.pixel_size -= PIXEL_SPEED * self.game.delta_time
+            self.pixel_size -= self.PIXEL_SPEED * self.game.delta_time
             self.pixel_size = max(self.pixel_size, self.target_pixel_size)
 
         # Fps

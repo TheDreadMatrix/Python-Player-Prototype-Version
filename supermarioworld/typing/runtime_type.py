@@ -1,3 +1,15 @@
+
+
+class BasicEvent:
+    type: ...
+    key: int
+    y: int
+
+
+class BasicSettings:
+    ...
+
+
 class BasicApi:
     def closeGame(self) -> None: ...
     def setTitle(self, title: str) -> None: ...
@@ -5,6 +17,12 @@ class BasicApi:
    
     def restartScene(self) -> None: ...
     def redirectScene(self, scene: str) -> None: ...
+
+    @staticmethod
+    def isQuiting(event: BasicEvent) -> bool: ...
+
+    @staticmethod
+    def isResized(event: BasicEvent) -> bool: ...
 
 
 class BasicPath:

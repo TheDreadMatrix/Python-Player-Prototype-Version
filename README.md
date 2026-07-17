@@ -4,7 +4,7 @@ SUPER MANTIS WORLD 91 - DaemonDuck16
 main.py
 
 
-games/ <- output directory for exe
+.output_games/ <- output directory for exe
 
 The command prompt build
 
@@ -16,7 +16,7 @@ pyinstaller `
     --name WhatADaemonWorld `
     --icon=assets/icon.ico `
     --version-file version.txt `
-    --distpath games `
+    --distpath .output_games `
     --add-data "assets;assets" `
     --add-binary "soloud_x64.dll;." `
     main.py
@@ -30,7 +30,7 @@ pyinstaller `
     --name DaemonOverworldEditor `
     --icon=assets/icon.ico `
     --version-file version.txt `
-    --distpath games `
+    --distpath .output_games `
     --add-data "assets;assets" `
     --add-binary "soloud_x64.dll;." `
     overworld_main.py

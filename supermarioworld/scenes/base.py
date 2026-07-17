@@ -6,7 +6,9 @@ class EmptyScene:
     def __init__(self, game: GameType, **kwargs):
         self.game = game
 
-        self._router = game.router
+        self.settings = game.settings
+        for name, value in vars(self.settings).items():
+            setattr(self, name, value)
 
         self.request = game.request
         self.paths = game.paths

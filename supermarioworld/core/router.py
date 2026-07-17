@@ -1,29 +1,34 @@
-
+class SceneStub:
+    def onUpdate(self): ...
+    def onEvent(self, event): ...
+    def onRender(self): ...
+    def onSave(self): ...
 
 
 class SceneManager:
-    def onLoad(self, game):
-        pass
-
-    def onInitScene(self, game):
-        pass
-
-    def _postInitScene(self):
-        start_scene = self.game._run_scene or self.START_SCENE
-
-        self.game._scene_name = start_scene
-        self._manager_state = start_scene
-        self._current_scene = self.scene_dict.get(start_scene)()
-
-
     def __init__(self, game):
         self.game = game
 
         self.START_SCENE = self.game._scene_name
 
         self._manager_state = ""
-        self._current_scene = None
+
         self.scene_dict = {}
+
+        for name, scene in game.settings.SCENES.items():
+            self.registerScene(
+                name,
+                lambda scene=scene: scene["class"](
+                    game=game,
+                    **scene["kwargs"]
+                )
+            )
+
+        start_scene = game.settings.START_SCENE
+
+        game._scene_name = start_scene
+        self._manager_state = start_scene
+        self._current_scene: SceneStub = self.scene_dict[start_scene]()
 
     
     def registerScene(self, name, scene_factory):
@@ -39,7 +44,7 @@ class SceneManager:
 
 
     def save(self):
-        pass
+        self.game.settings.SAVE_CALLBACK()
 
 
     def update(self):

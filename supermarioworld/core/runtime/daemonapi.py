@@ -16,3 +16,14 @@ class GameRequest:
 
     def closeGame(self):
         self.game._running = False
+
+
+    @staticmethod
+    def isQuiting(event):
+        return event.type == pygame.QUIT 
+    
+    @staticmethod
+    def isResized(event):
+        return event.type == pygame.VIDEORESIZE
+    
+    

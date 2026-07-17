@@ -1,11 +1,13 @@
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
-from supermarioworld.bootloder import Bootloader
+
+from supermarioworld.core.router import SceneManager
 
 
 from supermarioworld.core.runtime.corepaths import CorePath
 from supermarioworld.core.runtime.daemonapi import GameRequest
+from supermarioworld.core.runtime.settings import Settings
 
 from supermarioworld.core.accounts import PlayerAccountManager
 from supermarioworld.core.resources import AssetsResources
@@ -58,11 +60,13 @@ class Locale:
 
 
 class SuperMariWorldApplication:
-    def __init__(self, file_execution: str, use_resizeble=False, vendor_size=(780, 580), title="Super Martis World 91"):
+    def __init__(self, file_execution: str, project_name: str, use_resizeble=False, vendor_size=(780, 580), title="Super Martis World 91"):
+        self.PROJECT_NAME = project_name
         
         # Runtime
         self.request = GameRequest(self)
         self.paths = CorePath(file_execution=file_execution)
+        self.settings = Settings(project_name)
         
 
 
@@ -98,8 +102,7 @@ class SuperMariWorldApplication:
         self._focused = True
 
         
-        self._run_scene = None
-        self._DEBUG = True if os.getenv("DAEMON_SMW_DEBUG") else False 
+        self.DEBUG = False
 
         self.delta_time = 0
         self.tick_time = 1 / self.account.getFps()
@@ -112,16 +115,26 @@ class SuperMariWorldApplication:
         self.renderer = MainRenderer(self)
 
 
+        # Scenes
+        self.assets.beginScene("GLOBAL-DAEMON")
 
-  
-    def _initSubstence(self):
+        for name, path in self.settings.ATLASES.items():
+            self.assets.regAtlas(name, path)
+
+        for name, path in self.settings.FONTS.items():
+            self.assets.regFont(name, path)
+
+        for name, path in self.settings.MUSIC.items():
+            self.assets.regMusic(name, path)
+
+        for name, path in self.settings.SOUNDS.items():
+            self.assets.regSound(name, path)
+
+
         self._scene_name = ""
         self.SCENA_DATA = {}
 
-        self.router = Bootloader(self)
-        self.router.onLoad(self)
-        self.router.onInitScene(self)
-        self.router._postInitScene()
+        self.router = SceneManager(self)
 
         
 
@@ -139,9 +152,6 @@ class SuperMariWorldApplication:
     def player(self):
         return self.account.current_account
     
-    @property
-    def DEBUG(self):
-        return self._DEBUG
     
     def getFps(self):
         return self._clock.get_fps()
@@ -165,7 +175,7 @@ class SuperMariWorldApplication:
 
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_F3:
-                    self._DEBUG = not self._DEBUG
+                    self.DEBUG = not self.DEBUG
 
             elif event.type == pg.WINDOWFOCUSLOST:
                 self.audio.pause()
