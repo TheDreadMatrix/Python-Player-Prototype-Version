@@ -10,16 +10,14 @@ from supermarioworld.rendering.users import TextLabel
 
 
 
-from supermarioworld.configuration import (PIXEL_TILE_SIZE, ITEM_HEIGHT, UNDO_DELAY,
-                                           PALETTE_PER_ROW, OVERWORLD_EDITOR_COLS, OVERWORLD_EDITOR_ROWS, MIN_ZOOM_EDITOR, MAX_ZOOM_EDITOR)
 
 
 
 # Type checker
 # New
 class OverworldEditor(EmptyScene):
-    def __init__(self, game: GameType):
-        super().__init__(game)
+    def onInitialization(self, game: GameType):
+        
         # Editor flag
         self.editor_loaded = False
 
@@ -182,9 +180,9 @@ class OverworldEditor(EmptyScene):
             width = max_width + 20
 
             for i, item in enumerate(self.dropdown_labels[menu_name]):
-                rect = (menu_x, menu_y + i * ITEM_HEIGHT, width, ITEM_HEIGHT)
+                rect = (menu_x, menu_y + i * self.ITEM_HEIGHT, width, self.ITEM_HEIGHT)
 
-                item["label"].position = (menu_x + 5, menu_y + i * ITEM_HEIGHT + 6)
+                item["label"].position = (menu_x + 5, menu_y + i * self.ITEM_HEIGHT + 6)
 
                 self.dropdown_rects[menu_name].append(rect)
 
@@ -254,17 +252,17 @@ class OverworldEditor(EmptyScene):
                 key_images = [f"{tile_key}_{i}" for i in range(len(tile["frames"]))]
 
                 anim = AnimationCutOut(game=self.game, key_atlas="overworld",
-                    frames=[(*f.get("xy", (0, 0)), *f.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))) for f in tile["frames"]],
+                    frames=[(*f.get("xy", (0, 0)), *f.get("wh", (self.PIXEL_TILE_SIZE, self.PIXEL_TILE_SIZE))) for f in tile["frames"]],
                     durations=tile.get("durations", [0.1] * len(tile["frames"])), key_images=key_images)
 
                 self.animations[tile_key] = anim
             else:
                 if isinstance(tile, list):
                     x, y = tile
-                    w, h = (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE)
+                    w, h = (self.PIXEL_TILE_SIZE, self.PIXEL_TILE_SIZE)
                 else:
                     x, y = tile.get("xy", (0, 0))
-                    w, h = tile.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))
+                    w, h = tile.get("wh", (self.PIXEL_TILE_SIZE, self.PIXEL_TILE_SIZE))
 
 
                 self.assets.regCutOutImage(tile_key, "overworld", x=x, y=y, w=w, h=h)
@@ -306,11 +304,11 @@ class OverworldEditor(EmptyScene):
         is_completely_empty = all((not cell) for row in layer for cell in row) if layer else True
 
         
-        while len(layer) < OVERWORLD_EDITOR_ROWS:
+        while len(layer) < self.OVERWORLD_EDITOR_ROWS:
             layer.append([])
 
         width = max((len(row) for row in layer), default=0)
-        width = max(width, OVERWORLD_EDITOR_COLS)
+        width = max(width, self.OVERWORLD_EDITOR_COLS)
         for row in layer:
             while len(row) < width:
                 row.append(default_tile if is_completely_empty else "")
@@ -383,7 +381,7 @@ class OverworldEditor(EmptyScene):
     def _palette_rects(self):
         rects = []
         start_x, start_y, _, _ = self._palette_view_rect()
-        per_row = PALETTE_PER_ROW
+        per_row = self.PALETTE_PER_ROW
         pad = 4
         row_offset = self.palette_scroll_rows * (self.cell_size + pad)
         for i, tile_key in enumerate(self.palette_keys):
@@ -398,7 +396,7 @@ class OverworldEditor(EmptyScene):
 
     def _palette_view_rect(self):
         pad = 4
-        per_row = PALETTE_PER_ROW
+        per_row = self.PALETTE_PER_ROW
         width = per_row * self.cell_size + (per_row - 1) * pad
         if self.palette_pos[0] == 0:
             self.palette_pos[0] = self.game.width - width - 20
@@ -410,7 +408,7 @@ class OverworldEditor(EmptyScene):
         return (x, top, width, height)
 
     def _palette_max_scroll_rows(self):
-        per_row = PALETTE_PER_ROW
+        per_row = self.PALETTE_PER_ROW
         total_rows = (len(self.palette_keys) + per_row - 1) // per_row
         _, _, _, view_h = self._palette_view_rect()
         pad = 4
@@ -449,7 +447,7 @@ class OverworldEditor(EmptyScene):
         if (keys[pg.K_LCTRL] or keys[pg.K_RCTRL]) and keys[pg.K_z]:
             if self.undo_timer <= 0:
                 self._undo_last()
-                self.undo_timer = UNDO_DELAY
+                self.undo_timer = self.UNDO_DELAY
 
         for animation in self.animations.values():
             animation.update()
@@ -585,7 +583,7 @@ class OverworldEditor(EmptyScene):
 
     def _change_zoom(self, delta: float):
         old_zoom = self.zoom
-        new_zoom = max(MIN_ZOOM_EDITOR, min(MAX_ZOOM_EDITOR, old_zoom + delta))
+        new_zoom = max(self.MIN_ZOOM_EDITOR, min(self.MAX_ZOOM_EDITOR, old_zoom + delta))
 
         if old_zoom == new_zoom:
             return

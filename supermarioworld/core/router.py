@@ -8,26 +8,27 @@ class SceneStub:
 class SceneManager:
     def __init__(self, game):
         self.game = game
-
-        self.START_SCENE = self.game._scene_name
-
-        self._manager_state = ""
-
+       
         self.scene_dict = {}
 
+        # Adding scenes to dict
         for name, scene in game.settings.SCENES.items():
             self.registerScene(
                 name,
-                lambda scene=scene: scene["class"](
-                    game=game,
+                lambda scene=scene, name=name: scene["class"](
+                    game=game, scene_name=name,
                     **scene["kwargs"]
                 )
             )
 
+        # Registering START SCENE
         start_scene = game.settings.START_SCENE
+        
 
-        game._scene_name = start_scene
+        self._current_scene_name = start_scene
+
         self._manager_state = start_scene
+
         self._current_scene: SceneStub = self.scene_dict[start_scene]()
 
     
@@ -36,10 +37,11 @@ class SceneManager:
 
 
     def _restartScene(self):
-        self._manager_state = self.game.getScene()
+        self._manager_state = self._current_scene_name
         
         self._current_scene.onSave()
-        self._current_scene = None
+        self.game.assets.releaseScene()
+        self.game.renderer.releaseScene()
         self._current_scene = self.scene_dict.get(self._manager_state)()
 
 
@@ -48,14 +50,15 @@ class SceneManager:
 
 
     def update(self):
-        state_scene = self.game.getScene()
+        state_scene = self._current_scene_name
         
         
-            
         if state_scene != self._manager_state:
             self._current_scene.onSave()
-            self._current_scene.assets.releaseScene()
+            self.game.assets.releaseScene()
+            self.game.renderer.releaseScene()
             self._current_scene = self.scene_dict.get(state_scene)()
+            
             self._manager_state = state_scene
 
 

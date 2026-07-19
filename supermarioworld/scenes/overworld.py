@@ -21,12 +21,8 @@ class Overworld(EmptyScene):
         # overworld player
         self.player = OverWorldPlayer(game, map_ref=map_ref, move_speed=self.WALK_SPEED)
 
-        
 
         # Tile map
-        self.assets.beginScene(map_ref)
-
-        
         self.overworld_map = OverWorldMap(game=game, notation_file=f"overworld/notations/{self.NOTATION_BIOME_OVERWORLD.get(biome)}.json")
         self.overworld_map.load(map_ref)
 
@@ -72,6 +68,7 @@ class Overworld(EmptyScene):
         self.audio.load(music_name)
         self.audio.play(loop=True)
 
+        
 
 
     def onUpdate(self):
@@ -191,22 +188,7 @@ class Overworld(EmptyScene):
 
         self.fade_label.render()
 
-
-
-
-
-    
-
-    def onSave(self):
-        self.renderer.deleteFbo("tile-map")
-        self.renderer.delShader("pxm")
         
-
-        self.text_account.delRes()
-        self.text_fps.delRes()
-        self.text_lives.delRes()
-        self.text_points.delRes()
-        self.text_titles.delRes()
 
 
     

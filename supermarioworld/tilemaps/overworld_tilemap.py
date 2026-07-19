@@ -4,13 +4,15 @@ from supermarioworld.johnson import readData
 from supermarioworld.rendering.animation import AnimationCutOut
 
 from supermarioworld.tilemaps.spatial_hash import ChunkHasher, TileEntity
-from supermarioworld.configuration import DRAW_TILE_SIZE, DRAW_BIGGER_TILE_SIZE, PIXEL_TILE_SIZE
 
 
 
 class OverWorldMap:
     def __init__(self, game: GameType, notation_file: str, notation_file_buildings: str="overworld/notations/tile-notation-buildings.json"):
         self.game = game
+        self.DRAW_TILE_SIZE = game.settings.DRAW_TILE_SIZE
+        self.DRAW_BIGGER_TILE_SIZE = game.settings.DRAW_BIGGER_TILE_SIZE
+        self.PIXEL_TILE_SIZE = game.settings.PIXEL_TILE_SIZE
 
         
 
@@ -138,7 +140,7 @@ class OverWorldMap:
                 anim = AnimationCutOut(
                     game=self.game,
                     key_atlas=atlas_key,
-                    frames=[(*f.get("xy", (0, 0)), *f.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))) for f in tile["frames"]],
+                    frames=[(*f.get("xy", (0, 0)), *f.get("wh", (self.PIXEL_TILE_SIZE, self.PIXEL_TILE_SIZE))) for f in tile["frames"]],
                     durations=tile.get("durations", [0.1] * len(tile["frames"])),
                     key_images=key_images,
                 )
@@ -149,13 +151,13 @@ class OverWorldMap:
                 if isinstance(tile, dict):
                     
                     x, y = tile.get("xy", (0, 0))
-                    w, h = tile.get("wh", (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE))
+                    w, h = tile.get("wh", (self.PIXEL_TILE_SIZE, self.PIXEL_TILE_SIZE))
                 else:
                     x = int(tile[0])
                     y = int(tile[1])
-                    w, h = (PIXEL_TILE_SIZE, PIXEL_TILE_SIZE)
+                    w, h = (self.PIXEL_TILE_SIZE, self.PIXEL_TILE_SIZE)
 
-                self.assets.regCutOutImage( texture_key=tile_key, atlas_key=atlas_key, x=x, y=y, w=w, h=h)
+                self.assets.regCutOutImage(texture_key=tile_key, atlas_key=atlas_key, x=x, y=y, w=w, h=h)
                 self._registered_keys.add(tile_key)
 
     def _build_entities(self):
@@ -168,7 +170,7 @@ class OverWorldMap:
                 continue
             normalized_key = self._normalize_tile_key(tile_build_dict["type"], tile_type="build")
 
-            self.tiles_build.append(TileEntity(tile=normalized_key, x=x, y=y, s_w=DRAW_BIGGER_TILE_SIZE, s_h=DRAW_BIGGER_TILE_SIZE, flx=0, fly=0))
+            self.tiles_build.append(TileEntity(tile=normalized_key, x=x, y=y, s_w=self.DRAW_BIGGER_TILE_SIZE, s_h=self.DRAW_BIGGER_TILE_SIZE, flx=0, fly=0))
 
         
         for row_i, row in enumerate(self.layers):
@@ -190,7 +192,7 @@ class OverWorldMap:
                     flx = tile.get("flx", 0)
                     fly = tile.get("fly", 0)
 
-                tile_entity = TileEntity(tile=normalized_key, x=col_i * DRAW_TILE_SIZE, y=row_i * DRAW_TILE_SIZE, s_w=DRAW_TILE_SIZE, s_h=DRAW_TILE_SIZE, flx=flx, fly=fly)
+                tile_entity = TileEntity(tile=normalized_key, x=col_i * self.DRAW_TILE_SIZE, y=row_i * self.DRAW_TILE_SIZE, s_w=self.DRAW_TILE_SIZE, s_h=self.DRAW_TILE_SIZE, flx=flx, fly=fly)
                 entities.append(tile_entity)
                 
                 self.tile_entities[(row_i, col_i)] = tile_entity

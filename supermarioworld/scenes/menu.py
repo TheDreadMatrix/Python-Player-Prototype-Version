@@ -57,8 +57,6 @@ class Menu(EmptyScene):
 
 
         # SPRITES
-        self.assets.beginScene("menu")
-
         game.assets.regImage("title", "menu/title.png")
         game.assets.regImage("title-border", "menu/title-border.png")
         game.assets.regImage("background", "menu/background.png")
@@ -276,21 +274,13 @@ class Menu(EmptyScene):
         self.fade_label.render()
 
         
-       
-    def onSave(self):
-        self.renderer.deleteFbo("background")
-        self.renderer.delShader("pxm")
-        
-        self.text_quit.delRes()
-        self.text_options.delRes()
-        self.text_play.delRes()        
+             
 
         
        
     
 
 class QuitScene(EmptyScene):
-    def __init__(self, game):
-        super().__init__(game)
+    def onInitialization(self, game, **kwargs):
 
         self.request.closeGame()

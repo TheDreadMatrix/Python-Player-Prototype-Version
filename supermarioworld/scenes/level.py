@@ -1,11 +1,11 @@
 from supermarioworld.scenes.base import EmptyScene
+from supermarioworld.typing.gametype import GameType
 from supermarioworld.tilemaps.level_tilemap import LevelTileMap
 
 
 
 class Level(EmptyScene):
-    def __init__(self, game, biome: int, music_name: str):
-        super().__init__(game)
+    def onInitialization(self, game: GameType, biome: int, music_name: str):
 
         self.audio.load(music_name)
         self.audio.play()

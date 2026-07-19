@@ -32,7 +32,6 @@ class Locale:
         language_key = language_key.lower()
 
         if language_key not in self.AVAILABLE_LANGUAGES:
-            print(f"[Locale] Unknown language '{language_key}', fallback to 'en'")
             language_key = "en"
 
 
@@ -43,7 +42,6 @@ class Locale:
         language_key = language_key.lower()
 
         if language_key not in self.AVAILABLE_LANGUAGES:
-            print(f"[Locale] Unknown language '{language_key}', fallback to 'en'")
             language_key = "en"
 
         self.language_data = readData(self.game.paths.ConfigPath(f"locale/{language_key}.json"))
@@ -131,7 +129,6 @@ class SuperMariWorldApplication:
             self.assets.regSound(name, path)
 
 
-        self._scene_name = ""
         self.SCENA_DATA = {}
 
         self.router = SceneManager(self)
@@ -155,9 +152,6 @@ class SuperMariWorldApplication:
     
     def getFps(self):
         return self._clock.get_fps()
-    
-    def getScene(self):
-        return self._scene_name
     
 
     def clearColor(self, r, g, b):
@@ -210,13 +204,10 @@ class SuperMariWorldApplication:
 
         self.router.render()
 
-        
-       
         pg.display.flip()
 
         
         
-
 
     def _run(self):
         while self._running:
@@ -230,9 +221,6 @@ class SuperMariWorldApplication:
         self.router.save()
         
         self.account.save()
-
-        
-        pg.quit()
 
 
 

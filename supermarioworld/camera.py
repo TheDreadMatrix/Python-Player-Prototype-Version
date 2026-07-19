@@ -1,7 +1,7 @@
 
 
 class OverworldCamera:
-    def __init__(self, game, screen_width: int, screen_height: int, smooth: float = 0.1,):
+    def __init__(self, game, screen_width: int, screen_height: int, smooth: float = 0.1):
         self.game = game
 
         self.x = 0
@@ -30,15 +30,9 @@ class OverworldCamera:
         self.x += (target_x - self.x) * self.smooth
         self.y += (target_y - self.y) * self.smooth
 
-        self.x = max(
-            self.bound_left,
-            min(self.x, self.bound_right - self.screen_width)
-        )
+        self.x = max(self.bound_left, min(self.x, self.bound_right - self.screen_width))
 
-        self.y = max(
-            self.bound_top,
-            min(self.y, self.bound_bottom - self.screen_height)
-        )
+        self.y = max(self.bound_top, min(self.y, self.bound_bottom - self.screen_height))
 
     def apply(self, x: float, y: float):
         return (x - self.x, y - self.y)

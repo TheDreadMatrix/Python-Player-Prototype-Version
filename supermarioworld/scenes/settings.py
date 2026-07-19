@@ -2,8 +2,8 @@ from supermarioworld.scenes.base import EmptyScene
 
 
 class Settings(EmptyScene):
-    def __init__(self, game):
-        super().__init__(game)
+    def onInitialization(self, game, **kwargs):
+        pass
 
     def onUpdate(self):
         pass

@@ -2,9 +2,10 @@ from supermarioworld.typing.gametype import GameType, BasicEvent
 
 
 class EmptyScene:
-    NAME = "BASE-ABC"
-    def __init__(self, game: GameType, **kwargs):
+    
+    def __init__(self, game: GameType, scene_name: str, **kwargs):
         self.game = game
+        self.SCENE_NAME = scene_name
 
         self.settings = game.settings
         for name, value in vars(self.settings).items():
@@ -20,8 +21,13 @@ class EmptyScene:
         
         self.renderer = game.renderer
 
-        self.onInitialization(game, **kwargs)
 
+        # register begin
+        self.assets.beginScene(self.SCENE_NAME)
+        self.renderer.beginScene(self.SCENE_NAME)
+
+        self.onInitialization(game, **kwargs)
+        
     def onInitialization(self, game: GameType, **kwargs): pass
 
     

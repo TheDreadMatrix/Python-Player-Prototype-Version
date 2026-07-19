@@ -1,5 +1,4 @@
 from supermarioworld.core.audio.soloud import Wav, WavStream, Soloud, BiquadResonantFilter
-from supermarioworld.configuration import LOWPASS_PARAMETR
 
 
 class AudioStream:
@@ -11,7 +10,7 @@ class AudioStream:
         self.engine.init()
 
         self.low_pass_filter = BiquadResonantFilter()
-        self.low_pass_filter.set_params(BiquadResonantFilter.LOWPASS, LOWPASS_PARAMETR, 1)
+        self.low_pass_filter.set_params(BiquadResonantFilter.LOWPASS, self.game.settings.LOWPASS_PARAMETR, 1)
 
         self.engine.set_global_filter(0, self.low_pass_filter)
 

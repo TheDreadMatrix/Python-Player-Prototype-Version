@@ -1,5 +1,3 @@
-from array import array
-
 from supermarioworld.core.gl_utils.gl_textures import moderngl, create_error_texture
 from supermarioworld.core.gl_utils.gl_sources import (
     _DEFAULT_VERTEX_SOURCE_INSTANCE,
@@ -9,7 +7,7 @@ from supermarioworld.core.gl_utils.gl_sources import (
     _DEFAULT_VERTEX_SOURCE_MESH
 )
 
-import numpy
+import numpy as np
 import glm
 
 
@@ -85,7 +83,7 @@ class ShaderEntry:
     def _buildUniforms(self, custom_shader):
         # Default shader
         if self.shader_type == 0:
-            self.uniforms = self.uniforms = {
+            self.uniforms = {
                 "unPos": self.program["gluminary_Position"],
                 "unSize": self.program["gluminary_Size"],
             
@@ -133,9 +131,9 @@ class MainRenderer:
 
   
         # Buffers
-        vertices_only = array("f", [0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
-        vertices = array("f", [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        indices = array("I", [0, 1, 2, 2, 3, 0])
+        vertices_only = np.array([0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], dtype=np.float32)
+        vertices = np.array([0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+        indices = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
 
         # Create render context
         self._ctx = moderngl.create_context()
@@ -143,8 +141,8 @@ class MainRenderer:
         self._ctx.blend_func = (moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA)
 
         self._ctx.viewport = (0, 0, game.width, game.height)
-        self._ctx.point_size = 10.0
-        self._ctx.line_width = 5.0
+        self._ctx.point_size = 5.0
+        self._ctx.line_width = 2.0
 
         
 
@@ -161,7 +159,7 @@ class MainRenderer:
         self.ubo.write(self.projection.to_bytes())
 
 
-        # Layers
+        # Shaders
         self.default_shader = ShaderEntry(self._ctx, 0, shader_type=0, vbo=self.vbo, ebo=self.ebo, vbo_instance=self.vbo_instance)
         
         self.default_shader_mesh = ShaderEntry(self._ctx, 0, shader_type=1, vbo=self.vbo_only, ebo=self.ebo, vbo_instance=None)
@@ -172,15 +170,18 @@ class MainRenderer:
         self.current_shader = self.default_shader
         self._fbo_stack = []
 
+        # Res
+        self._owner = None
+        self.set_to_destroy = {}
+
         # Cache
-        self.last_texture_name = None
-
-        self.last_shader_name = None
-
-        
+        self.last_texture_name = ""
+        self.last_shader_name = ""
 
         
-    
+
+        
+    # Backend methods
     def _eventResize(self):
         self.projection = glm.ortho(0, self.game.width, self.game.height, 0, -1, 1)
         self.ubo.write(self.projection.to_bytes())
@@ -189,6 +190,71 @@ class MainRenderer:
     def _clearColor(self, r, g, b):
         self._ctx.clear(r, g, b, 1)
 
+
+    # GPU resources
+    def beginScene(self, scene_name):
+        self._owner = scene_name
+
+    def _set_to_stack(self, owner, resource_type, resource_key):
+        self.set_to_destroy.setdefault(owner, [])
+        self.set_to_destroy[owner].append((resource_type, resource_key))
+
+    def releaseScene(self):
+        for typ, key in self.set_to_destroy.pop(self._owner, []):
+            if typ == "shader":
+                self.delShader(key)
+            elif typ == "frame":
+                self.deleteFbo(key)
+
+
+    def regShader(self, shader_key, your_shader):
+        self.shaders.update({shader_key: ShaderEntry(self._ctx, your_shader, shader_type=-1)})
+        self._set_to_stack(self._owner, "shader", shader_key)
+
+
+    def delShader(self, shader_key):
+        shader = self.shaders.pop(shader_key, None)
+        if shader is not None:
+            shader.uniforms.clear()
+            shader.program.release()
+            shader.vao.release()
+
+
+    def createFbo(self, frame_key, size):
+        self.fbos.update({frame_key: RenderTarget(self._ctx, size)})
+        self._set_to_stack(self._owner, "frame", frame_key)
+
+
+    def deleteFbo(self, frame_key):
+        fbo = self.fbos.pop(frame_key, None)
+        fbo.delete()
+
+    # Fbo methods
+    def beginFbo(self, frame_key):
+        fbo = self.fbos.get(frame_key)
+
+        if not fbo:
+            return
+
+        self._fbo_stack.append(fbo)
+
+        fbo.use()
+        fbo.clear()
+
+    def endFbo(self):
+        if not self._fbo_stack:
+            self._ctx.screen.use()
+            return
+
+        self._fbo_stack.pop()
+
+        if self._fbo_stack:
+            self._fbo_stack[-1].use()
+        else:
+            self._ctx.screen.use()
+
+
+    # Rendering
     def _renderTexture(self, texture, *, size=(1,1), position=(0,0), r=1, g=1, b=1, a=1, flx=False, fly=False, shader_key="default"):
 
         if self.last_shader_name != shader_key:
@@ -216,49 +282,6 @@ class MainRenderer:
         uniforms["unFly"].value = fly
 
         vao.render()
-
-
-    def regShader(self, shader_key, your_shader):
-        self.shaders.update({shader_key: ShaderEntry(self._ctx, your_shader, shader_type=-1)})
-
-
-    def delShader(self, shader_key):
-        shader = self.shaders.pop(shader_key, None)
-        if shader is not None:
-            shader.uniforms.clear()
-            shader.program.release()
-            shader.vao.release()
-
-
-    def createFbo(self, frame_key, size):
-        self.fbos.update({frame_key: RenderTarget(self._ctx, size)})
-
-    def deleteFbo(self, frame_key):
-        fbo = self.fbos.pop(frame_key, None)
-        fbo.delete()
-
-    def beginFbo(self, frame_key):
-        fbo = self.fbos.get(frame_key)
-
-        if not fbo:
-            return
-
-        self._fbo_stack.append(fbo)
-
-        fbo.use()
-        fbo.clear()
-
-    def endFbo(self):
-        if not self._fbo_stack:
-            self._ctx.screen.use()
-            return
-
-        self._fbo_stack.pop()
-
-        if self._fbo_stack:
-            self._fbo_stack[-1].use()
-        else:
-            self._ctx.screen.use()
         
 
     def renderFbo(self, frame_key, *, position=(0, 0), size=(1, 1), r=1, g=1, b=1, a=1, flx=False, fly=True, shader_key="default"):
@@ -288,7 +311,7 @@ class MainRenderer:
     def renderInstance(self, texture_key, *, position=(0, 0), r=1, g=1, b=1, a=1, shader_key="instance", instances=[]):
         if self.last_shader_name != shader_key:
             self.last_shader_name = shader_key
-            self.current_shader = (self.shaders.get(shader_key, self.default_shader_instance))
+            self.current_shader = self.shaders.get(shader_key, self.default_shader_instance)
 
         shader = self.current_shader
 
@@ -300,7 +323,7 @@ class MainRenderer:
 
     
 
-        data = numpy.array(instances, dtype="f4").flatten()
+        data = np.array(instances, dtype="f4").flatten()
 
         self.vbo_instance.orphan()
 
@@ -319,31 +342,9 @@ class MainRenderer:
 
     
     def render(self, texture_key, *, size=(1, 1), position=(0, 0), r=1, g=1, b=1, a=1, flx=False, fly=False, shader_key="default"):
-        if self.last_shader_name != shader_key:
-            self.last_shader_name = shader_key
-            self.current_shader = self.shaders.get(shader_key, self.default_shader)
-            
-        shader = self.current_shader
-        uniforms = shader.uniforms
-        vao = shader.vao
+        texture = self.resources.textures.get(texture_key, self.default_texture)
+        self._renderTexture(texture, position=position, size=size, r=r, g=g, b=b, a=a, flx=flx, fly=fly, shader_key=shader_key)
 
-        if self.last_texture_name != texture_key:
-            self.last_texture_name = texture_key
-            texture = self.resources.textures.get(texture_key, self.default_texture)
-            texture.use(0)
-
-        uniforms["unPos"].value = position
-        uniforms["unSize"].value = size
-       
-        uniforms["r"].value = r
-        uniforms["g"].value = g
-        uniforms["b"].value = b 
-        uniforms["a"].value = a
-
-        uniforms["unFlx"].value = flx
-        uniforms["unFly"].value = fly
-        
-        vao.render()
 
 
 
