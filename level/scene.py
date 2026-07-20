@@ -1,6 +1,6 @@
 from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.typing.gametype import GameType
-from supermarioworld.tilemaps.level_tilemap import LevelTileMap
+from level.level_tilemap import LevelTileMap
 
 
 

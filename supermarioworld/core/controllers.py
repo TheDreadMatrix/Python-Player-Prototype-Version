@@ -5,18 +5,18 @@ class Keyboard:
     def __init__(self):
         self._keys = None
 
-    def _update(self):
+    def update(self):
         self._keys = pg.key.get_pressed()
 
-
-    def pressed(self, key):
+    def isPressed(self, key):
         return self._keys[key]
 
-    def pressedDown(self, key, event):
-        pass
+    def isDown(self, key, event):
+        return event.type == pg.KEYDOWN and event.key == key
+    
 
-    def pressedUp(self, key, event):
-        pass
+    def isUp(self, key, event):
+        return event.type == pg.KEYUP and event.key == key
 
 
 

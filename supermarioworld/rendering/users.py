@@ -49,14 +49,7 @@ class FadeLabel:
         if self.alpha <= 0:
             return
 
-        self.renderer.renderQuad(
-            position=self.position,
-            size=self.size,
-            r=0,
-            g=0,
-            b=0,
-            a=self.alpha
-        )
+        self.renderer.renderQuad(position=self.position, size=self.size, r=0, g=0, b=0, a=self.alpha)
 
 
 
@@ -127,4 +120,4 @@ class TextLabel:
 
 
     def __repr__(self):
-        return f"<TextLabel - {self.text}>"
+        return f"<TextLabel - {self.texture_id}>"

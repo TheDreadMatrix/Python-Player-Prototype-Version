@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(slots=True)
 class TileEntity:
     tile: str
     x: float
@@ -10,6 +10,8 @@ class TileEntity:
     s_h: float
     flx: bool
     fly: bool
+
+EMPTY = ()
 
 
 class ChunkHasher:
@@ -24,9 +26,12 @@ class ChunkHasher:
     def setEntities(self, entities: list[TileEntity]):
         self.grids.clear()
 
+        cw = self.cell_width
+        ch = self.cell_height
+
         for entity in entities:
-            cx = int(entity.x // self.cell_width)
-            cy = int(entity.y // self.cell_height)
+            cx = int(entity.x // cw)
+            cy = int(entity.y // ch)
 
             cell = (cx, cy)
 
@@ -37,15 +42,14 @@ class ChunkHasher:
 
 
     def getEntities(self, x, y):
-        cx = int(x // self.cell_width)
-        cy = int(y // self.cell_height)
+        cx, cy = self.getCellSizes(x, y)
 
         entities = []
 
         for ox in (-1, 0, 1):
             for oy in (-1, 0, 1):
                 entities.extend(
-                    self.grids.get((cx + ox, cy + oy), [])
+                    self.grids.get((cx + ox, cy + oy), EMPTY)
                 )
 
         return entities

@@ -4,6 +4,7 @@ import importlib
 
 
 class Settings:
+    PROHIBITED = ["ATLASES", "FONTS", "MUSIC", "SOUNDS", "SAVE_CALLBACK", "START_SCENE", "SCENES"]
     def __init__(self, PROJECT_NAME):
         module = importlib.import_module(f"{PROJECT_NAME}.settings")
         

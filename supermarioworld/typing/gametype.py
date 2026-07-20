@@ -4,6 +4,7 @@ from supermarioworld.typing.account_type import BasicAccount, BasicAccountManage
 from supermarioworld.typing.runtime_type import BasicApi, BasicPath, BasicEvent, BasicSettings
 from supermarioworld.typing.audio_type import BasicAudioEngine
 from supermarioworld.typing.assets_type import BasicAssets
+from supermarioworld.typing.controllers import BasicKeyboard, BasicMouse
 
 
 
@@ -26,6 +27,9 @@ class GameType(typing.Protocol):
     
     width: int
     height: int
+
+    keyboard: BasicKeyboard
+    mouse: BasicMouse
 
     renderer: BasicRenderer
     locale: BasicI18N

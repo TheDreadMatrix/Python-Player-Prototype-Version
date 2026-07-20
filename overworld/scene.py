@@ -1,12 +1,12 @@
 from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.typing.gametype import GameType
 
-from supermarioworld.tilemaps.overworld_tilemap import OverWorldMap
-from supermarioworld.entities.overworld_entities import OverWorldPlayer
-
 from supermarioworld.rendering.users import TextLabel, FadeLabel
 from supermarioworld.rendering.shaders import CustomShader
-from supermarioworld.camera import OverworldCamera
+from supermarioworld.camera import Camera
+
+from overworld.overworld_tilemap import OverWorldMap
+from overworld.overworld_entities import OverWorldPlayer
 
 
 import pygame as pg
@@ -28,8 +28,9 @@ class Overworld(EmptyScene):
 
   
         # Camera
-        self.camera = OverworldCamera(game=game, screen_width=game.width, screen_height=game.height, smooth=self.SMOOTH_CAMERA)
+        self.camera = Camera(screen_width=game.width, screen_height=game.height, smooth=self.SMOOTH_CAMERA)
         self.camera.setBounds(0, -80, 2500, 2500)
+      
 
        
         # Ui
@@ -72,13 +73,11 @@ class Overworld(EmptyScene):
 
 
     def onUpdate(self):
-        
-
         # Fade
         self.fade_label.update()
 
         # Camera
-        self.camera.follow(*self.player.position)
+        self.camera.update(delta_time=self.game.delta_time, target_x=self.player.position[0], target_y=self.player.position[1])
 
         # Overworld spatial
         self.player.updatePlayer(sound_if_passed=self.sound_choose)
@@ -127,15 +126,11 @@ class Overworld(EmptyScene):
     
 
     def onEvent(self, event):
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_e:
-                self.sound_exit.play()
-
         if event.type == pg.KEYDOWN and self.game.DEBUG:
             if event.key == pg.K_l:
                 self.request.restartScene()
 
-        self.player.handleEventNodes(event=event)
+        self.player.handleEventNodes(event=event, sound_if_exit=self.sound_exit)
         
         
     

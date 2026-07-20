@@ -3,52 +3,22 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
 
 from supermarioworld.core.router import SceneManager
-
-
 from supermarioworld.core.runtime.corepaths import CorePath
 from supermarioworld.core.runtime.daemonapi import GameRequest
 from supermarioworld.core.runtime.settings import Settings
-
+from supermarioworld.core.controllers import Keyboard, Mouse
 from supermarioworld.core.accounts import PlayerAccountManager
 from supermarioworld.core.resources import AssetsResources
-
 from supermarioworld.core.audio.audio import AudioStream
-
 from supermarioworld.core.renderer import MainRenderer
+from supermarioworld.core.language import Locale
 
 import pygame as pg
 
-from supermarioworld.johnson import readData
 
 
-class Locale:
-    AVAILABLE_LANGUAGES = {
-        "ru",
-        "en"
-    }
-    def __init__(self, game: "SuperMariWorldApplication", language_key: str):
-        self.game = game
-
-        language_key = language_key.lower()
-
-        if language_key not in self.AVAILABLE_LANGUAGES:
-            language_key = "en"
 
 
-        self.language_data = readData(game.paths.ConfigPath(f"locale/{language_key}.json"))
-
-
-    def switchLanguage(self, language_key: str):
-        language_key = language_key.lower()
-
-        if language_key not in self.AVAILABLE_LANGUAGES:
-            language_key = "en"
-
-        self.language_data = readData(self.game.paths.ConfigPath(f"locale/{language_key}.json"))
-
-
-    def gettext(self, word_key):
-        return self.language_data.get(word_key, word_key)
 
 
 
@@ -65,6 +35,9 @@ class SuperMariWorldApplication:
         self.request = GameRequest(self)
         self.paths = CorePath(file_execution=file_execution)
         self.settings = Settings(project_name)
+
+        self.keyboard = Keyboard()
+        self.mouse = Mouse()
         
 
 
@@ -103,7 +76,7 @@ class SuperMariWorldApplication:
         self.DEBUG = False
 
         self.delta_time = 0
-        self.tick_time = 1 / self.account.getFps()
+        self.tick_time = 1 / (self.account.getFps() or 120)
 
         # Scenes and user side
         self.assets = AssetsResources(self)
@@ -159,6 +132,7 @@ class SuperMariWorldApplication:
     
 
     def _update(self):
+        self.keyboard.update()
         if self._focused:        
             self.router.update()
     
@@ -215,6 +189,7 @@ class SuperMariWorldApplication:
         
             self._update()
             self._render()
+            
 
             
 

@@ -158,7 +158,7 @@ class OverWorldPlayer:
 
 
 
-    def handleEventNodes(self, event):
+    def handleEventNodes(self, event, sound_if_exit: BasicSound):
         if event.type == pg.QUIT:
             self.game.player.current_overworld = self.MAP_REF
             self.game.player.current_overworld_level = self.current_node_key
@@ -207,6 +207,7 @@ class OverWorldPlayer:
             # Exit to menu
             if event.key == pg.K_e:
                 if not self.moving:
+                    sound_if_exit.play()
                     self.redirecting = True 
                     self.redirect_scene = "base:menu"
                     

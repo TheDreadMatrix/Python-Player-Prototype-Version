@@ -3,7 +3,7 @@ from supermarioworld.johnson import readData
 
 from supermarioworld.rendering.animation import AnimationCutOut
 
-from supermarioworld.tilemaps.spatial_hash import ChunkHasher, TileEntity
+from supermarioworld.spatial_hash import ChunkHasher, TileEntity
 
 
 
@@ -44,6 +44,7 @@ class OverWorldMap:
         self.tiles_build = []
         self.tiles = []
         self.tile_entities = {}
+        self.batches = {}
 
         self.current_cells = None
         
@@ -238,15 +239,15 @@ class OverWorldMap:
 
 
     def renderMap(self, camera, r=1, g=1, b=1):
-        batches = {}
+        self.batches.clear()
         x, y = camera.apply(0, 0)
 
         for tile in self.tiles:
             tex = self._get_texture_key(tile.tile)
-            batches.setdefault(tex, []).append([tile.x, tile.y, tile.s_w, tile.s_h, tile.flx, tile.fly])
+            self.batches.setdefault(tex, []).append([tile.x, tile.y, tile.s_w, tile.s_h, tile.flx, tile.fly])
 
         
-        for texture_key, instances in batches.items():
+        for texture_key, instances in self.batches.items():
             self.renderer.renderInstance(
                 texture_key,
                 position=(x, y), 

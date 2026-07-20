@@ -9,13 +9,17 @@ class EmptyScene:
 
         self.settings = game.settings
         for name, value in vars(self.settings).items():
-            setattr(self, name, value)
+            if name not in game.settings.PROHIBITED:
+                setattr(self, name, value)
 
         self.request = game.request
         self.paths = game.paths
         self.assets = game.assets
         self.audio = game.audio
         self.account = game.account
+
+        self.keyboard = game.keyboard
+        self.mouse = game.mouse
 
         self.locale = game.locale
         

@@ -69,6 +69,10 @@ class OverworldEditor(EmptyScene):
                 (self.locale.gettext("set-node-mode"), lambda: self._set_status(self.locale.gettext("soon"))),
                 (self.locale.gettext("set-mapso-mode"), lambda: self._set_status(self.locale.gettext("soon"))),
                 (self.locale.gettext("set-tile-mode"), lambda: self._set_status(self.locale.gettext("soon")))    
+            ],
+
+            self.locale.gettext("music"): [
+                (self.locale.gettext("switch-music"), self._set_music)
             ]
         }
 
@@ -135,6 +139,7 @@ class OverworldEditor(EmptyScene):
         # Audio is finally
         self.audio.load("A-underground")
         self.audio.play()
+        
 
 
 
@@ -195,6 +200,16 @@ class OverworldEditor(EmptyScene):
         self.load_label = TextLabel(self.game, text=self.locale.gettext("set-map-n-notations"), size_font=24, font_key="pixel")
         self.load_label.position = (self.game.width * 0.2, self.game.height * 0.5)
 
+
+
+    def _set_music(self):
+        path = easygui.fileopenbox(msg="choose", title="Open music", filetypes=["*.ogg", "*.wav", "*mp3"])
+        if not path: 
+            return
+        
+        self.assets.regMusic("overworld-editor", path)
+        self.audio.load("overworld-editor")
+        self.audio.play()
 
         
 
