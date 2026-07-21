@@ -57,12 +57,12 @@ class OverWorldPlayer:
         game.assets.regAtlas("chr-spr", "overworld/overworld-sprites.png")
 
 
-        self.animation_choose = AnimationCutOut(game, "chr-spr", frames=[(8, 136, 16, 16)], durations=[], key_images=["mc-1"])
+        self.animation_choose = AnimationCutOut(game, "chr-spr", frames=[(8, 136, 16, 16)], durations=[])
 
-        self.animation_left = AnimationCutOut(game, "chr-spr", frames=[(8, 64, 16, 16), (32, 64, 16, 16)], durations=[0.2, 0.2], key_images=["ml-1", "ml-2"])
-        self.animation_down = AnimationCutOut(game, "chr-spr", frames=[(8, 16, 16, 16), (32, 16, 16, 16), (56, 16, 16, 16), (80, 16, 16, 16)], durations=[0.3, 0.5, 0.3, 0.5], key_images=["md-1", "md-2", "md-3", "md-4"])
-        self.animation_up = AnimationCutOut(game, "chr-spr", frames=[(8, 40, 16, 16), (32, 40, 16, 16), (56, 40, 16, 16), (80, 40, 16, 16)], durations=[0.2, 0.4, 0.2, 0.4], key_images=["mu-1", "mu-2", "mu-3", "mu-4"])
-        self.animation_right = AnimationCutOut(game, "chr-spr", frames=[(56, 64, 16, 16), (80, 64, 16, 16)], durations=[0.2, 0.2], key_images=["mr-1", "mr-2"])
+        self.animation_left = AnimationCutOut(game, "chr-spr", frames=[(8, 64, 16, 16), (32, 64, 16, 16)], durations=[0.2, 0.2])
+        self.animation_down = AnimationCutOut(game, "chr-spr", frames=[(8, 16, 16, 16), (32, 16, 16, 16), (56, 16, 16, 16), (80, 16, 16, 16)], durations=[0.3, 0.5, 0.3, 0.5])
+        self.animation_up = AnimationCutOut(game, "chr-spr", frames=[(8, 40, 16, 16), (32, 40, 16, 16), (56, 40, 16, 16), (80, 40, 16, 16)], durations=[0.2, 0.4, 0.2, 0.4])
+        self.animation_right = AnimationCutOut(game, "chr-spr", frames=[(56, 64, 16, 16), (80, 64, 16, 16)], durations=[0.2, 0.2])
 
         self.current_animation = self.animation_down
 

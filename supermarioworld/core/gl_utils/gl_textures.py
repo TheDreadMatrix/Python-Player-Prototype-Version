@@ -17,6 +17,13 @@ BASE_FILTER_DICT = {
     5: (moderngl.LINEAR_MIPMAP_LINEAR, moderngl.LINEAR, True)
 }
 
+def give_font(font_path, size_font):
+    if font_path:
+        font = pygame.font.Font(font_path, size_font)
+    else:
+        font = pygame.font.SysFont("arial", size_font)
+    return font
+
 def _build_texture_attribute(texture, filter, anisotropy):
     min_filter, mag_filter, use_mipmap = BASE_FILTER_DICT.get(filter, BASE_FILTER_DICT[0])
 

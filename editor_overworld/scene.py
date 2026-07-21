@@ -264,11 +264,9 @@ class OverworldEditor(EmptyScene):
 
             if isinstance(tile, dict) and "frames" in tile:
                 # ANIMATION
-                key_images = [f"{tile_key}_{i}" for i in range(len(tile["frames"]))]
-
                 anim = AnimationCutOut(game=self.game, key_atlas="overworld",
                     frames=[(*f.get("xy", (0, 0)), *f.get("wh", (self.PIXEL_TILE_SIZE, self.PIXEL_TILE_SIZE))) for f in tile["frames"]],
-                    durations=tile.get("durations", [0.1] * len(tile["frames"])), key_images=key_images)
+                    durations=tile.get("durations", [0.1] * len(tile["frames"])))
 
                 self.animations[tile_key] = anim
             else:

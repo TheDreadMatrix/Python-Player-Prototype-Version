@@ -4,6 +4,7 @@ from supermarioworld.core.gl_utils.gl_sources import INSTANCE_VERTEX_REPLACER, D
 import re
 from enum import Enum, auto
 from dataclasses import dataclass
+from collections import defaultdict
 
 @dataclass(slots=True)
 class ProcessResult:
@@ -140,25 +141,33 @@ class CustomShader:
 
 
         # uniform and vao registry
-        self._uniforms = {}
-        
-        self._uniforms.update({
+        self._uniforms = defaultdict(lambda: DefaultUniform(12),{
             "unPos": _uniform(self._program, "gluminary_Position", (1, 1)),
-            "unSize": _uniform(self._program, "gluminary_Size", (1, 1)),
-
-            "unFlx": _uniform(self._program, "gluminary_Flx", 0),
-            "unFly": _uniform(self._program, "gluminary_Fly", 0),
-
             "r": _uniform(self._program, "gluminary_r", 1.0),
             "g": _uniform(self._program, "gluminary_g", 1.0),
             "b": _uniform(self._program, "gluminary_b", 1.0),
             "a": _uniform(self._program, "gluminary_a", 1.0),
         })
 
+        if vertex.include == "custom_default_vertex":
+            self._uniforms.update({
+                "unSize": _uniform(self._program, "gluminary_Size", (1, 1)),
+
+                "unFlx": _uniform(self._program, "gluminary_Flx", 0),
+                "unFly": _uniform(self._program, "gluminary_Fly", 0),
+            })
+
+
+        vbo, vbo_instance, ebo = renderer.vbo, renderer.vbo_instance, renderer.ebo
+        vao_settings = [(vbo, "2f 2f", "gluminary_input_Position", "gluminary_input_Coordinate")]
+
+        if vertex.include == "custom_instance_vertex":
+            vao_settings.append((vbo_instance, "2f 2f 1f 1f/i", "gluminary_instance_Position", "gluminary_instance_Size", "gluminary_instance_Flx", "gluminary_instance_Fly"))
+
         
-        self._vao = renderer._ctx.vertex_array(self._program, 
-            [(renderer.vbo, "2f 2f", "gluminary_input_Position", "gluminary_input_Coordinate")], index_buffer=renderer.ebo)
+        self._vao = renderer._ctx.vertex_array(self._program, vao_settings, index_buffer=ebo)
         
+
         
         
     def setUniform(self, name: str, value):

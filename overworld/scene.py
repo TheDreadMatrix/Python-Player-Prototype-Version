@@ -68,7 +68,6 @@ class Overworld(EmptyScene):
 
         self.audio.load(music_name)
         self.audio.play(loop=True)
-
         
 
 
