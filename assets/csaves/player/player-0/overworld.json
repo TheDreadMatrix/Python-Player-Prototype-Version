@@ -1,5 +1,5 @@
 {
-    "active": "overworld-1",
+    "active": "overworld-2",
     "worlds": {
         "overworld-1": {
             "nodes": {
@@ -11,7 +11,7 @@
                 "level-5": true,
                 "level-end": true
             },
-            "current-node": "level-3"
+            "current-node": "level-end"
         },
         "overworld-2": {
             "current-node": "level-6",

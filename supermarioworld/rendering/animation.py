@@ -5,19 +5,35 @@ from supermarioworld.typing.gametype import GameType
 
 class Animation:
     _id = 0
-    def __init__(self, game: GameType, frame_paths: list[str], durations: list[float], repeat: bool=True, tex_filter: int=0, anisotropy: int=0):
+    def __init__(self, game: GameType, frame_paths: list[str], durations: list[float]=[], repeat: bool=True, tex_filter: int=0, anisotropy: int=0):
         self.game = game
 
         anim_id = Animation._id
         Animation._id += 1
 
         textures = [load_texture(game.renderer._ctx, game.paths.ImagesPath(path), tex_filter, anisotropy) for path in frame_paths]
+
+        self._pre_init(game, anim_id, durations, repeat, textures)
+
+    
+    def _pre_init(self, game, anim_id, durations, repeat, textures):
         self.key_images = []
 
         for i, texture in enumerate(textures):
             key = f"animation_{anim_id}_frame_{i}"
             self.key_images.append(key)
             game.assets._regRawImage(key, texture)
+
+        frame_count = len(self.key_images)
+
+        if not durations:
+            durations = [0.1] * frame_count
+
+        elif len(durations) < frame_count:
+            durations = durations + [durations[-1]] * (frame_count - len(durations))
+
+        elif len(durations) > frame_count:
+            durations = durations[:frame_count]
 
         self.durations = durations
         self.repeat = repeat
@@ -49,7 +65,7 @@ class Animation:
 
 
 class AnimationCutOut(Animation):
-    def __init__(self, game: GameType, key_atlas: str, frames: list[tuple], durations: list[float], repeat: bool=True, tex_filter: int=0, anisotropy: int=0):
+    def __init__(self, game: GameType, key_atlas: str, frames: list[tuple], durations: list[float]=[], repeat: bool=True, tex_filter: int=0, anisotropy: int=0):
         self.game = game
 
         anim_id = Animation._id
@@ -60,16 +76,5 @@ class AnimationCutOut(Animation):
             load_texture_cutout(game.renderer._ctx, game.assets.atlas_surfaces[key_atlas], frame[0], frame[1], frame[2], frame[3], tex_filter, anisotropy) for frame in frames
         ]
 
-        self.key_images = []
-
-        for i, texture in enumerate(textures):
-            key = f"animation_{anim_id}_frame_{i}"
-            self.key_images.append(key)
-            game.assets._regRawImage(key, texture)
-
-        self.durations = durations
-        self.repeat = repeat
-
-        self.index = 0
-        self.timer = 0.0
+        self._pre_init(game, anim_id, durations, repeat, textures)
         

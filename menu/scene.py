@@ -11,14 +11,7 @@ import math
 
 
 
-
-
-
-  
-
-
 class Menu(EmptyScene):
-    NAME="Menu"
     def onInitialization(self, game, **kwargs):
 
         #MUSIC
@@ -61,11 +54,7 @@ class Menu(EmptyScene):
         game.assets.regImage("title-border", "menu/title-border.png")
         game.assets.regImage("background", "menu/background.png")
 
-
-        game.assets.regAtlas("blocks", "levels/tile-blocks.png")
-        game.assets.regAtlas("koopas", "atlas/koopas.png")
         
-
         game.assets.regCutOutImage("b1", "blocks", 16, 200, 16, 16)
         game.assets.regCutOutImage("b4", "blocks", 32, 40, 16, 16)
 

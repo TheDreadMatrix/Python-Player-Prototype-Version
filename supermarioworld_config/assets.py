@@ -5,6 +5,8 @@ FONTS = {
 
 ATLASES = {
     "fonts": "atlas/fonts.png",
+    "blocks": "levels/tile-blocks.png",
+    "tiles": "levels/tiles.png"
 }
 
 MUSIC = {

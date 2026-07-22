@@ -3,11 +3,7 @@ from enum import IntEnum
 
 
 
-class CharacterState(IntEnum):
-    DEFAULT = 0
-    POWERUP = 1
-    FILEFLOW = 2
-    CAPE = 4
+
 
 class LevelBiome(IntEnum):
     VALLEY = 0

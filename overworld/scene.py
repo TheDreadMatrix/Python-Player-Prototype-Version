@@ -5,8 +5,8 @@ from supermarioworld.rendering.users import TextLabel, FadeLabel
 from supermarioworld.rendering.shaders import CustomShader
 from supermarioworld.camera import Camera
 
-from overworld.overworld_tilemap import OverWorldMap
-from overworld.overworld_entities import OverWorldPlayer
+from overworld.tilemap import OverWorldMap
+from overworld.player import OverWorldPlayer
 
 
 import pygame as pg

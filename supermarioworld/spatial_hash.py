@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from supermarioworld.enums.render import RenderMode
 
 @dataclass(slots=True)
 class TileEntity:
@@ -53,6 +53,24 @@ class ChunkHasher:
                 )
 
         return entities
+    
+    def renderDebug(self, renderer, camera=None):
+        x, y = (0, 0)
+        if camera:
+           x, y = camera.apply(0, 0) 
+
+        for (cx, cy) in self.grids:
+            renderer.renderQuad(
+                position=(
+                    cx * self.cell_width + x,
+                    cy * self.cell_height + y
+                ),
+                size=(
+                    self.cell_width,
+                    self.cell_height
+                ), g=0, b=0,
+                mode=RenderMode.LINE_LOOP
+            )
 
 
 

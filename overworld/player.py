@@ -59,8 +59,8 @@ class OverWorldPlayer:
 
         self.animation_choose = AnimationCutOut(game, "chr-spr", frames=[(8, 136, 16, 16)], durations=[])
 
-        self.animation_left = AnimationCutOut(game, "chr-spr", frames=[(8, 64, 16, 16), (32, 64, 16, 16)], durations=[0.2, 0.2])
-        self.animation_down = AnimationCutOut(game, "chr-spr", frames=[(8, 16, 16, 16), (32, 16, 16, 16), (56, 16, 16, 16), (80, 16, 16, 16)], durations=[0.3, 0.5, 0.3, 0.5])
+        self.animation_left = AnimationCutOut(game, "chr-spr", frames=[(8, 64, 16, 16), (32, 64, 16, 16)], durations=[0.2])
+        self.animation_down = AnimationCutOut(game, "chr-spr", frames=[(8, 16, 16, 16), (32, 16, 16, 16), (56, 16, 16, 16), (80, 16, 16, 16)], durations=[0.3, 0.5])
         self.animation_up = AnimationCutOut(game, "chr-spr", frames=[(8, 40, 16, 16), (32, 40, 16, 16), (56, 40, 16, 16), (80, 40, 16, 16)], durations=[0.2, 0.4, 0.2, 0.4])
         self.animation_right = AnimationCutOut(game, "chr-spr", frames=[(56, 64, 16, 16), (80, 64, 16, 16)], durations=[0.2, 0.2])
 
