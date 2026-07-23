@@ -102,7 +102,7 @@ class SuperMariWorldApplication:
             self.assets.regSound(name, path)
 
 
-        self.SCENA_DATA = {}
+        self.SCENE_DATA = {}
 
         self.router = SceneManager(self)
 

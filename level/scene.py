@@ -1,12 +1,13 @@
 from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.typing.gametype import GameType
+
 from supermarioworld.rendering.users import FadeLabel
 from supermarioworld.rendering.shaders import CustomShader
 
 from level.world import World
 
 
-
+# Fix spatial hash
 class Level(EmptyScene):
     def onInitialization(self, game: GameType, biome: int, music_name: str):
         self.world = World(game=game, biome=biome)

@@ -199,9 +199,10 @@ class OverWorldPlayer:
             # Rederecting to scene
             if event.key == pg.K_q:
                 redirect = self.current_node.get("redirect")
+                self.game.SCENE_DATA["scene"] = redirect
                 if redirect and not self.moving:
                     self.redirecting = True
-                    self.redirect_scene = redirect
+                    self.redirect_scene = "base:player-start" if not self.current_node.get("node-type") else redirect
 
 
             # Exit to menu

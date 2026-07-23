@@ -26,6 +26,7 @@ class CharacterAction(IntEnum):
     LOOK_UP = 9
     RUN_JUMP = 10
     SPIN = 11
+    DEAD = 12
 
 
 

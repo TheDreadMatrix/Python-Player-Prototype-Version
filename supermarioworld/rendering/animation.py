@@ -37,6 +37,7 @@ class Animation:
 
         self.durations = durations
         self.repeat = repeat
+        self.finished = False
 
         self.index = 0
         self.timer = 0.0
@@ -55,6 +56,7 @@ class Animation:
                     self.index = 0
                 else:
                     self.index = len(self.key_images) - 1
+                    self.finished = True
 
 
     def getTextureKey(self):
