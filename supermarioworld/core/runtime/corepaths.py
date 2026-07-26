@@ -4,9 +4,7 @@ import sys
 
 class CorePath:
     def __init__(self, file_execution):
-        # copying assets to APPDATA and we not using MEIPASS 
-
-        if hasattr(sys, "_MEIPASS"):
+        if hasattr(sys, "frozen"):
             self._resource_dir = Path("assets")
         else:
             self._resource_dir = Path(file_execution).resolve().parent / "assets"

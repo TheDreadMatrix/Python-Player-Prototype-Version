@@ -1,26 +1,31 @@
 Global solutions:
-* Add folders for each scenes
+- None
 
 
 Fix CustomShader:
-* Uniforms and vao for each shader
-* Shader source for instance shader
+* custom input attribute
 
 Fix Overworld editor:
 * New
 * JSON type attribute
 
 
+Audio:
+* loops not working
+
 
 Fix Menu:
 * UI
 
 
-Change scene destroy res
 
 Change core pygame -> pysdl2
 
-
+* gl_textures.py
+* daemonapi.py
+* controllers.py
+* resources.py
+* app.py
 
 
 

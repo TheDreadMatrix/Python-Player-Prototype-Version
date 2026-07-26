@@ -1,8 +1,9 @@
 from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.typing.gametype import GameType
 
-from supermarioworld.rendering.users import FadeLabel
+from supermarioworld.rendering.users import FadeLabel, TextLabel
 from supermarioworld.rendering.shaders import CustomShader
+
 
 from level.world import World
 
@@ -17,6 +18,9 @@ class Level(EmptyScene):
         self.fade_label = FadeLabel(game)
         self.fade_label.fadeIn(speed=0.5)
 
+        self.time_label = TextLabel(game, f"TIME: {self.world.time}", font_key="pixel")
+        self.time_label.position = (0, 50)
+
         # Fbo
         self.renderer.createFbo("background", (game.width, game.height))
 
@@ -29,6 +33,8 @@ class Level(EmptyScene):
         self.target_pixel_size = 1
         self.pixel_speed = 140
 
+        self.death_started = False
+
         # Audio
         self.audio.load(music_name)
         self.audio.play()
@@ -36,12 +42,24 @@ class Level(EmptyScene):
     
 
     def onUpdate(self):
-        self.fade_label.update() 
         self.world.update()
+
+        self.fade_label.update()
+        self.time_label.setText(f"TIME: {int(self.world.time)}")
+
+        
 
         if self.pixel_size > self.target_pixel_size:
             self.pixel_size -= self.pixel_speed * self.game.delta_time
             self.pixel_size = max(self.pixel_size, self.target_pixel_size)
+
+        if self.world.main_entity.death_timer >= 4.5 and not self.death_started:
+            self.fade_label.fadeOut(0.5)
+            self.death_started = True
+
+        if self.world.main_entity.death_timer >= 8.5:
+            self.request.redirectScene(self.game.player.current_overworld)
+        
     
 
     def onEvent(self, event):
@@ -60,6 +78,8 @@ class Level(EmptyScene):
         self.pixel_mosiac_shader.setUniform("textureSize", (self.game.width, self.game.height))
 
         self.renderer.renderFbo("background", size=(self.game.width, self.game.height), shader_key="pxm")
+
+        self.time_label.render()
 
         self.fade_label.render()
 

@@ -6,10 +6,12 @@ T = TypeVar("T", bound="Entity")
 
 
 class BaseWorld:
-    def __init__(self, game: GameType):
+    def __init__(self, game: GameType, time):
         self.game = game
         self.assets = game.assets
         self.renderer = game.renderer
+
+        self.time = time
 
         self.main_entity: "Character" = None
 
@@ -18,6 +20,8 @@ class BaseWorld:
 
         self.entities: list[Entity] = []
         self.objects: list[Entity] = []
+
+    def update(self): self.time -= self.game.delta_time
 
     def show_message(self, text): pass
     def spawn_effect(self, effect: T): pass
@@ -41,6 +45,7 @@ class Entity:
 
         self.gravity = 1200
         self.acceleration = 1200
+        self.friction = 700
 
         self.on_ground = False
         self.solid = False
@@ -66,6 +71,8 @@ class Entity:
         self.x = x
         self.y = y
         return self
+
+
 
 
     def hit_from_below(self, entity: "Entity"): pass

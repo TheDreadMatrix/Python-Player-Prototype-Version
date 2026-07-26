@@ -87,24 +87,35 @@ class SuperMariWorldApplication:
 
 
         # Scenes
-        self.assets.beginScene("GLOBAL-DAEMON")
-
         for name, path in self.settings.ATLASES.items():
-            self.assets.regAtlas(name, path)
+            self.assets.regAtlas(name, path, persistent=True)
 
         for name, path in self.settings.FONTS.items():
-            self.assets.regFont(name, path)
+            self.assets.regFont(name, path, persistent=True)
 
         for name, path in self.settings.MUSIC.items():
-            self.assets.regMusic(name, path)
+            self.assets.regMusic(name, path, persistent=True)
 
         for name, path in self.settings.SOUNDS.items():
-            self.assets.regSound(name, path)
+            self.assets.regSound(name, path, persistent=True)
 
 
         self.SCENE_DATA = {}
 
         self.router = SceneManager(self)
+
+        self.pre_updates = []
+        self.updates = []
+   
+        self.pre_renders = []
+        self.renders = []
+   
+
+    def preUpdate(self, func): self.pre_updates.append(func)
+    def onUpdate(self, func): self.updates.append(func)
+
+    def preRender(self, func): self.pre_renders.append(func)
+    def onRender(self, func): self.renders.append(func)   
 
         
 
@@ -133,9 +144,15 @@ class SuperMariWorldApplication:
 
     def _update(self):
         self.keyboard.update()
+        
         if self._focused:        
+            for func in self.pre_updates:
+                func()
+
             self.router.update()
-    
+
+            for func in self.updates:
+                func()
             
 
 
@@ -176,7 +193,15 @@ class SuperMariWorldApplication:
     
         self.renderer._clearColor(0, 0, 0)
 
+        for func in self.pre_renders:
+            func()
+
         self.router.render()
+
+        for func in self.renders:
+            func()
+
+        
 
         pg.display.flip()
 

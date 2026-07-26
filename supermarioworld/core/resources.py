@@ -23,7 +23,10 @@ class AssetsResources:
     def beginScene(self, scene_name):
         self._owner = scene_name
 
-    def _set_to_stack(self, owner, resource_type, resource_key):
+    def _set_to_stack(self, owner, resource_type, resource_key, persistent=False):
+        if persistent:
+            return
+
         self.set_to_destroy.setdefault(owner, [])
         self.set_to_destroy[owner].append((resource_type, resource_key))
 
@@ -50,23 +53,23 @@ class AssetsResources:
     # Registering Atlas Font Textures and Sounds
 
     # 1. Pygame object
-    def regAtlas(self, atlas_key, atlas_path):
+    def regAtlas(self, atlas_key, atlas_path, persistent=False):
         self.atlas_surfaces.update({atlas_key: pg.image.load(self.game.paths.ImagesPath(atlas_path)).convert_alpha()})
-        self._set_to_stack(self._owner, "atlas", atlas_key)
+        self._set_to_stack(self._owner, "atlas", atlas_key, persistent=persistent)
 
-    def regFont(self, font_key, font_path):
+    def regFont(self, font_key, font_path, persistent=False):
         self.font_surfaces.update({font_key: self.game.paths.FontsPath(font_path)})
-        self._set_to_stack(self._owner, "font", font_key)
+        self._set_to_stack(self._owner, "font", font_key, persistent=persistent)
 
 
     # 2. Moderngl object
-    def regImage(self, texture_key, texture_path, texture_filter=0, texture_anisotropy=0):
+    def regImage(self, texture_key, texture_path, texture_filter=0, texture_anisotropy=0, persistent=False):
         self.textures.update({texture_key: load_texture(self.game.renderer._ctx, self.game.paths.ImagesPath(texture_path), texture_filter, texture_anisotropy)})
 
-        self._set_to_stack(self._owner, "image", texture_key)
+        self._set_to_stack(self._owner, "image", texture_key, persistent=persistent)
         
 
-    def regCutOutImage(self,  texture_key, atlas_key, x, y, w, h, texture_filter=0, texture_anisotropy=0):
+    def regCutOutImage(self,  texture_key, atlas_key, x, y, w, h, texture_filter=0, texture_anisotropy=0, persistent=False):
         atlas = self.atlas_surfaces.get(atlas_key)
 
         if atlas is None:
@@ -74,27 +77,27 @@ class AssetsResources:
 
         self.textures.update({texture_key: load_texture_cutout(self.game.renderer._ctx, atlas, x, y, w, h, texture_filter, texture_anisotropy)})
 
-        self._set_to_stack(self._owner, "image", texture_key)
+        self._set_to_stack(self._owner, "image", texture_key, persistent=persistent)
 
 
-    def _regRawImage(self, texture_key, texture):
+    def _regRawImage(self, texture_key, texture, persistent=False):
         self.textures.update({texture_key: texture})
-        self._set_to_stack(self._owner, "image", texture_key)
+        self._set_to_stack(self._owner, "image", texture_key, persistent=persistent)
 
     
 
 
     # 3. Just string path
-    def regSound(self, sound_key, sound_path):
+    def regSound(self, sound_key, sound_path, persistent=False):
         self.sounds.update({sound_key: self.game.paths.SoundPath(sound_path)})
-        self._set_to_stack(self._owner, "sound", sound_key)
+        self._set_to_stack(self._owner, "sound", sound_key, persistent=persistent)
 
     
 
 
-    def regMusic(self, music_key, music_path):
+    def regMusic(self, music_key, music_path, persistent=False):
         self.musics.update({music_key: self.game.paths.MusicPath(music_path)})
-        self._set_to_stack(self._owner, "music", music_key)
+        self._set_to_stack(self._owner, "music", music_key, persistent=persistent)
 
 
 

@@ -202,7 +202,7 @@ class OverWorldPlayer:
                 self.game.SCENE_DATA["scene"] = redirect
                 if redirect and not self.moving:
                     self.redirecting = True
-                    self.redirect_scene = "base:player-start" if not self.current_node.get("node-type") else redirect
+                    self.redirect_scene = "player-start" if self.current_node.get("redirect-starter", True) else redirect
 
 
             # Exit to menu
@@ -210,7 +210,7 @@ class OverWorldPlayer:
                 if not self.moving:
                     sound_if_exit.play()
                     self.redirecting = True 
-                    self.redirect_scene = "base:menu"
+                    self.redirect_scene = "menu"
                     
                     
 

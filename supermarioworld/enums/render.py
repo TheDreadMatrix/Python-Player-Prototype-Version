@@ -9,6 +9,15 @@ class TextureFilter(IntEnum):
     LINEAR_LINE = 5
 
 
+class Anisotropy(IntEnum):
+    X0 = 0
+    X1 = 1
+    X2 = 2
+    X4 = 4
+    X8 = 8
+    X16 = 16
+
+
 class RenderMode(IntEnum):
     TRIANGLES = 0
     LINE_LOOP = 1

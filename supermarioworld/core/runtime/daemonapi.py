@@ -11,8 +11,8 @@ class GameRequest:
     def restartScene(self):
         self.game.router._restartScene()
 
-    def redirectScene(self, scene):
-        self.game.router._current_scene_name = scene
+    def redirectScene(self, scene, namespace="base:"):
+        self.game.router._current_scene_name = namespace + scene
 
     def closeGame(self):
         self.game._running = False

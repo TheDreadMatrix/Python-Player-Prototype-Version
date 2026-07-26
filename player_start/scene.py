@@ -14,7 +14,7 @@ class PlayerStart(EmptyScene):
         self.timer += self.game.delta_time
 
         if self.timer >= 0.6:
-            self.request.redirectScene(self.game.SCENE_DATA.get("scene", "base:level-1"))
+            self.request.redirectScene(self.game.SCENE_DATA.get("scene", "level-1"))
 
 
     def onEvent(self, event):

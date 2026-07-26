@@ -39,9 +39,9 @@ SOUNDS = {
     "open-egg": "wav/open.wav",
 
     "pointer": "mp3/pointer.mp3",
-    "losing": "mp3/lost.mp3",
+    "lost": "mp3/lost.mp3",
     "success": "mp3/success.mp3",
 
     "coin": "mp3/coins.mp3",
-    "jumping": "mp3/jump.mp3",
+    "jump": "mp3/jump.mp3",
 }

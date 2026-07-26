@@ -3,7 +3,7 @@ from supermarioworld.typing.gametype import GameType, BasicEvent
 from supermarioworld.camera import Camera
 
 from supermarioworld.rendering.animation import AnimationCutOut
-from supermarioworld.rendering.users import TextLabel
+
 
 from level.entities import Block, BaseWorld
 from level.blocks import LootBlock, MessageBlock
@@ -11,20 +11,14 @@ from level.items import Mushroom
 from level.mario import Mario
 
 class World(BaseWorld):
-    def __init__(self, game: GameType, biome: int, time=3):
-        super().__init__(game)
-        self.time = time
+    def __init__(self, game: GameType, biome: int, time=299):
+        super().__init__(game, time=time)
 
-        self.time_label = TextLabel(game, f"TIME: {self.time}", font_key="pixel")
-        self.time_label.position = (500, 50)
 
         self.main_entity = Mario(world=self) 
 
         self.camera = Camera(self.game.width, self.game.height,smooth=0.05)
         self.camera.setBounds(0, 0, 2000, self.game.height)
-
-        
-
 
         
 
@@ -87,8 +81,9 @@ class World(BaseWorld):
 
 
     def update(self):
-        self.time -= self.game.delta_time
-        self.time_label.setText(f"TIME: {int(self.time)}")
+        if not self.main_entity.beat:
+            super().update()
+        
 
         self.camera.update(self.game.delta_time, target_x=self.main_entity.x, target_y=self.main_entity.y)
 
@@ -100,7 +95,7 @@ class World(BaseWorld):
 
         cell = self.spatial_hash.getCellSizes(self.main_entity.x, self.main_entity.y)
 
-        if cell != self.current_cell:
+        if cell != self.current_cell and not self.main_entity.beat:
             self.objects = self.spatial_hash.getEntities(self.main_entity.x, self.main_entity.y)
             self.current_cell = cell
 
@@ -146,7 +141,7 @@ class World(BaseWorld):
         self.main_entity.render(self.camera)
 
 
-        self.time_label.render()
+        
 
 
 

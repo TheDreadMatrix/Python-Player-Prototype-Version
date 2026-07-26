@@ -200,7 +200,7 @@ class Menu(EmptyScene):
                     else:
                         self.switching = True
                         self.switch_timer = 0
-                        self.switch_target_scene = "base:settings" if selected_option == "SETTINGS" else "base:quit"
+                        self.switch_target_scene = "settings" if selected_option == "SETTINGS" else "quit"
 
                         self.audio.fadeOut(2500)
                         self.fade_label.fadeOut(speed=0.6)
@@ -210,7 +210,7 @@ class Menu(EmptyScene):
                     
                     self.switching = True
                     self.switch_timer = 0
-                    self.switch_target_scene = f"base:{self.game.player.current_overworld}"
+                    self.switch_target_scene = self.game.player.current_overworld
 
                     self.audio.fadeOut(3000)
                     self.fade_label.fadeOut(speed=0.6)

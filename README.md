@@ -19,7 +19,11 @@ pyinstaller `
     --distpath .output_games `
     --add-data "assets;assets" `
     --add-binary "soloud_x64.dll;." `
-    main.py
+    --hidden-import supermarioworld_config `
+    --hidden-import supermarioworld_config.settings `
+    --hidden-import supermarioworld_config.scenes `
+    --hidden-import supermarioworld_config.assets `
+    test.py
 
 
 # Overworld editor
@@ -33,4 +37,5 @@ pyinstaller `
     --distpath .output_games `
     --add-data "assets;assets" `
     --add-binary "soloud_x64.dll;." `
+    --hidden-import supermarioworld_config `
     overworld_main.py

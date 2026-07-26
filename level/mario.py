@@ -17,9 +17,12 @@ class Mario(Character):
         game = self.game
         self.assets.regAtlas("mario-spr", "atlas/mario.png")
 
+        self.jump_sound = game.audio.giveSound("jump")
+        self.lost_sound = game.audio.giveSound("lost")
+
         self.w, self.h = 48, 72
-        self.x = 120
-        self.y = 440
+        self.x = 192
+        self.y = 450
 
         self.flip_x = True
         self.looking = False
@@ -28,6 +31,11 @@ class Mario(Character):
         self.was_skidding = False
         self.skidding = False
         self.run_jump = False
+
+        self.death_timer = 0
+        self.death_started = False
+        self.flip_timer = 0
+        self.flip_delay = 0.1
 
     
         self.walk_speed = 220
@@ -133,17 +141,51 @@ class Mario(Character):
 
 
     def check_live(self):
-        if self.world.time <= 0:
+        if self.world.time <= 0 or self.health <= 0:
             self.beat = True
+
+
+    def on_beat(self):
+        if self.death_started:
+            return
+
+        self.game.audio.stop()
+        self.lost_sound.play()
+
+        self.action = CharacterAction.DEAD
+
+        self.death_started = True
+        self.vx = 0
+        self.vy = -700    
 
 
 
 
     def update(self, delta_time):
-        move = 0
+        if self.keyboard.isPressed(Keys.U) and self.game.DEBUG:
+            self.beat = True
+        
+
+        if self.death_started:
+            self.death_timer += delta_time
+
+      
+            if self.death_timer >= 1.3:
+                self.vy += self.gravity * delta_time
+                self.y += self.vy * delta_time
+
+         
+                self.flip_timer += delta_time
+
+                if self.flip_timer >= self.flip_delay:
+                    self.flip_x = not self.flip_x
+                    self.flip_timer = 0
+            return
      
 
         # X moving
+        move = 0
+
         if self.keyboard.isPressed(Keys.D):
             move = 1
             self.flip_x = True
@@ -168,13 +210,19 @@ class Mario(Character):
         else:
             self.p_speed = max(0, self.p_speed - delta_time * 3)
 
-        target_speed = move * (self.walk_speed if not running else self.run_speed) 
+        if move != 0:
+            target_speed = move * (self.walk_speed if not running else self.run_speed) 
 
-        if self.vx < target_speed:
-            self.vx = min(self.vx + self.acceleration * delta_time, target_speed)
+            if self.vx < target_speed:
+                self.vx = min(self.vx + self.acceleration * delta_time, target_speed)
 
-        elif self.vx > target_speed:
-            self.vx = max(self.vx - self.acceleration * delta_time, target_speed)
+            elif self.vx > target_speed:
+                self.vx = max(self.vx - self.acceleration * delta_time, target_speed)
+        else:
+            if self.vx > 0:
+                self.vx = max(0, self.vx - self.friction * delta_time)
+            elif self.vx < 0:
+                self.vx = min(0, self.vx + self.friction * delta_time)
 
         
                     
@@ -200,6 +248,7 @@ class Mario(Character):
 
         # Y moving
         if self.keyboard.isPressed(Keys.SPACE) and self.on_ground:
+            self.jump_sound.play()
             self.run_jump = self.p_speed >= 1.0
             self.vy = -800
 

@@ -195,7 +195,10 @@ class MainRenderer:
     def beginScene(self, scene_name):
         self._owner = scene_name
 
-    def _set_to_stack(self, owner, resource_type, resource_key):
+    def _set_to_stack(self, owner, resource_type, resource_key, persistent=False):
+        if persistent:
+            return
+
         self.set_to_destroy.setdefault(owner, [])
         self.set_to_destroy[owner].append((resource_type, resource_key))
 
@@ -207,9 +210,9 @@ class MainRenderer:
                 self.deleteFbo(key)
 
 
-    def regShader(self, shader_key, your_shader):
+    def regShader(self, shader_key, your_shader, persistent=False):
         self.shaders.update({shader_key: ShaderEntry(self._ctx, your_shader, shader_type=-1)})
-        self._set_to_stack(self._owner, "shader", shader_key)
+        self._set_to_stack(self._owner, "shader", shader_key, persistent=persistent)
 
 
     def delShader(self, shader_key):
@@ -220,9 +223,9 @@ class MainRenderer:
             shader.vao.release()
 
 
-    def createFbo(self, frame_key, size):
+    def createFbo(self, frame_key, size, persistent=False):
         self.fbos.update({frame_key: RenderTarget(self._ctx, size)})
-        self._set_to_stack(self._owner, "frame", frame_key)
+        self._set_to_stack(self._owner, "frame", frame_key, persistent=persistent)
 
 
     def deleteFbo(self, frame_key):
