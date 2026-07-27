@@ -4,7 +4,7 @@ from level.scene import Level
 from menu.scene import Menu, QuitScene
 from overworld.scene import Overworld
 from settings.scene import Settings
-from player_start.scene import PlayerStart
+from player_start.scene import PlayerActionScene
 
 
 from supermarioworld.enums.game import LevelBiome, OverWorldBiome
@@ -12,7 +12,7 @@ from supermarioworld.enums.game import LevelBiome, OverWorldBiome
 
 
 
-START_SCENE = "base:level-20"
+START_SCENE = "base:level-1"
 SAVE_CALLBACK = lambda: print("SAVED")
 
 
@@ -29,8 +29,23 @@ SCENES = {
 
     # Menu
     "base:player-start": {
-        "class": PlayerStart,
+        "class": PlayerActionScene,
         "kwargs": {}
+    },
+
+    "base:player-game-over": {
+        "class": PlayerActionScene,
+        "kwargs": {"action": "game-over"}
+    },
+
+    "base:player-time-out": {
+        "class": PlayerActionScene,
+        "kwargs": {"action": "time-out"}
+    },
+
+    "base:player-bonus-game": {
+        "class": PlayerActionScene,
+        "kwargs": {"action": "bonus-game"}
     },
 
     "base:menu": {

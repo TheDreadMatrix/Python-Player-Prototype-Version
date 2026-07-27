@@ -1,7 +1,10 @@
 from supermarioworld.typing.gametype import GameType
 from supermarioworld.rendering.shaders import CustomShader
+from supermarioworld.enums.controllers import Keys
+import supermarioworld
 
 game: GameType
+print(supermarioworld.__file__)
 
 crt = CustomShader(game, "vertex/vertex_1.vert", "post-processing/post-processing-crt.frag")
 
@@ -20,7 +23,7 @@ time = 0
 def onUpdate():
     global time
 
-    time += game.delta_time
+    time += game.delta_time * 20
 
 
 def preRender():

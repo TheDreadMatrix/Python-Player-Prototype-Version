@@ -8,15 +8,6 @@ class GameRequest:
     def setTitle(self, title):
         pygame.display.set_caption(title)
 
-    def restartScene(self):
-        self.game.router._restartScene()
-
-    def redirectScene(self, scene, namespace="base:"):
-        self.game.router._current_scene_name = namespace + scene
-
-    def closeGame(self):
-        self.game._running = False
-
 
     @staticmethod
     def isQuiting(event):

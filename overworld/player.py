@@ -115,7 +115,7 @@ class OverWorldPlayer:
                 self.game.player.current_overworld_level = self.current_node_key
                 
                 self.game.player.save()
-                self.request.redirectScene(self.redirect_scene)
+                self.game.router.redirect(self.redirect_scene)
 
             return
 

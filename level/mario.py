@@ -108,13 +108,11 @@ class Mario(Character):
 
 
     def update_action(self):
-        if self.ducking:
-            self.action = CharacterAction.DUCK
-        
-        
-        
-        elif self.spin_jump:
+        if self.spin_jump:
             self.action = CharacterAction.SPIN
+
+        elif self.ducking:
+            self.action = CharacterAction.DUCK
         
         elif self.vy != 0:
             if self.run_jump:
@@ -244,6 +242,7 @@ class Mario(Character):
             self.ducking = False
             if self.can_stand():
                 self.set_height(72)
+                
 
 
         # Y moving

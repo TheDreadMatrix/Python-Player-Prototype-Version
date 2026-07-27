@@ -39,6 +39,7 @@ class Level(EmptyScene):
         self.audio.load(music_name)
         self.audio.play()
 
+
     
 
     def onUpdate(self):
@@ -58,7 +59,7 @@ class Level(EmptyScene):
             self.death_started = True
 
         if self.world.main_entity.death_timer >= 8.5:
-            self.request.redirectScene(self.game.player.current_overworld)
+            self.game.router.redirect(self.game.player.current_overworld)
         
     
 

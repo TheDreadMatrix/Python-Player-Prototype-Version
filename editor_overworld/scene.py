@@ -301,11 +301,11 @@ class OverworldEditor(EmptyScene):
 
     def _save_and_exit(self):
         self.player_data.saveData(self.player_data_dict)
-        self.request.closeGame()
+        self.game.exit()
 
     def _set_lan_and_restart(self, language: str):
         self.account.setLanguage(language=language)
-        self.request.restartScene()
+        self.game.router.restart()
     
 
     def _normalize_active_layer(self):

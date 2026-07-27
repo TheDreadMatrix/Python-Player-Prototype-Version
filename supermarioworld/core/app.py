@@ -103,6 +103,7 @@ class SuperMariWorldApplication:
         self.SCENE_DATA = {}
 
         self.router = SceneManager(self)
+        self.router._post_init()
 
         self.pre_updates = []
         self.updates = []
@@ -140,6 +141,9 @@ class SuperMariWorldApplication:
 
     def clearColor(self, r, g, b):
         self.renderer._clearColor(r, g, b)
+
+    def exit(self):
+        self._running = False
     
 
     def _update(self):

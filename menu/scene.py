@@ -160,7 +160,7 @@ class Menu(EmptyScene):
             self.switch_timer += self.game.delta_time
 
             if self.switch_timer >= 2.5 and self.switch_target_scene:
-                self.game.request.redirectScene(self.switch_target_scene)
+                self.game.router.redirect(self.switch_target_scene)
 
  
 
@@ -171,8 +171,8 @@ class Menu(EmptyScene):
             return
 
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_ESCAPE:
-                self.request.restartScene()
+            if event.key == pg.K_ESCAPE and self.game.DEBUG:
+                self.game.router.restart()
 
             if event.key == pg.K_w:
                 self.sound_choose.play()
@@ -272,4 +272,4 @@ class Menu(EmptyScene):
 class QuitScene(EmptyScene):
     def onInitialization(self, game, **kwargs):
 
-        self.request.closeGame()
+        self.game.exit()

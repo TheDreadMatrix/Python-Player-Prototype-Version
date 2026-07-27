@@ -23,7 +23,8 @@ pyinstaller `
     --hidden-import supermarioworld_config.settings `
     --hidden-import supermarioworld_config.scenes `
     --hidden-import supermarioworld_config.assets `
-    test.py
+    main.py
+
 
 
 # Overworld editor

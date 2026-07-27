@@ -17,6 +17,10 @@ Audio:
 Fix Menu:
 * UI
 
+Fix accounts:
+* Default branches
+* For modding
+
 
 
 Change core pygame -> pysdl2

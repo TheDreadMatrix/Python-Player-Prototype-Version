@@ -24,13 +24,15 @@ class EmptyScene:
         self.locale = game.locale
         
         self.renderer = game.renderer
+        self.router = game.router
 
 
         # register begin
+        self._kwargs = kwargs
         self.assets.beginScene(self.SCENE_NAME)
         self.renderer.beginScene(self.SCENE_NAME)
 
-        self.onInitialization(game, **kwargs)
+        
         
     def onInitialization(self, game: GameType, **kwargs): pass
 

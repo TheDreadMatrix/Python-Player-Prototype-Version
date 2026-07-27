@@ -15,6 +15,17 @@ class BasicI18N:
     def gettext(self, word_key: str) -> str: ...
 
 
+class BasicRouter:
+    def redirect(self, scene_name: str, namespace: str="base:") -> None: ...
+    def restart(self) -> None: ...
+
+    @property
+    def current(self): ...
+
+    @property
+    def name(self) -> str: ...
+
+
 
 
 class GameType(typing.Protocol):
@@ -45,7 +56,10 @@ class GameType(typing.Protocol):
 
     audio: BasicAudioEngine
 
+    router: BasicRouter
+
 
     def getFps(self) -> float: ...
+    def exit(self) -> None: ...
     def clearColor(self, r: float, g: float, b: float) -> None: ...
 

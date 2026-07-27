@@ -127,7 +127,7 @@ class Overworld(EmptyScene):
     def onEvent(self, event):
         if event.type == pg.KEYDOWN and self.game.DEBUG:
             if event.key == pg.K_l:
-                self.request.restartScene()
+                self.game.router.restart()
 
         self.player.handleEventNodes(event=event, sound_if_exit=self.sound_exit)
         
