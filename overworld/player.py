@@ -3,8 +3,8 @@ from supermarioworld.typing.audio_type import BasicSound
 from supermarioworld.johnson import Johnson
 
 from supermarioworld.rendering.animation import AnimationCutOut
+from supermarioworld.enums import Keys
 
-import pygame as pg
 import math
 
 
@@ -52,6 +52,7 @@ class OverWorldPlayer:
         # Rendering
         self.renderer = game.renderer
         self.request = game.request
+        self.keyboard = game.keyboard
         
 
         game.assets.regAtlas("chr-spr", "overworld/overworld-sprites.png")
@@ -159,7 +160,7 @@ class OverWorldPlayer:
 
 
     def handleEventNodes(self, event, sound_if_exit: BasicSound):
-        if event.type == pg.QUIT:
+        if self.request.isQuiting(event):
             self.game.player.current_overworld = self.MAP_REF
             self.game.player.current_overworld_level = self.current_node_key
             
@@ -171,46 +172,46 @@ class OverWorldPlayer:
         if self.redirecting:
             return
 
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_w:
-                up_node = self.current_node.get("up")
-                if up_node:
-                    self.startMove(up_node)
+    
+        if self.keyboard.isDown(Keys.W, event=event):
+            up_node = self.current_node.get("up")
+            if up_node:
+                self.startMove(up_node)
                 
 
-            if event.key == pg.K_s:
-                down_node = self.current_node.get("down")
-                if down_node:
-                    self.startMove(down_node)
+        if self.keyboard.isDown(Keys.S, event=event):
+            down_node = self.current_node.get("down")
+            if down_node:
+                self.startMove(down_node)
                 
 
-            if event.key == pg.K_d:
-                right_node = self.current_node.get("right")
-                if right_node:
-                    self.startMove(right_node)
+        if self.keyboard.isDown(Keys.D, event=event):
+            right_node = self.current_node.get("right")
+            if right_node:
+                self.startMove(right_node)
                 
 
-            if event.key == pg.K_a:
-                left_node = self.current_node.get("left")
-                if left_node:
-                    self.startMove(left_node)
+        if self.keyboard.isDown(Keys.A, event=event):
+            left_node = self.current_node.get("left")
+            if left_node:
+                self.startMove(left_node)
                 
 
-            # Rederecting to scene
-            if event.key == pg.K_q:
-                redirect = self.current_node.get("redirect")
-                self.game.SCENE_DATA["scene"] = redirect
-                if redirect and not self.moving:
-                    self.redirecting = True
-                    self.redirect_scene = "player-start" if self.current_node.get("redirect-starter", True) else redirect
+        # Rederecting to scene
+        if self.keyboard.isDown(Keys.Q, event=event):
+            redirect = self.current_node.get("redirect")
+            self.game.SCENE_DATA["scene"] = redirect
+            if redirect and not self.moving:
+                self.redirecting = True
+                self.redirect_scene = "player-start" if self.current_node.get("redirect-starter", True) else redirect
 
 
-            # Exit to menu
-            if event.key == pg.K_e:
-                if not self.moving:
-                    sound_if_exit.play()
-                    self.redirecting = True 
-                    self.redirect_scene = "menu"
+        # Exit to menu
+        if self.keyboard.isDown(Keys.E, event=event):
+            if not self.moving:
+                sound_if_exit.play()
+                self.redirecting = True 
+                self.redirect_scene = "menu"
                     
                     
 

@@ -18,7 +18,9 @@ class Mario(Character):
         self.assets.regAtlas("mario-spr", "atlas/mario.png")
 
         self.jump_sound = game.audio.giveSound("jump")
+        self.spin_jump_sound = game.audio.giveSound("spin-jump")
         self.lost_sound = game.audio.giveSound("lost")
+        
 
         self.w, self.h = 48, 72
         self.x = 192
@@ -139,7 +141,11 @@ class Mario(Character):
 
 
     def check_live(self):
-        if self.world.time <= 0 or self.health <= 0:
+        if self.world.time <= 0 or self.health <= 0 or self.y >= 900:
+            self.beat = True
+            return
+
+        if self.keyboard.isPressed(Keys.U) and self.game.DEBUG:
             self.beat = True
 
 
@@ -160,10 +166,6 @@ class Mario(Character):
 
 
     def update(self, delta_time):
-        if self.keyboard.isPressed(Keys.U) and self.game.DEBUG:
-            self.beat = True
-        
-
         if self.death_started:
             self.death_timer += delta_time
 
@@ -253,15 +255,19 @@ class Mario(Character):
 
 
         elif self.keyboard.isPressed(Keys.Z) and self.on_ground:
+            self.spin_jump_sound.play()
             self.flip_x = random.choice([True, False])
             self.spin_jump = True
             self.vy = -500
 
 
-        self.update_action()
-        self.check_live()
+        
+        
 
         super().update(delta_time)
+
+        self.check_live()
+        self.update_action()
 
 
     def move_x(self, dt):

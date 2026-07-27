@@ -111,7 +111,7 @@ class Keys(IntEnum):
     KP_0 = 256
     KP_PERIOD = 266
 
-    LCTRL = 306
+    LCTRL = 1073742048
     LSHIFT = 304
     LALT = 308
     LSUPER = 311

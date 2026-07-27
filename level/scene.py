@@ -24,7 +24,9 @@ class Level(EmptyScene):
         # Fbo
         self.renderer.createFbo("background", (game.width, game.height))
 
-        self.pixel_mosiac_shader = CustomShader(game, "vertex/vertex_1.vert", "post-processing/post-processing-pxm.frag")
+        self.pixel_mosiac_shader = CustomShader(game.renderer, 
+                                                game.paths.ShaderText("vertex/vertex_1.vert"), 
+                                                game.paths.ShaderText("post-processing/post-processing-pxm.frag"))
      
         self.renderer.regShader("pxm", self.pixel_mosiac_shader)
       

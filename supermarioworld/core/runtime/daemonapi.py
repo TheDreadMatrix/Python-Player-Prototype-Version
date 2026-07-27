@@ -2,11 +2,9 @@ import pygame
 
 
 class GameRequest:
-    def __init__(self, game):
-        self.game = game
 
-    def setTitle(self, title):
-        pygame.display.set_caption(title)
+    @staticmethod
+    def setTitle(title): pygame.display.set_caption(title)
 
 
     @staticmethod

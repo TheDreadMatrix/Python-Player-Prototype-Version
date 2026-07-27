@@ -1,4 +1,4 @@
-from supermarioworld.typing.gametype import GameType
+from supermarioworld.typing.gametype import BasicRenderer
 from supermarioworld.core.gl_utils.gl_sources import INSTANCE_VERTEX_REPLACER, DEFAULT_VERTEX_REPLACER, DEFAULT_FRAGMENT_REPLACER
 
 import re
@@ -69,6 +69,7 @@ class _IncludeProcessor:
         self.include_count_for_source = 0
 
         clean_source = _strip_comments(source)
+        used_include = None
 
         clean_lines = clean_source.splitlines()
         real_lines = source.splitlines()
@@ -121,14 +122,8 @@ _processor = _IncludeProcessor()
 
 
 class CustomShader:
-    def __init__(self, game: GameType, vertex_path: str, fragment_path: str):
-        renderer = game.renderer
-
-
-        # load sources
-        vertex_source = game.paths.ShaderText(vertex_path)
-        fragment_source = game.paths.ShaderText(fragment_path)
-
+    def __init__(self, renderer: BasicRenderer, vertex_source: str, fragment_source: str):
+     
         # preprocess includes (BOTH)
         vertex = _processor.process(vertex_source, which_type=ShaderType.VERTEX)
         fragment = _processor.process(fragment_source, which_type=ShaderType.FRAGMENT)

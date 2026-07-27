@@ -21,6 +21,14 @@ Fix accounts:
 * Default branches
 * For modding
 
+Fix modding
+* Reading dirs
+* 
+
+Fix Keyboards:
+* Keyboard KMOD 
+* Mouse class mouse event
+
 
 
 Change core pygame -> pysdl2

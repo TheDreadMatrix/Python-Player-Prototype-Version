@@ -7,12 +7,13 @@ from supermarioworld.scenes.base import EmptyScene
 
 from supermarioworld.rendering.animation import AnimationCutOut
 from supermarioworld.rendering.users import TextLabel
+from supermarioworld.enums import Keys
 
 
 
 
 
-
+# Memory bugs
 # Type checker
 # New
 class OverworldEditor(EmptyScene):
@@ -452,12 +453,10 @@ class OverworldEditor(EmptyScene):
     
 
     def onUpdate(self):
-        keys = pg.key.get_pressed()
-
         if self.undo_timer > 0:
             self.undo_timer -= self.game.delta_time
 
-        if (keys[pg.K_LCTRL] or keys[pg.K_RCTRL]) and keys[pg.K_z]:
+        if self.keyboard.isPressed(Keys.LCTRL) and self.keyboard.isPressed(Keys.Z):
             if self.undo_timer <= 0:
                 self._undo_last()
                 self.undo_timer = self.UNDO_DELAY
@@ -579,10 +578,6 @@ class OverworldEditor(EmptyScene):
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_s and (event.mod & pg.KMOD_CTRL) and self.map_path:
                 self._save_current_map(self.map_path)
-            elif event.key in (pg.K_EQUALS, pg.K_PLUS, pg.K_KP_PLUS):
-                self._change_zoom(0.1)
-            elif event.key in (pg.K_MINUS, pg.K_KP_MINUS):
-                self._change_zoom(-0.1)
 
 
 

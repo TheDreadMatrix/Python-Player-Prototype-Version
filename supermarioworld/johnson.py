@@ -1,14 +1,11 @@
 import json
-from pathlib import Path
 
 
 
 class Johnson:
     def __init__(self, json_path):
-        self.path = Path(json_path)
-        if not self.path.exists():
-            raise FileNotFoundError(f"File not found: {str(self.path)}")
-
+        self.path = json_path
+       
     def readData(self) -> dict[str]:
         return readData(self.path)
     

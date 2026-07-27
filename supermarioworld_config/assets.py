@@ -37,6 +37,7 @@ SOUNDS = {
     "scroll": "wav/scroll.wav",
     "thunder": "wav/smw_thunder.wav",
     "open-egg": "wav/open.wav",
+    "spin-jump": "wav/spin_jump.wav",
 
     "pointer": "mp3/pointer.mp3",
     "lost": "mp3/lost.mp3",

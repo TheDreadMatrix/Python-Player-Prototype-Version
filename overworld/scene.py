@@ -4,12 +4,11 @@ from supermarioworld.typing.gametype import GameType
 from supermarioworld.rendering.users import TextLabel, FadeLabel
 from supermarioworld.rendering.shaders import CustomShader
 from supermarioworld.camera import Camera
+from supermarioworld.enums import Keys
 
 from overworld.tilemap import OverWorldMap
 from overworld.player import OverWorldPlayer
 
-
-import pygame as pg
 
 
 
@@ -56,7 +55,7 @@ class Overworld(EmptyScene):
         self.target_pixel_size = 1
 
        
-        self.pixel_mosiac_shader = CustomShader(game, "vertex/vertex_1.vert", "post-processing/post-processing-pxm.frag")
+        self.pixel_mosiac_shader = CustomShader(game.renderer, game.paths.ShaderText("vertex/vertex_1.vert"), game.paths.ShaderText("post-processing/post-processing-pxm.frag"))
 
         self.renderer.regShader("pxm", self.pixel_mosiac_shader)
         self.renderer.createFbo("tile-map", (game.width, game.height))
@@ -125,9 +124,8 @@ class Overworld(EmptyScene):
     
 
     def onEvent(self, event):
-        if event.type == pg.KEYDOWN and self.game.DEBUG:
-            if event.key == pg.K_l:
-                self.game.router.restart()
+        if self.keyboard.isDown(Keys.L, event=event):
+            self.game.router.restart()
 
         self.player.handleEventNodes(event=event, sound_if_exit=self.sound_exit)
         

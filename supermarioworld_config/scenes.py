@@ -12,7 +12,7 @@ from supermarioworld.enums.game import LevelBiome, OverWorldBiome
 
 
 
-START_SCENE = "base:level-1"
+START_SCENE = "base:overworld-1"
 SAVE_CALLBACK = lambda: print("SAVED")
 
 

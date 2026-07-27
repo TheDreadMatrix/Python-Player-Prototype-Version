@@ -2,8 +2,7 @@ from supermarioworld.scenes.base import EmptyScene
 
 from supermarioworld.rendering.users import TextLabel, FadeLabel
 from supermarioworld.rendering.shaders import CustomShader
-
-
+from supermarioworld.enums import Keys
 
 
 import pygame as pg
@@ -68,7 +67,10 @@ class Menu(EmptyScene):
         self.renderer.createFbo("background", (game.width, game.height))
 
 
-        self.pixel_mosiac_shader = CustomShader(game, "vertex/vertex_1.vert", "post-processing/post-processing-pxm.frag")
+        self.pixel_mosiac_shader = CustomShader(game.renderer, 
+                                                game.paths.ShaderText("vertex/vertex_1.vert"), 
+                                                game.paths.ShaderText("post-processing/post-processing-pxm.frag"))
+        
         self.renderer.regShader("pxm", self.pixel_mosiac_shader)
 
         
@@ -170,65 +172,64 @@ class Menu(EmptyScene):
         if self.switching:
             return
 
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_ESCAPE and self.game.DEBUG:
-                self.game.router.restart()
+        
+        if self.keyboard.isDown(Keys.ESCAPE, event=event) and self.game.DEBUG:
+            self.game.router.restart()
 
-            if event.key == pg.K_w:
-                self.sound_choose.play()
-                self.selected -= 1
-                if self.selected < 0:
-                    self.selected = len(self.options) - 1 
+        if self.keyboard.isDown(Keys.W, event=event):
+            self.sound_choose.play()
+            self.selected -= 1
+            if self.selected < 0:
+                self.selected = len(self.options) - 1 
 
-            elif event.key == pg.K_s:
-                self.sound_choose.play()
-                self.selected += 1
-                if self.selected >= len(self.options):
+        elif self.keyboard.isDown(Keys.S, event=event):
+            self.sound_choose.play()
+            self.selected += 1
+            if self.selected >= len(self.options):
+                self.selected = 0
+
+        if self.keyboard.isDown(Keys.Q, event=event):       
+            self.sound_pointer.play()
+            if not self.switching_game:
+                selected_option = self.options[self.selected]
+
+                if selected_option == "PLAY MODE":
+                    self.switching_game = True
+                    self.options = ["P-0", "P-1", "P-2"]
                     self.selected = 0
 
-            if event.key == pg.K_q:
-               
-                self.sound_pointer.play()
-                if not self.switching_game:
-                    selected_option = self.options[self.selected]
-
-                    if selected_option == "PLAY MODE":
-                        self.switching_game = True
-                        self.options = ["P-0", "P-1", "P-2"]
-                        self.selected = 0
-
-                    else:
-                        self.switching = True
-                        self.switch_timer = 0
-                        self.switch_target_scene = "settings" if selected_option == "SETTINGS" else "quit"
-
-                        self.audio.fadeOut(2500)
-                        self.fade_label.fadeOut(speed=0.6)
-
                 else:
-                    self.account.loadPlayer(self.accounts.get(self.options[self.selected], 0))
-                    
                     self.switching = True
                     self.switch_timer = 0
-                    self.switch_target_scene = self.game.player.current_overworld
+                    self.switch_target_scene = "settings" if selected_option == "SETTINGS" else "quit"
 
-                    self.audio.fadeOut(3000)
+                    self.audio.fadeOut(2500)
                     self.fade_label.fadeOut(speed=0.6)
 
+            else:
+                self.account.loadPlayer(self.accounts.get(self.options[self.selected], 0))
+                    
+                self.switching = True
+                self.switch_timer = 0
+                self.switch_target_scene = self.game.player.current_overworld
+
+                self.audio.fadeOut(3000)
+                self.fade_label.fadeOut(speed=0.6)
+
    
-            if event.key == pg.K_z and self.switching_game:
-                self.sound_cancer.play()
-                self.switching_game = False
-                self.options = ["PLAY MODE", "SETTINGS", "QUIT"]
-                self.selected = 0
+        if self.keyboard.isDown(Keys.E, event=event) and self.switching_game:
+            self.sound_cancer.play()
+            self.switching_game = False
+            self.options = ["PLAY MODE", "SETTINGS", "QUIT"]
+            self.selected = 0
 
         
             
-        
-    
     def onRender(self):
-        self.renderer.beginFbo("background")
         self.game.clearColor(0.53, 0.99, 1)
+
+        self.renderer.beginFbo("background")
+        
         
         
 

@@ -6,7 +6,7 @@ from supermarioworld.core.router import SceneManager
 from supermarioworld.core.runtime.corepaths import CorePath
 from supermarioworld.core.runtime.daemonapi import GameRequest
 from supermarioworld.core.runtime.settings import Settings
-from supermarioworld.core.controllers import Keyboard, Mouse
+from supermarioworld.core.runtime.controllers import Keyboard, Mouse
 from supermarioworld.core.accounts import PlayerAccountManager
 from supermarioworld.core.resources import AssetsResources
 from supermarioworld.core.audio.audio import AudioStream
@@ -17,22 +17,12 @@ import pygame as pg
 
 
 
-
-
-
-
-
-
-
-
-
-
 class SuperMariWorldApplication:
     def __init__(self, file_execution: str, project_name: str, use_resizeble=False, vendor_size=(780, 580), title="Super Martis World 91"):
         self.PROJECT_NAME = project_name
         
         # Runtime
-        self.request = GameRequest(self)
+        self.request = GameRequest()
         self.paths = CorePath(file_execution=file_execution)
         self.settings = Settings(project_name)
 
@@ -110,7 +100,10 @@ class SuperMariWorldApplication:
    
         self.pre_renders = []
         self.renders = []
-   
+
+        self.events = []
+
+    def onEvent(self, func): self.events.append(func)
 
     def preUpdate(self, func): self.pre_updates.append(func)
     def onUpdate(self, func): self.updates.append(func)
@@ -134,9 +127,17 @@ class SuperMariWorldApplication:
     def player(self):
         return self.account.current_account
     
-    
+    @property
+    def focused(self):
+        return self._focused
+
+    @property
+    def is_living(self):
+        return self._running
+
     def getFps(self):
         return self._clock.get_fps()
+
     
 
     def clearColor(self, r, g, b):
@@ -166,16 +167,19 @@ class SuperMariWorldApplication:
                 if event.key == pg.K_F3:
                     self.DEBUG = not self.DEBUG
 
-            elif event.type == pg.WINDOWFOCUSLOST:
+            if self._focused:
+                self.router.event(event=event)
+
+                for event_func in self.events:
+                    event_func(event)
+
+            if event.type == pg.WINDOWFOCUSLOST:
                 self.audio.pause()
                 self._focused = False
-
+            
             elif event.type == pg.WINDOWFOCUSGAINED:
                 self.audio.unpause()
                 self._focused = True
-
-            if self._focused:
-                self.router.event(event=event)
 
             if event.type == pg.QUIT:
                 self._running = False
@@ -205,8 +209,7 @@ class SuperMariWorldApplication:
         for func in self.renders:
             func()
 
-        
-
+    
         pg.display.flip()
 
         
@@ -219,9 +222,6 @@ class SuperMariWorldApplication:
             self._update()
             self._render()
             
-
-            
-
         self.router.save()
         
         self.account.save()

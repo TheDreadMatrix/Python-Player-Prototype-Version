@@ -22,7 +22,6 @@ for mod_file in sorted(MODS_DIR.glob("*.py")):
 
     environment = {
         "game": smw,
-        "trace": print,
         "__file__": str(mod_file),
         "__name__": mod_file.stem
     }
@@ -30,13 +29,13 @@ for mod_file in sorted(MODS_DIR.glob("*.py")):
     try:
         exec(compile(mod_file.read_text("utf-8"), str(mod_file), "exec"), environment)
 
-        for event in ("preUpdate", "onUpdate", "preRender", "onRender"):
+        for event in ("preUpdate", "onUpdate", "preRender", "onRender", "onEvent"):
             func = environment.get(event)
             if callable(func):
                 getattr(smw, event)(func)
 
     except Exception as e:
         print(f"Ошибка в моде {mod_file.name}:")
-        print(e)
+        print(e, type(e))
 
 smw._run()
