@@ -1,11 +1,10 @@
 from supermarioworld.scenes.base import EmptyScene
 
-from supermarioworld.rendering.users import TextLabel, FadeLabel
-from supermarioworld.rendering.shaders import CustomShader
+from supermarioworld.users import TextLabel, FadeLabel
+from supermarioworld.shaders import CustomShader
 from supermarioworld.enums import Keys
 
 
-import pygame as pg
 import math
 
 

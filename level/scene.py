@@ -1,8 +1,8 @@
 from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.typing.gametype import GameType
 
-from supermarioworld.rendering.users import FadeLabel, TextLabel
-from supermarioworld.rendering.shaders import CustomShader
+from supermarioworld.users import FadeLabel, TextLabel
+from supermarioworld.shaders import CustomShader
 
 
 from level.world import World
@@ -56,11 +56,11 @@ class Level(EmptyScene):
             self.pixel_size -= self.pixel_speed * self.game.delta_time
             self.pixel_size = max(self.pixel_size, self.target_pixel_size)
 
-        if self.world.main_entity.death_timer >= 4.5 and not self.death_started:
+        if self.world.main.death_timer >= 4.5 and not self.death_started:
             self.fade_label.fadeOut(0.5)
             self.death_started = True
 
-        if self.world.main_entity.death_timer >= 8.5:
+        if self.world.main.death_timer >= 8.5:
             self.game.router.redirect(self.game.player.current_overworld)
         
     

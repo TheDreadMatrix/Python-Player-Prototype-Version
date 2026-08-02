@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from collections import defaultdict
 
 @dataclass(slots=True)
-class ProcessResult:
+class _ProcessResult:
     source: str
     include: str | None
 
@@ -15,7 +15,7 @@ class ShaderType(Enum):
     VERTEX = auto()
     FRAGMENT = auto()
 
-class Include:
+class _Include:
     def __init__(self, code: str, shader_type: ShaderType):
         self.code = code
         self.shader_type = shader_type
@@ -44,10 +44,19 @@ def _strip_comments(source: str) -> str:
 
 
 
+class VertexAttribute:
+    def __init__(self, buffer: list, format_buf: str, *attributes: str): 
+        self.buffer = buffer
+        self.format = format_buf
+        self.attributes = attributes
+
+
+
+
 # add own input attr
 class _IncludeProcessor:
     def __init__(self):
-        self.includes = {}
+        self.includes: dict[str, _Include] = {}
         self.include_count_for_source = 0
 
         
@@ -61,7 +70,7 @@ class _IncludeProcessor:
        
 
     def register(self, name: str, source: str, shader_type: ShaderType):
-        self.includes[name] = Include(source, shader_type)
+        self.includes[name] = _Include(source, shader_type)
 
     
 
@@ -114,7 +123,7 @@ class _IncludeProcessor:
             else:
                 out.append(real_line)
 
-        return ProcessResult(source="\n".join(out), include=used_include)
+        return _ProcessResult(source="\n".join(out), include=used_include)
 
 
 _processor = _IncludeProcessor()
@@ -122,8 +131,10 @@ _processor = _IncludeProcessor()
 
 
 class CustomShader:
-    def __init__(self, renderer: BasicRenderer, vertex_source: str, fragment_source: str):
-     
+    def __init__(self, renderer: BasicRenderer, vertex_source: str, fragment_source: str, attributes: list[VertexAttribute] = []):
+        self._vao_attr: list[VertexAttribute] = []
+        self._vao_attr.extend(attributes)
+
         # preprocess includes (BOTH)
         vertex = _processor.process(vertex_source, which_type=ShaderType.VERTEX)
         fragment = _processor.process(fragment_source, which_type=ShaderType.FRAGMENT)
@@ -154,14 +165,19 @@ class CustomShader:
 
 
         vbo, vbo_instance, ebo = renderer.vbo, renderer.vbo_instance, renderer.ebo
-        vao_settings = [(vbo, "2f 2f", "gluminary_input_Position", "gluminary_input_Coordinate")]
+        self.registerAttribute(vbo, "2f 2f", "gluminary_input_Position", "gluminary_input_Coordinate")
 
         if vertex.include == "custom_instance_vertex":
-            vao_settings.append((vbo_instance, "2f 2f 1f 1f/i", "gluminary_instance_Position", "gluminary_instance_Size", "gluminary_instance_Flx", "gluminary_instance_Fly"))
+            self.registerAttribute(vbo_instance, "2f 2f 1f 1f/i", "gluminary_instance_Position", "gluminary_instance_Size", "gluminary_instance_Flx", "gluminary_instance_Fly")
+          
 
         
-        self._vao = renderer._ctx.vertex_array(self._program, vao_settings, index_buffer=ebo)
+        self._vao = renderer._ctx.vertex_array(self._program, [(va.buffer, va.format, *va.attributes) for va in self._vao_attr], index_buffer=ebo)
         
+
+
+    def registerAttribute(self, buffer, format_buf, *attributes):
+        self._vao_attr.append(VertexAttribute(buffer, format_buf, *attributes))
 
         
         

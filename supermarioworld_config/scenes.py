@@ -12,7 +12,7 @@ from supermarioworld.enums.game import LevelBiome, OverWorldBiome
 
 
 
-START_SCENE = "base:overworld-1"
+START_SCENE = "base:level-1"
 SAVE_CALLBACK = lambda: print("SAVED")
 
 
@@ -38,9 +38,9 @@ SCENES = {
         "kwargs": {"action": "game-over"}
     },
 
-    "base:player-time-out": {
+    "base:player-time-up": {
         "class": PlayerActionScene,
-        "kwargs": {"action": "time-out"}
+        "kwargs": {"action": "time-up"}
     },
 
     "base:player-bonus-game": {

@@ -23,6 +23,18 @@ class ChunkHasher:
     def getCellSizes(self, x, y):
         return int(x // self.cell_width), int(y // self.cell_height)
 
+    def set_entity(self, entity: TileEntity):
+        cx = int(entity.x // self.cell_width)
+        cy = int(entity.y // self.cell_height)
+
+        cell = (cx, cy)
+        
+        if cell not in self.grids:
+            self.grids[cell] = []
+        
+        self.grids[cell].append(entity)
+        
+
     def setEntities(self, entities: list[TileEntity]):
         self.grids.clear()
 
@@ -60,20 +72,15 @@ class ChunkHasher:
            x, y = camera.apply(0, 0) 
 
         for (cx, cy) in self.grids:
-            renderer.renderQuad(
-                position=(
-                    cx * self.cell_width + x,
-                    cy * self.cell_height + y
-                ),
-                size=(
-                    self.cell_width,
-                    self.cell_height
-                ), g=0, b=0,
-                mode=RenderMode.LINE_LOOP
-            )
+            renderer.renderQuad(position=(cx * self.cell_width + x, cy * self.cell_height + y),
+                size=(self.cell_width, self.cell_height), g=0, b=0, mode=RenderMode.LINE_LOOP)
 
 
 
+
+class DynamicHasher(ChunkHasher):
+    def __init__(self, cell_sizes = (128, 128)):
+        super().__init__(cell_sizes)
 
 
 

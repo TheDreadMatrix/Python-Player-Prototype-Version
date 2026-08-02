@@ -5,8 +5,8 @@ from supermarioworld.johnson import readData, saveData, Johnson
 from supermarioworld.typing.gametype import GameType
 from supermarioworld.scenes.base import EmptyScene
 
-from supermarioworld.rendering.animation import AnimationCutOut
-from supermarioworld.rendering.users import TextLabel
+from supermarioworld.animation import AnimationCutOut
+from supermarioworld.users import TextLabel
 from supermarioworld.enums import Keys
 
 
@@ -546,7 +546,7 @@ class OverworldEditor(EmptyScene):
 
 
     def onEvent(self, event):
-        if self.request.isQuiting(event):
+        if self.request.isQuiting(event) and self.dirty:
             self.player_data.saveData(self.player_data_dict)
 
         if self.request.isResized(event):

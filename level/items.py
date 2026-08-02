@@ -17,8 +17,8 @@ class Mushroom(Item):
 
         super().update(delta_time)
 
-        if self.intersects(self.world.main_entity):
-            self.on_collect(self.world.main_entity)
+        if self.intersects(self.world.main):
+            self.on_collect(self.world.main)
 
 
     def on_spawn_from_block(self, block):

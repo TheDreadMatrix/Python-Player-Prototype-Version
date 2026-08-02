@@ -1,0 +1,7 @@
+{
+    "img-ref": "",
+    "tiles": {
+        "b1": {"xywh": [], "class": "Block"},
+        "lucky-block-1": {"anim": {}, "class": "LootBlock"}
+    }
+}

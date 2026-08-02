@@ -37,13 +37,14 @@ class AudioStream:
     
         
 
-    def play(self, loop=True):
+    def play(self, loop=True, speed=1.0):
         wav = self.music
 
+        wav.set_looping(loop)
         self.music_handle = self.engine.play(wav, aVolume=self.game.account.getMusicVolume())
 
-       
-        wav.set_looping(loop)
+        self.engine.set_relative_play_speed(self.music_handle, speed)       
+        
         
         self.passed = False
         
@@ -68,7 +69,8 @@ class AudioStream:
             self.engine.stop(self.music_handle)
 
     def setVolume(self, volume):
-        self.engine.set_volume(0, volume)
+        if self.music_handle is not None:
+            self.engine.set_volume(self.music_handle, volume)
 
 
     def giveSound(self, sound_key):
@@ -90,8 +92,9 @@ class SoundStream:
         self.handle = None
             
 
-    def play(self):
+    def play(self, speed=1.0):
         self.handle = self.audio.play(self.sound)
+        self.audio.set_relative_play_speed(self.handle, speed)
         self.audio.set_volume(self.handle, self.game.account.getSoundVolume())
         
 

@@ -38,6 +38,7 @@ SOUNDS = {
     "thunder": "wav/smw_thunder.wav",
     "open-egg": "wav/open.wav",
     "spin-jump": "wav/spin_jump.wav",
+    "game-over": "wav/game_over.wav",
 
     "pointer": "mp3/pointer.mp3",
     "lost": "mp3/lost.mp3",

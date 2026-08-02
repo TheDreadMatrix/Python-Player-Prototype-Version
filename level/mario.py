@@ -3,7 +3,7 @@ from supermarioworld.enums.state import CharacterPowerup, CharacterEnvironment, 
 from supermarioworld.enums.render import RenderMode
 
 
-from supermarioworld.rendering.animation import AnimationCutOut
+from supermarioworld.animation import AnimationCutOut
 
 from level.entities import Character
 from level.effects import SkidDust
@@ -184,6 +184,10 @@ class Mario(Character):
      
 
         # X moving
+        if self.x <= 5:
+            self.x = 5
+            self.vx = 0
+
         move = 0
 
         if self.keyboard.isPressed(Keys.D):
@@ -277,13 +281,19 @@ class Mario(Character):
             if not block.solid:
                 continue
 
-            if self.intersects(block):
 
-                if self.vx > 0:
-                    self.x = block.x - self.w
+            if block.collision == 0:
+                if self.intersects(block):
 
-                elif self.vx < 0:
-                    self.x = block.x + block.w
+                    if self.vx > 0:
+                        self.x = block.x - self.w
+                        self.vx = 0
+
+                    elif self.vx < 0:
+                        self.x = block.x + block.w
+                        self.vx = 0
+
+
 
     def move_y(self, dt):
         self.vy += self.gravity * dt
@@ -296,19 +306,23 @@ class Mario(Character):
             if not block.solid:
                 continue
 
-            if self.intersects(block):
+            if block.collision == 0:
+                if self.intersects(block):
 
-                if self.vy > 0:
-                    self.y = block.y - self.h
-                    self.vy = 0
-                    self.on_ground = True
-                    self.run_jump = False
-                    self.spin_jump = False
+                    if self.vy > 0:
+                        self.y = block.y - self.h
+                        self.vy = 0
+                
+                        self.on_ground = True
+                        self.run_jump = False
+                        self.spin_jump = False
 
-                elif self.vy < 0:
-                    self.y = block.y + block.h
-                    self.vy = 0
-                    block.hit_from_below(self)
+                        block.on_land(self)
+
+                    elif self.vy < 0:
+                        self.y = block.y + block.h
+                        self.vy = 0
+                        block.hit_from_below(self)
 
 
     def render(self, camera):
@@ -321,5 +335,6 @@ class Mario(Character):
         if self.game.DEBUG:
             self.renderer.renderQuad(position=(x, y), size=(self.w, self.h), g=0, b=0, mode=RenderMode.LINE_LOOP)
         self.renderer.render(animation.getTextureKey(), position=(x, y), size=(48, 72), flx=self.flip_x)
+
 
 

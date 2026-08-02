@@ -1,7 +1,7 @@
 from supermarioworld.typing.gametype import GameType
 from supermarioworld.johnson import readData
 
-from supermarioworld.rendering.animation import AnimationCutOut
+from supermarioworld.animation import AnimationCutOut
 
 from supermarioworld.spatial_hash import ChunkHasher, TileEntity
 

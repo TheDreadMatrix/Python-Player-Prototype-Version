@@ -4,7 +4,7 @@ import sys
 from supermarioworld.core.app import SuperMariWorldApplication
 
 
-if getattr(sys, "frozen", False):
+if hasattr(sys, "frozen"):
     BASE_DIR = Path(sys.executable).parent
 else:
     BASE_DIR = Path(__file__).parent
@@ -16,8 +16,21 @@ smw = SuperMariWorldApplication(__file__, "supermarioworld_config")
 
 MODS_DIR.mkdir(exist_ok=True)
 
+"""
 
+Modlib:
+    -> manifest.json
+    -> assets
+    -> src
+    -> scripts
+    -> globals
+
+
+"""
 for mod_file in sorted(MODS_DIR.glob("*.py")):
+    if mod_file.name.startswith("_"):
+        continue
+
     print(f"Loading mod: {mod_file.name}")
 
     environment = {

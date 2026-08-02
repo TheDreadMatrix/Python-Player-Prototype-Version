@@ -1,10 +1,14 @@
 from supermarioworld.typing.gametype import GameType, BasicEvent
-from supermarioworld.rendering.shaders import CustomShader
+from supermarioworld.shaders import CustomShader, VertexAttribute
 from supermarioworld.enums.controllers import Keys
+
+
+
 
 game: GameType = game
 
-crt = CustomShader(game.renderer, game.paths.ShaderText("vertex/vertex_1.vert"), game.paths.ShaderText("post-processing/post-processing-crt.frag"))
+
+crt = CustomShader(game.renderer, game.paths.ShaderText("vertex/vertex_1.vert"), game.paths.ShaderText("post-processing/post-processing-crt.frag"), attributes=[])
 
 
 
@@ -14,7 +18,8 @@ game.renderer.createFbo("fbo-shader", (game.width, game.height), True)
 
 
 
-crt_flag = False
+crt_flag = True
+game.audio.setFilterLowPass(1500 if crt_flag else 20000)
 time = 0 
 
 def onUpdate():

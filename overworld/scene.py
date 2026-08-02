@@ -1,8 +1,8 @@
 from supermarioworld.scenes.base import EmptyScene
 from supermarioworld.typing.gametype import GameType
 
-from supermarioworld.rendering.users import TextLabel, FadeLabel
-from supermarioworld.rendering.shaders import CustomShader
+from supermarioworld.users import TextLabel, FadeLabel
+from supermarioworld.shaders import CustomShader
 from supermarioworld.camera import Camera
 from supermarioworld.enums import Keys
 

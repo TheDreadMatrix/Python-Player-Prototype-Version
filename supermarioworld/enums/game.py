@@ -18,3 +18,10 @@ class OverWorldBiome(IntEnum):
     RED_FOREST = 2
     MAGMA = 3
     SPECIAL = 4
+
+
+
+class CollisionType(IntEnum):
+    SOLID = 0
+    SLOPE_LEFT = 1
+    SLOPE_RIGHT = 2

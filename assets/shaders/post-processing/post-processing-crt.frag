@@ -35,5 +35,5 @@ void main()
     color += noise;
     color *= 0.8;
 
-    gluminary_FragColor = vec4(color * vec3(1, 0.9, 0.8), 1.0) * vec4(gluminary_r, gluminary_g, gluminary_b, gluminary_a);
+    gluminary_FragColor = vec4(color * vec3(1, 0.9, 0.8), 1.0);
 }

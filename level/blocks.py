@@ -1,6 +1,10 @@
 from level.entities import Block, Type, Item
 
 
+
+
+
+
 class HitBlock(Block):
     def __init__(self, world):
         super().__init__(world)
@@ -41,26 +45,25 @@ class LootBlock(HitBlock):
     def __init__(self, world, loot: Type[Item]):
         super().__init__(world)
 
-        self.used = False
+        self.count = 0
         
         self.loot = loot
 
     
     def hit_from_below(self, entity):
-        super().hit_from_below(entity)
-
-        if self.used:
+        if self.count >= 5:
+            self.texture = "used-block"
+            self.animation = None
             return
 
-        #self.used = True
+        super().hit_from_below(entity)
+        self.count += 1
 
     
         item = self.world.spawn(self.loot(self.world, x=self.x, y=self.y - 48))
         item.on_spawn_from_block(self)    
 
-        #self.texture = "used-block"
-        #self.animation = None
-
+        
 
     
 
@@ -73,3 +76,20 @@ class MessageBlock(HitBlock):
     def hit_from_below(self, entity):
         super().hit_from_below(entity)
         self.world.show_message(self.text)
+
+
+class SpringBlock(HitBlock):
+    def on_land(self, entity):
+        if self.bump_velocity != 0:
+            return
+                
+        self.bump_velocity = -200
+        entity.vy = -500
+
+
+
+class NotSolidBlock(Block):
+    def __init__(self, world):
+        super().__init__(world)
+
+        self.solid = False

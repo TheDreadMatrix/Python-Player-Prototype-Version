@@ -1,5 +1,8 @@
 from supermarioworld.typing.gametype import GameType
 from supermarioworld.spatial_hash import ChunkHasher
+from supermarioworld.enums.game import CollisionType
+
+
 from typing import TypeVar, Type
 
 T = TypeVar("T", bound="Entity")
@@ -13,18 +16,21 @@ class BaseWorld:
 
         self.time = time
 
-        self.main_entity: "Character" = None
+        self.main: "Character" = None
 
         self.spatial_hash = ChunkHasher(cell_sizes=(500, 600))
         self.current_cell = None
 
-        self.entities: list[Entity] = []
-        self.objects: list[Entity] = []
+        self.statics: list[Entity] = []
+        self.dynamics: list[Entity] = []
+
+        self.objects: list[Entity | Block] = []
 
     def update(self): self.time -= self.game.delta_time
 
     def show_message(self, text): pass
     def spawn_effect(self, effect: T): pass
+    def spawn_block(self, object: T): pass
     def spawn(self, object: T) -> T: pass
 
 
@@ -74,8 +80,7 @@ class Entity:
 
 
 
-
-    def hit_from_below(self, entity: "Entity"): pass
+    
     def move_x(self, delta_time):pass
     def move_y(self, delta_time):pass
     def on_beat(self): pass
@@ -109,8 +114,14 @@ class Block(Entity):
         super().__init__(world, w=48, h=48)
         self.texture = None
         self.animation = None
+        self.collision = CollisionType.SOLID
 
         self.solid = True
+
+    def on_land(self, entity: Entity): pass
+    def hit_from_below(self, entity: Entity): pass
+    def get_ground(self, *args): return self.y
+
 
     def set_texture(self, texture):
         self.texture = texture

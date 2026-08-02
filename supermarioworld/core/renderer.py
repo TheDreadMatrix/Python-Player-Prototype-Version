@@ -7,6 +7,7 @@ from supermarioworld.core.gl_utils.gl_sources import (
     _DEFAULT_VERTEX_SOURCE_MESH
 )
 
+
 import numpy as np
 import glm
 
@@ -189,6 +190,10 @@ class MainRenderer:
 
     def _clearColor(self, r, g, b):
         self._ctx.clear(r, g, b, 1)
+
+
+    def createBuffer(self, data):
+        return self._ctx.buffer(np.asarray(data, dtype=np.float32).tobytes())
 
 
     # GPU resources

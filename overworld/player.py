@@ -2,7 +2,7 @@ from supermarioworld.typing.gametype import GameType
 from supermarioworld.typing.audio_type import BasicSound
 from supermarioworld.johnson import Johnson
 
-from supermarioworld.rendering.animation import AnimationCutOut
+from supermarioworld.animation import AnimationCutOut
 from supermarioworld.enums import Keys
 
 import math
